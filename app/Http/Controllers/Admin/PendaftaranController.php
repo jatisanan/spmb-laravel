@@ -14,22 +14,15 @@ class PendaftaranController extends Controller
     {
         $query = Pendaftaran::with(['jenjang', 'gelombang']);
 
-        // Search
         if ($request->filled('q')) {
             $query->search($request->q);
         }
-
-        // Filter jenjang
         if ($request->filled('jenjang_id')) {
             $query->where('jenjang_id', $request->jenjang_id);
         }
-
-        // Filter verifikasi
         if ($request->filled('status_verifikasi')) {
             $query->where('status_verifikasi', $request->status_verifikasi);
         }
-
-        // Filter kelulusan
         if ($request->filled('status_kelulusan')) {
             $query->where('status_kelulusan', $request->status_kelulusan);
         }
@@ -48,6 +41,9 @@ class PendaftaranController extends Controller
         return view('admin.pendaftaran.show', compact('pendaftaran', 'jenjangs'));
     }
 
+    // ============================================
+    // UPDATE VERIFIKASI
+    // ============================================
     public function updateVerifikasi(Request $request, Pendaftaran $pendaftaran)
     {
         $request->validate([
@@ -60,11 +56,30 @@ class PendaftaranController extends Controller
             'catatan_verifikasi' => $request->catatan_verifikasi,
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status verifikasi berhasil diupdate.',
+                'data' => $this->rowData($pendaftaran),
+            ]);
+        }
+
         return back()->with('success', 'Status verifikasi berhasil diupdate.');
     }
 
+    // ============================================
+    // UPDATE UJIAN (guard: harus Terverifikasi)
+    // ============================================
     public function updateUjian(Request $request, Pendaftaran $pendaftaran)
     {
+        if ($pendaftaran->status_verifikasi !== 'Terverifikasi') {
+            $msg = 'Ujian tidak bisa dijadwalkan. Verifikasi berkas terlebih dahulu (Status: ' . $pendaftaran->status_verifikasi . ').';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
+        }
+
         $request->validate([
             'status_ujian' => 'required|in:Belum Dijadwalkan,Terjadwal,Sudah Ujian',
             'tanggal_ujian' => 'nullable|date',
@@ -77,11 +92,30 @@ class PendaftaranController extends Controller
             'nilai_ujian' => $request->nilai_ujian,
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Data ujian berhasil diupdate.',
+                'data' => $this->rowData($pendaftaran),
+            ]);
+        }
+
         return back()->with('success', 'Data ujian berhasil diupdate.');
     }
 
+    // ============================================
+    // UPDATE KELULUSAN (guard: harus Sudah Ujian)
+    // ============================================
     public function updateKelulusan(Request $request, Pendaftaran $pendaftaran)
     {
+        if ($pendaftaran->status_ujian !== 'Sudah Ujian') {
+            $msg = 'Kelulusan belum bisa diubah. Pendaftar harus menyelesaikan ujian terlebih dahulu (Status Ujian: ' . $pendaftaran->status_ujian . ').';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
+        }
+
         $request->validate([
             'status_kelulusan' => 'required|in:Menunggu Hasil,Lulus,Tidak Lulus',
         ]);
@@ -90,11 +124,30 @@ class PendaftaranController extends Controller
             'status_kelulusan' => $request->status_kelulusan,
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status kelulusan berhasil diupdate.',
+                'data' => $this->rowData($pendaftaran),
+            ]);
+        }
+
         return back()->with('success', 'Status kelulusan berhasil diupdate.');
     }
 
+    // ============================================
+    // UPDATE DAFTAR ULANG (guard: harus Lulus)
+    // ============================================
     public function updateDaftarUlang(Request $request, Pendaftaran $pendaftaran)
     {
+        if ($pendaftaran->status_kelulusan !== 'Lulus') {
+            $msg = 'Daftar ulang belum bisa diubah. Pendaftar harus dinyatakan LULUS terlebih dahulu (Status Kelulusan: ' . $pendaftaran->status_kelulusan . ').';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
+        }
+
         $request->validate([
             'status_daftar_ulang' => 'required|in:Belum Dibuka,Sudah Daftar Ulang,Belum Daftar Ulang',
             'tanggal_daftar_ulang' => 'nullable|date',
@@ -109,7 +162,30 @@ class PendaftaranController extends Controller
             'link_daftar_ulang' => $request->link_daftar_ulang,
         ]);
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Status daftar ulang berhasil diupdate.',
+                'data' => $this->rowData($pendaftaran),
+            ]);
+        }
+
         return back()->with('success', 'Status daftar ulang berhasil diupdate.');
+    }
+
+    /**
+     * Data ringkas untuk update baris tabel via AJAX.
+     */
+    private function rowData(Pendaftaran $p): array
+    {
+        return [
+            'id' => $p->id,
+            'status_verifikasi' => $p->status_verifikasi,
+            'status_ujian' => $p->status_ujian,
+            'status_kelulusan' => $p->status_kelulusan,
+            'status_daftar_ulang' => $p->status_daftar_ulang,
+            'nilai_ujian' => $p->nilai_ujian,
+        ];
     }
 
     public function destroy(Pendaftaran $pendaftaran)
@@ -137,15 +213,14 @@ class PendaftaranController extends Controller
 
         return response()->streamDownload(function () use ($data) {
             $out = fopen('php://output', 'w');
-            fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM UTF-8
+            fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
-            // === Header CSV (tambah Email) ===
             fputcsv($out, [
                 'Nomor Pendaftaran', 'NISN', 'Nama Lengkap', 'Jenis Kelamin',
                 'Tempat Lahir', 'Tanggal Lahir', 'Asal Sekolah',
                 'Jenjang', 'Gelombang',
                 'Nama Ayah', 'Nama Ibu', 'Nama Wali',
-                'No WhatsApp', 'Email', 'Alamat',       // ← Email ditambahkan
+                'No WhatsApp', 'Email', 'Alamat',
                 'Status Verifikasi', 'Status Ujian', 'Tanggal Ujian', 'Nilai Ujian',
                 'Status Kelulusan', 'Status Daftar Ulang', 'Tanggal Daftar Ulang',
                 'Tanggal Daftar',
@@ -166,7 +241,7 @@ class PendaftaranController extends Controller
                     $p->nama_ibu,
                     $p->nama_wali,
                     $p->no_whatsapp,
-                    $p->email,                          // ← Email ditambahkan
+                    $p->email,
                     $p->alamat,
                     $p->status_verifikasi,
                     $p->status_ujian,
@@ -202,7 +277,6 @@ class PendaftaranController extends Controller
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
             'nisn' => 'required|string|size:10|unique:pendaftarans,nisn,' . $pendaftaran->id,
             'tempat_lahir' => 'required|string|max:100',
-            // 'tanggal_lahir' => DIHAPUS — tidak boleh diubah
             'asal_sekolah' => 'required|string|max:150',
             'jenjang_id' => 'required|exists:jenjangs,id',
             'gelombang_id' => 'required|exists:gelombang_pendaftarans,id',
@@ -210,7 +284,6 @@ class PendaftaranController extends Controller
             'nama_ibu' => 'required|string|max:100',
             'nama_wali' => 'nullable|string|max:100',
             'no_whatsapp' => 'required|string|max:20',
-            // 'email' => DIHAPUS — tidak boleh diubah
             'alamat' => 'required|string|max:500',
         ]);
 

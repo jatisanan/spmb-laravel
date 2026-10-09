@@ -203,6 +203,35 @@
         </div>
 
         {{-- ============================================ --}}
+        {{-- TOMBOL DOWNLOAD KARTU UJIAN --}}
+        {{-- ============================================ --}}
+        @if (in_array($pendaftaran->status_ujian, ['Terjadwal', 'Sudah Ujian']))
+            <div class="rounded-2xl border border-[#d8ae45] bg-[#fff8dd] p-5 sm:p-6 mb-5">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#d8ae45]">
+                        <i data-lucide="file-text" class="h-6 w-6 text-[#073528]"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="display-font text-lg font-bold text-[#0d4a36]">
+                            Kartu Ujian Tersedia
+                        </p>
+                        <p class="mt-1 text-sm text-[#617064] leading-6">
+                            @if($pendaftaran->tanggal_ujian)
+                                Jadwal ujian Anda: <strong>{{ $pendaftaran->tanggal_ujian->isoFormat('dddd, D MMMM Y') }}</strong>.
+                            @endif
+                            Silakan download kartu ujian dan bawa saat ujian seleksi.
+                        </p>
+                    </div>
+                    <a href="{{ route('student.kartu.download') }}"
+                    class="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-lg bg-[#0d4a36] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#176346] transition shrink-0">
+                        <i data-lucide="download" class="h-4 w-4"></i>
+                        Download Kartu Ujian
+                    </a>
+                </div>
+            </div>
+        @endif
+
+        {{-- ============================================ --}}
         {{-- CTA DAFTAR ULANG (kalau lulus & belum daftar ulang) --}}
         {{-- ============================================ --}}
         @if ($pendaftaran->status_kelulusan === 'Lulus'

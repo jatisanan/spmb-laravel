@@ -115,15 +115,33 @@
         </div>
 
         {{-- Form Update Ujian --}}
-        <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm">
-            <h3 class="display-font text-lg font-bold text-[#0d4a36] mb-4">Jadwal & Nilai Ujian</h3>
+        <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm
+            {{ $pendaftaran->status_verifikasi !== 'Terverifikasi' ? 'opacity-60' : '' }}">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="display-font text-lg font-bold text-[#0d4a36]">Jadwal & Nilai Ujian</h3>
+                @if ($pendaftaran->status_verifikasi !== 'Terverifikasi')
+                    <span class="status-chip status-pending">
+                        <i data-lucide="lock" class="inline h-3 w-3 mr-1"></i>
+                        Terkunci
+                    </span>
+                @endif
+            </div>
+
+            @if ($pendaftaran->status_verifikasi !== 'Terverifikasi')
+                <p class="mb-3 text-xs text-[#963d21] bg-[#fff0ea] rounded-lg p-3 border border-[#f2c1ae]">
+                    <i data-lucide="info" class="inline h-3 w-3"></i>
+                    Verifikasi berkas terlebih dahulu sebelum menjadwalkan ujian.
+                </p>
+            @endif
+
             <form method="POST" action="{{ route('admin.pendaftaran.ujian', $pendaftaran) }}">
                 @csrf
                 @method('PATCH')
                 <div class="grid gap-3 sm:grid-cols-3">
                     <div>
                         <label class="mb-1.5 block text-xs font-bold text-[#244535]">Status Ujian</label>
-                        <select name="status_ujian" class="field-control">
+                        <select name="status_ujian" class="field-control"
+                            {{ $pendaftaran->status_verifikasi !== 'Terverifikasi' ? 'disabled' : '' }}>
                             @foreach (['Belum Dijadwalkan', 'Terjadwal', 'Sudah Ujian'] as $s)
                                 <option value="{{ $s }}" @selected($pendaftaran->status_ujian === $s)>{{ $s }}</option>
                             @endforeach
@@ -131,14 +149,20 @@
                     </div>
                     <div>
                         <label class="mb-1.5 block text-xs font-bold text-[#244535]">Tanggal Ujian</label>
-                        <input type="date" name="tanggal_ujian" value="{{ $pendaftaran->tanggal_ujian?->format('Y-m-d') }}" class="field-control">
+                        <input type="date" name="tanggal_ujian" value="{{ $pendaftaran->tanggal_ujian?->format('Y-m-d') }}"
+                            class="field-control"
+                            {{ $pendaftaran->status_verifikasi !== 'Terverifikasi' ? 'disabled' : '' }}>
                     </div>
                     <div>
                         <label class="mb-1.5 block text-xs font-bold text-[#244535]">Nilai Ujian</label>
-                        <input type="text" name="nilai_ujian" value="{{ $pendaftaran->nilai_ujian }}" placeholder="85" class="field-control">
+                        <input type="text" name="nilai_ujian" value="{{ $pendaftaran->nilai_ujian }}" placeholder="85"
+                            class="field-control"
+                            {{ $pendaftaran->status_verifikasi !== 'Terverifikasi' ? 'disabled' : '' }}>
                     </div>
                 </div>
-                <button type="submit" class="mt-3 rounded-lg bg-[#0d4a36] px-4 py-2 text-sm font-bold text-white hover:bg-[#176346]">
+                <button type="submit"
+                    class="mt-3 rounded-lg bg-[#0d4a36] px-4 py-2 text-sm font-bold text-white hover:bg-[#176346] disabled:opacity-50 disabled:cursor-not-allowed"
+                    {{ $pendaftaran->status_verifikasi !== 'Terverifikasi' ? 'disabled' : '' }}>
                     Simpan Ujian
                 </button>
             </form>
@@ -190,9 +214,25 @@
         </div>
 
         {{-- Form Daftar Ulang --}}
-        <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm"
+        <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm
+            {{ $pendaftaran->status_kelulusan !== 'Lulus' ? 'opacity-60' : '' }}"
             x-data="{ status: '{{ $pendaftaran->status_daftar_ulang }}' }">
-            <h3 class="font-bold text-[#0d4a36] mb-3">Daftar Ulang</h3>
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-[#0d4a36]">Daftar Ulang</h3>
+                @if ($pendaftaran->status_kelulusan !== 'Lulus')
+                    <span class="status-chip status-pending">
+                        <i data-lucide="lock" class="inline h-3 w-3 mr-1"></i>
+                        Terkunci
+                    </span>
+                @endif
+            </div>
+
+            @if ($pendaftaran->status_kelulusan !== 'Lulus')
+                <p class="mb-3 text-xs text-[#963d21] bg-[#fff0ea] rounded-lg p-2.5 border border-[#f2c1ae]">
+                    <i data-lucide="info" class="inline h-3 w-3"></i>
+                    Pendaftar harus dinyatakan LULUS terlebih dahulu.
+                </p>
+            @endif
 
             <form method="POST" action="{{ route('admin.pendaftaran.daftar-ulang', $pendaftaran) }}">
                 @csrf
@@ -201,44 +241,35 @@
                 <div class="space-y-3">
                     <div>
                         <label class="mb-1.5 block text-xs font-bold text-[#244535]">Status Daftar Ulang</label>
-                        <select name="status_daftar_ulang" x-model="status" class="field-control">
+                        <select name="status_daftar_ulang" x-model="status" class="field-control"
+                            {{ $pendaftaran->status_kelulusan !== 'Lulus' ? 'disabled' : '' }}>
                             @foreach (['Belum Dibuka', 'Belum Daftar Ulang', 'Sudah Daftar Ulang'] as $s)
                                 <option value="{{ $s }}" @selected($pendaftaran->status_daftar_ulang === $s)>{{ $s }}</option>
                             @endforeach
                         </select>
                     </div>
 
-                    {{-- Muncul kalau status ≠ Belum Dibuka --}}
-                    <template x-if="status !== 'Belum Dibuka'">
-                        <div class="space-y-3">
-                            <div>
-                                <label class="mb-1.5 block text-xs font-bold text-[#244535]">
-                                    Link Form Daftar Ulang
-                                </label>
-                                <input type="url"
-                                    name="link_daftar_ulang"
-                                    value="{{ $pendaftaran->link_daftar_ulang }}"
-                                    placeholder="https://forms.gle/..."
-                                    class="field-control">
-                                <p class="mt-1 text-xs text-[#69786e]">
-                                    Link ini akan muncul di halaman cek status pendaftar.
-                                </p>
+                    @if ($pendaftaran->status_kelulusan === 'Lulus')
+                        <template x-if="status !== 'Belum Dibuka'">
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="mb-1.5 block text-xs font-bold text-[#244535]">Link Form Daftar Ulang</label>
+                                    <input type="url" name="link_daftar_ulang" value="{{ $pendaftaran->link_daftar_ulang }}"
+                                        placeholder="https://forms.gle/..." class="field-control">
+                                </div>
+                                <div>
+                                    <label class="mb-1.5 block text-xs font-bold text-[#244535]">Tanggal Daftar Ulang</label>
+                                    <input type="date" name="tanggal_daftar_ulang"
+                                        value="{{ $pendaftaran->tanggal_daftar_ulang?->format('Y-m-d') }}"
+                                        class="field-control">
+                                </div>
                             </div>
-
-                            <div>
-                                <label class="mb-1.5 block text-xs font-bold text-[#244535]">
-                                    Tanggal Daftar Ulang
-                                </label>
-                                <input type="date"
-                                    name="tanggal_daftar_ulang"
-                                    value="{{ $pendaftaran->tanggal_daftar_ulang?->format('Y-m-d') }}"
-                                    class="field-control">
-                            </div>
-                        </div>
-                    </template>
+                        </template>
+                    @endif
 
                     <button type="submit"
-                            class="w-full rounded-lg bg-[#0d4a36] px-4 py-2 text-sm font-bold text-white hover:bg-[#176346]">
+                        class="w-full rounded-lg bg-[#0d4a36] px-4 py-2 text-sm font-bold text-white hover:bg-[#176346] disabled:opacity-50 disabled:cursor-not-allowed"
+                        {{ $pendaftaran->status_kelulusan !== 'Lulus' ? 'disabled' : '' }}>
                         Update Daftar Ulang
                     </button>
                 </div>

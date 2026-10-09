@@ -87,6 +87,10 @@ Route::middleware(['auth', 'student'])
     ->name('student.')
     ->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
+
+        // Download kartu ujian
+        Route::get('/kartu/download', [\App\Http\Controllers\Student\KartuController::class, 'download'])->name('kartu.download');
     });
 
+    
 require __DIR__.'/auth.php';
