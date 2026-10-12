@@ -15,6 +15,7 @@
             <ul class="mt-1 list-disc list-inside space-y-1">
                 <li><strong>Nomor Pendaftaran, Tanggal Lahir, dan Email</strong> tidak dapat diubah karena dipakai untuk akun login.</li>
                 <li>Kalau salah satu dari field tersebut salah, <strong>hapus pendaftaran ini</strong> dan minta pendaftar mengisi ulang.</li>
+                <li><strong>Berkas</strong> dan <strong>Status</strong> hanya bisa dilihat di sini. Untuk mengubahnya, buka halaman detail pendaftar.</li>
             </ul>
         </div>
     </div>
@@ -268,6 +269,124 @@
                 @enderror
             </div>
         </div>
+
+        {{-- ============================================ --}}
+        {{-- Section: Berkas Pendaftaran (READ-ONLY) --}}
+        {{-- ============================================ --}}
+        <div class="mt-8 mb-6">
+            <h3 class="display-font text-lg font-bold text-[#0d4a36] border-b border-[#ebeee6] pb-2">
+                Berkas Pendaftaran
+            </h3>
+            <p class="mt-2 text-xs text-[#69786e]">
+                Berkas hanya bisa dilihat di sini. Untuk verifikasi/hapus, buka halaman detail pendaftar.
+            </p>
+        </div>
+
+        @if ($pendaftaran->berkas->isEmpty())
+            <div class="rounded-xl border border-dashed border-[#d6dccf] bg-[#f8faf5] p-6 text-center">
+                <i data-lucide="file-x" class="mx-auto h-8 w-8 text-[#d6dccf] mb-2"></i>
+                <p class="text-sm text-[#617064]">Belum ada berkas yang diunggah.</p>
+            </div>
+        @else
+            <div class="space-y-2">
+                @foreach ($pendaftaran->berkas as $b)
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-[#e1e9da] bg-[#f8faf5] px-4 py-3">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0d4a36]">
+                                <i data-lucide="file-text" class="h-5 w-5 text-white"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-sm font-bold text-[#244535]">{{ $b->label }}</p>
+                                <p class="text-xs text-[#617064] truncate">{{ $b->nama_asli }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            @if ($b->verified)
+                                <span class="inline-flex items-center gap-1 rounded-full bg-[#e8f4df] px-2.5 py-1 text-xs font-bold text-[#175b31]">
+                                    <i data-lucide="check-circle" class="h-3 w-3"></i>
+                                    Terverifikasi
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 rounded-full bg-[#fff2ca] px-2.5 py-1 text-xs font-bold text-[#805500]">
+                                    <i data-lucide="clock" class="h-3 w-3"></i>
+                                    Belum Diverifikasi
+                                </span>
+                            @endif
+                            <a href="{{ asset('storage/' . $b->file_path) }}" target="_blank" rel="noopener noreferrer"
+                               class="inline-flex items-center gap-1 rounded-lg border border-[#d6dccf] px-3 py-1.5 text-xs font-semibold text-[#244535] hover:bg-white">
+                                <i data-lucide="eye" class="h-3 w-3"></i>
+                                Lihat
+                            </a>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+
+        {{-- ============================================ --}}
+        {{-- Section: Status Pendaftaran (READ-ONLY) --}}
+        {{-- ============================================ --}}
+        <div class="mt-8 mb-6">
+            <h3 class="display-font text-lg font-bold text-[#0d4a36] border-b border-[#ebeee6] pb-2">
+                Status Pendaftaran
+            </h3>
+            <p class="mt-2 text-xs text-[#69786e]">
+                Status hanya bisa diubah dari halaman detail pendaftar.
+            </p>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {{-- Verifikasi --}}
+            <div class="rounded-xl border border-[#e1e9da] bg-[#f8faf5] p-3.5">
+                <p class="text-xs text-[#617064] mb-1">Verifikasi</p>
+                <p class="text-sm font-bold text-[#244535]">{{ $pendaftaran->status_verifikasi }}</p>
+                @if ($pendaftaran->catatan_verifikasi)
+                    <p class="mt-1 text-xs text-[#617064] italic">{{ $pendaftaran->catatan_verifikasi }}</p>
+                @endif
+            </div>
+
+            {{-- Ujian --}}
+            <div class="rounded-xl border border-[#e1e9da] bg-[#f8faf5] p-3.5">
+                <p class="text-xs text-[#617064] mb-1">Ujian</p>
+                <p class="text-sm font-bold text-[#244535]">{{ $pendaftaran->status_ujian }}</p>
+                @if ($pendaftaran->tanggal_ujian)
+                    <p class="mt-1 text-xs text-[#617064]">
+                        📅 {{ $pendaftaran->tanggal_ujian->isoFormat('D MMM Y') }}
+                    </p>
+                @endif
+                @if ($pendaftaran->nilai_ujian)
+                    <p class="mt-0.5 text-xs font-bold text-[#0d4a36]">Nilai: {{ $pendaftaran->nilai_ujian }}</p>
+                @endif
+            </div>
+
+            {{-- Kelulusan --}}
+            <div class="rounded-xl border border-[#e1e9da] bg-[#f8faf5] p-3.5">
+                <p class="text-xs text-[#617064] mb-1">Kelulusan</p>
+                <p class="text-sm font-bold text-[#244535]">{{ $pendaftaran->status_kelulusan }}</p>
+            </div>
+
+            {{-- Daftar Ulang --}}
+            <div class="rounded-xl border border-[#e1e9da] bg-[#f8faf5] p-3.5">
+                <p class="text-xs text-[#617064] mb-1">Daftar Ulang</p>
+                <p class="text-sm font-bold text-[#244535]">{{ $pendaftaran->status_daftar_ulang }}</p>
+                @if ($pendaftaran->tanggal_daftar_ulang)
+                    <p class="mt-1 text-xs text-[#617064]">
+                        📅 {{ $pendaftaran->tanggal_daftar_ulang->isoFormat('D MMM Y') }}
+                    </p>
+                @endif
+            </div>
+        </div>
+
+        {{-- Link Daftar Ulang --}}
+        @if ($pendaftaran->link_daftar_ulang)
+            <div class="mt-4 rounded-lg border border-[#dce6d3] bg-[#f4f8ee] p-3.5">
+                <p class="text-xs text-[#617064] mb-1">Link Daftar Ulang</p>
+                <a href="{{ $pendaftaran->link_daftar_ulang }}" target="_blank" rel="noopener noreferrer"
+                   class="text-sm font-bold text-[#0d4a36] hover:text-[#5d9f3f] underline break-all">
+                    {{ $pendaftaran->link_daftar_ulang }}
+                </a>
+            </div>
+        @endif
     </div>
 
     {{-- Actions --}}

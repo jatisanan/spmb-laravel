@@ -62,6 +62,24 @@
                     <dt class="text-xs text-[#617064]">Email</dt>
                     <dd class="text-[#244535]">{{ $pendaftaran->email ?? '—' }}</dd>
                 </div>
+
+                {{-- No WhatsApp --}}
+                <div>
+                    <dt class="text-xs text-[#617064]">No. WhatsApp</dt>
+                    <dd class="text-[#244535]">
+                        @if ($pendaftaran->no_whatsapp)
+                            <a href="https://wa.me/{{ preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $pendaftaran->no_whatsapp)) }}"
+                               target="_blank" rel="noopener noreferrer"
+                               class="text-[#0d4a36] font-semibold hover:underline inline-flex items-center gap-1">
+                                <i data-lucide="message-circle" class="h-3.5 w-3.5"></i>
+                                {{ $pendaftaran->no_whatsapp }}
+                            </a>
+                        @else
+                            —
+                        @endif
+                    </dd>
+                </div>
+
                 <div class="sm:col-span-2">
                     <dt class="text-xs text-[#617064]">Alamat</dt>
                     <dd class="text-[#244535]">{{ $pendaftaran->alamat }}</dd>
@@ -88,9 +106,63 @@
             </dl>
         </div>
 
+        {{-- Berkas Pendaftaran --}}
+        <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm">
+            <h3 class="display-font text-lg font-bold text-[#0d4a36] mb-4">Berkas Pendaftaran</h3>
+
+            @if ($pendaftaran->berkas->isEmpty())
+                <div class="rounded-xl border border-dashed border-[#d6dccf] bg-[#f8faf5] p-5 text-center">
+                    <i data-lucide="file-x" class="mx-auto h-7 w-7 text-[#d6dccf] mb-2"></i>
+                    <p class="text-sm text-[#617064]">Belum ada berkas yang diunggah.</p>
+                </div>
+            @else
+                <div class="space-y-2">
+                    @foreach ($pendaftaran->berkas as $b)
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-[#e1e9da] bg-[#f8faf5] px-4 py-3">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0d4a36]">
+                                    <i data-lucide="file-text" class="h-5 w-5 text-white"></i>
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="text-sm font-bold text-[#244535]">{{ $b->label }}</p>
+                                    <p class="text-xs text-[#617064] truncate">{{ $b->nama_asli }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                @if ($b->verified)
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-[#e8f4df] px-2.5 py-1 text-xs font-bold text-[#175b31]">
+                                        <i data-lucide="check-circle" class="h-3 w-3"></i>
+                                        Terverifikasi
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-[#fff2ca] px-2.5 py-1 text-xs font-bold text-[#805500]">
+                                        <i data-lucide="clock" class="h-3 w-3"></i>
+                                        Belum Diverifikasi
+                                    </span>
+                                @endif
+                                <a href="{{ asset('storage/' . $b->file_path) }}" target="_blank" rel="noopener noreferrer"
+                                   class="inline-flex items-center gap-1 rounded-lg border border-[#d6dccf] px-3 py-1.5 text-xs font-semibold text-[#244535] hover:bg-white">
+                                    <i data-lucide="eye" class="h-3 w-3"></i>
+                                    Lihat
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+
         {{-- Form Update Verifikasi --}}
         <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm">
             <h3 class="display-font text-lg font-bold text-[#0d4a36] mb-4">Verifikasi Berkas</h3>
+
+            @if ($pendaftaran->catatan_verifikasi)
+                <div class="mb-4 rounded-lg border border-[#dce6d3] bg-[#f4f8ee] p-3">
+                    <p class="text-xs font-bold text-[#0d4a36] mb-1">Catatan Verifikasi Saat Ini:</p>
+                    <p class="text-sm text-[#315440]">{{ $pendaftaran->catatan_verifikasi }}</p>
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('admin.pendaftaran.verifikasi', $pendaftaran) }}">
                 @csrf
                 @method('PATCH')
@@ -177,22 +249,57 @@
         <div class="rounded-2xl bg-[#0d4a36] text-white p-5 shadow-sm">
             <p class="text-xs font-bold uppercase tracking-[.14em] text-[#d8ae45]">Status Ringkas</p>
             <div class="mt-3 space-y-3 text-sm">
+
+                {{-- Verifikasi --}}
                 <div class="flex justify-between gap-2">
                     <span class="text-[#d6e3d0]">Verifikasi</span>
                     <span class="font-bold">{{ $pendaftaran->status_verifikasi }}</span>
                 </div>
+
+                {{-- Ujian --}}
                 <div class="flex justify-between gap-2">
                     <span class="text-[#d6e3d0]">Ujian</span>
                     <span class="font-bold">{{ $pendaftaran->status_ujian }}</span>
                 </div>
+                @if ($pendaftaran->tanggal_ujian)
+                    <div class="flex justify-between gap-2 text-xs">
+                        <span class="text-[#d6e3d0]">Tgl Ujian</span>
+                        <span class="font-bold">{{ $pendaftaran->tanggal_ujian->isoFormat('D MMM Y') }}</span>
+                    </div>
+                @endif
+                @if ($pendaftaran->nilai_ujian)
+                    <div class="flex justify-between gap-2 text-xs">
+                        <span class="text-[#d6e3d0]">Nilai</span>
+                        <span class="font-bold text-[#f0cf6f]">{{ $pendaftaran->nilai_ujian }}</span>
+                    </div>
+                @endif
+
+                {{-- Kelulusan --}}
                 <div class="flex justify-between gap-2">
                     <span class="text-[#d6e3d0]">Kelulusan</span>
                     <span class="font-bold">{{ $pendaftaran->status_kelulusan }}</span>
                 </div>
+
+                {{-- Daftar Ulang --}}
                 <div class="flex justify-between gap-2">
                     <span class="text-[#d6e3d0]">Daftar Ulang</span>
                     <span class="font-bold">{{ $pendaftaran->status_daftar_ulang }}</span>
                 </div>
+                @if ($pendaftaran->tanggal_daftar_ulang)
+                    <div class="flex justify-between gap-2 text-xs">
+                        <span class="text-[#d6e3d0]">Tgl Daftar Ulang</span>
+                        <span class="font-bold">{{ $pendaftaran->tanggal_daftar_ulang->isoFormat('D MMM Y') }}</span>
+                    </div>
+                @endif
+                @if ($pendaftaran->link_daftar_ulang)
+                    <div class="pt-2 border-t border-white/10">
+                        <a href="{{ $pendaftaran->link_daftar_ulang }}" target="_blank" rel="noopener noreferrer"
+                           class="text-xs font-bold text-[#f0cf6f] hover:underline inline-flex items-center gap-1">
+                            <i data-lucide="external-link" class="h-3 w-3"></i>
+                            Link Daftar Ulang
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
 

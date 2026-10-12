@@ -18,6 +18,9 @@ class PendaftaranController extends Controller
      */
     public function store(Request $request)
     {
+        // ================================
+        // 1. VALIDASI DASAR
+        // ================================
         $validator = Validator::make($request->all(), [
             'nama_lengkap' => 'required|string|max:100',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
@@ -30,7 +33,10 @@ class PendaftaranController extends Controller
             'nama_ayah' => 'required|string|max:100',
             'nama_ibu' => 'required|string|max:100',
             'nama_wali' => 'nullable|string|max:100',
-            'no_whatsapp' => 'required|string|max:20',
+
+            // >>> VALIDASI WHATSAPP: 11–12 digit angka <<<
+            'no_whatsapp' => ['required', 'string', 'regex:/^[0-9]{11,12}$/'],
+
             'email' => 'required|email|max:150|unique:users,email',
             'alamat' => 'required|string',
         ], [
@@ -38,6 +44,8 @@ class PendaftaranController extends Controller
             'nisn.unique' => 'NISN ini sudah terdaftar.',
             'email.unique' => 'Email ini sudah terdaftar. Gunakan email lain atau login jika sudah punya akun.',
             'tanggal_lahir.before' => 'Tanggal lahir tidak valid.',
+            'no_whatsapp.required' => 'Nomor WhatsApp wajib diisi.',
+            'no_whatsapp.regex' => 'Nomor WhatsApp harus 11–12 digit angka.',
         ]);
 
         if ($validator->fails()) {
@@ -47,6 +55,32 @@ class PendaftaranController extends Controller
             ], 422);
         }
 
+        // ================================
+        // 2. VALIDASI EMAIL AKTIF (MAILBOXLAYER)
+        // ================================
+        try {
+            $emailValidator = new \App\Services\EmailValidationService();
+            $isEmailValid = $emailValidator->validate($request->email);
+
+            if (!$isEmailValid) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => [
+                        'email' => ['Alamat email tidak valid atau tidak dapat ditemukan. Gunakan email aktif.'],
+                    ],
+                ], 422);
+            }
+        } catch (\Exception $e) {
+            // Kalau API Mailboxlayer down/error, LEWATI validasi (fallback)
+            \Illuminate\Support\Facades\Log::warning('Email validation API failed: ' . $e->getMessage(), [
+                'email' => $request->email,
+                'ip' => $request->ip(),
+            ]);
+        }
+
+        // ================================
+        // 3. SIMPAN
+        // ================================
         try {
             DB::beginTransaction();
 
@@ -54,7 +88,7 @@ class PendaftaranController extends Controller
             $gelombang = GelombangPendaftaran::findOrFail($request->gelombang_id);
             $nomor = Pendaftaran::generateNomor($jenjang->kode);
 
-            // === 1. Buat User Baru ===
+            // Buat User Baru
             $passwordPlain = User::generatePasswordFromBirthdate($request->tanggal_lahir);
 
             $user = User::create([
@@ -67,7 +101,7 @@ class PendaftaranController extends Controller
                 'is_active' => true,
             ]);
 
-            // === 2. Buat Pendaftaran ===
+            // Buat Pendaftaran
             $pendaftaran = Pendaftaran::create([
                 'nomor_pendaftaran' => $nomor,
                 'user_id' => $user->id,

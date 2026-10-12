@@ -369,22 +369,34 @@
 @if ($pengumumanPublik->isNotEmpty())
 <section id="pengumuman" class="w-full bg-[#fffdf7] py-12 sm:py-16">
     <div class="mx-auto max-w-6xl px-4 sm:px-5">
-        <div class="mb-8 sm:mb-9 max-w-2xl">
-            <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">Informasi Terbaru</p>
-            <h2 class="display-font mt-3 text-2xl sm:text-3xl md:text-4xl font-bold text-[#0d4a36]">Pengumuman</h2>
-            <p class="mt-4 text-sm sm:text-base leading-7 text-[#506056]">Ikuti informasi terbaru seputar PPDB Jati Sanan.</p>
+        <div class="mb-8 sm:mb-9 flex flex-wrap items-end justify-between gap-4">
+            <div class="max-w-2xl">
+                <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">Informasi Terbaru</p>
+                <h2 class="display-font mt-3 text-2xl sm:text-3xl md:text-4xl font-bold text-[#0d4a36]">Pengumuman</h2>
+                <p class="mt-4 text-sm sm:text-base leading-7 text-[#506056]">Ikuti informasi terbaru seputar PPDB Jati Sanan.</p>
+            </div>
+            <a href="{{ route('pengumuman.index') }}"
+            class="inline-flex items-center gap-2 rounded-lg border border-[#0d4a36] px-4 py-2 text-sm font-bold text-[#0d4a36] hover:bg-[#f4f8ee] shrink-0">
+                Lihat Semua
+                <i data-lucide="arrow-right" class="h-4 w-4"></i>
+            </a>
         </div>
 
         <div class="grid gap-5 md:grid-cols-3">
             @foreach ($pengumumanPublik as $p)
-                <article class="rounded-2xl border border-[#d8e3d0] bg-white p-5 shadow-sm">
+                <a href="{{ route('pengumuman.show', $p->id) }}"
+                class="group rounded-2xl border border-[#d8e3d0] bg-white p-5 shadow-sm hover:border-[#5d9f3f] hover:shadow-md transition block">
                     <p class="text-xs text-[#617064] mb-2">
                         <i data-lucide="clock" class="inline h-3 w-3"></i>
                         {{ $p->published_at?->isoFormat('D MMMM Y') }}
                     </p>
-                    <h3 class="font-bold text-[#0d4a36] mb-2 line-clamp-2">{{ $p->judul }}</h3>
+                    <h3 class="font-bold text-[#0d4a36] mb-2 line-clamp-2 group-hover:text-[#5d9f3f] transition">{{ $p->judul }}</h3>
                     <p class="text-sm text-[#536057] leading-6 line-clamp-3">{{ \Illuminate\Support\Str::limit($p->isi, 150) }}</p>
-                </article>
+                    <p class="mt-3 text-xs font-bold text-[#0d4a36] group-hover:text-[#5d9f3f] inline-flex items-center gap-1">
+                        Baca selengkapnya
+                        <i data-lucide="arrow-right" class="h-3 w-3"></i>
+                    </p>
+                </a>
             @endforeach
         </div>
     </div>
@@ -541,11 +553,22 @@
                 </div>
                 <div>
                     <label for="no-whatsapp" class="mb-2 block text-sm font-bold text-[#244535]">No. WhatsApp</label>
-                    <input id="no-whatsapp" name="no_whatsapp" type="tel" required class="field-control">
+                    <input id="no-whatsapp" name="no_whatsapp" type="tel"
+                        inputmode="numeric"
+                        pattern="[0-9]{11,12}"
+                        minlength="11"
+                        maxlength="12"
+                        required
+                        title="Nomor WhatsApp harus 11–12 digit angka. Contoh: 081234567890"
+                        class="field-control"
+                        placeholder="08xxxxxxxxxx">
+                    <p class="mt-1 text-xs text-[#69786e]">11–12 digit angka, contoh: 081234567890</p>
                 </div>
                 <div class="md:col-span-2">
                     <label for="email" class="mb-2 block text-sm font-bold text-[#244535]">Email Aktif</label>
-                    <input id="email" name="email" type="email" required autocomplete="email" class="field-control" placeholder="nama@email.com">
+                    <input id="email" name="email" type="email" required autocomplete="email"
+                           title="Masukkan alamat email yang valid. Contoh: nama@email.com"
+                           class="field-control" placeholder="nama@email.com">
                     <p class="mt-1 text-xs leading-5 text-[#69786e]">
                         Email ini akan digunakan untuk membuat akun login. Password awal adalah tanggal lahir Anda (ddmmyyyy).
                     </p>
@@ -753,6 +776,33 @@
     </div>
 </div>
 
+{{-- ============================================ --}}
+{{-- MODAL ERROR / VALIDASI --}}
+{{-- ============================================ --}}
+<div id="error-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-3 sm:p-4">
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+
+        <div class="bg-[#963d21] px-5 sm:px-6 py-4 sm:py-5 text-center text-white shrink-0">
+            <div class="mx-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-[#fff0ea] mb-3">
+                <i data-lucide="alert-triangle" class="h-7 w-7 sm:h-8 sm:w-8 text-[#963d21]"></i>
+            </div>
+            <h3 class="display-font text-xl sm:text-2xl font-bold">Periksa Kembali</h3>
+            <p class="text-sm text-[#f5d5c9] mt-1">Ada isian yang perlu diperbaiki</p>
+        </div>
+
+        <div class="px-5 sm:px-6 py-4 sm:py-5 overflow-y-auto">
+            <ul id="error-modal-list" class="space-y-2 text-sm text-[#963d21]"></ul>
+        </div>
+
+        <div class="px-5 sm:px-6 py-4 bg-[#fff8f5] border-t border-[#f2c1ae] flex justify-end shrink-0">
+            <button type="button" data-close-error-modal
+                    class="rounded-lg bg-[#963d21] px-5 py-2 text-sm font-bold text-white hover:bg-[#7a2f19]">
+                Mengerti
+            </button>
+        </div>
+    </div>
+</div>
+
 </main>
 
 {{-- ============================================ --}}
@@ -792,7 +842,7 @@
     // CONFIG & HELPERS
     // ============================================
     const CSRF = document.querySelector('meta[name="csrf-token"]').content;
-    
+
     // ============================================
     // AUTO UPPERCASE — SEMUA INPUT FORM
     // ============================================
@@ -817,7 +867,7 @@
             this.setSelectionRange(start, end);
         });
     });
-    
+
     const ROUTES = {
         daftar: '{{ route("daftar.store") }}',
         cekStatus: '{{ route("cek-status") }}',
@@ -854,6 +904,34 @@
         if (m) {
             m.classList.add('hidden');
             m.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+    }
+
+    function showErrorModal(messages) {
+        const modal = $('error-modal');
+        const list  = $('error-modal-list');
+        if (!modal || !list) return;
+
+        list.innerHTML = '';
+        messages.forEach((msg) => {
+            const li = document.createElement('li');
+            li.className = 'flex items-start gap-2 rounded-lg bg-[#fff0ea] px-3 py-2 border border-[#f2c1ae]';
+            li.innerHTML = '<i data-lucide="x-circle" class="h-4 w-4 mt-0.5 shrink-0"></i><span>' + msg + '</span>';
+            list.appendChild(li);
+        });
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function hideErrorModal() {
+        const modal = $('error-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
             document.body.style.overflow = '';
         }
     }
@@ -915,6 +993,13 @@
     // ============================================
     $('registration-form').addEventListener('submit', async function (e) {
         e.preventDefault();
+
+        // Validasi HTML5 dulu (biar pattern WhatsApp & email jalan)
+        if (!this.checkValidity()) {
+            this.reportValidity();
+            return;
+        }
+
         const btn = $('submit-button');
         const msg = $('form-message');
 
@@ -953,13 +1038,13 @@
                 $('gelombang-info').textContent = '';
             } else if (data.errors) {
                 const list = Object.values(data.errors).flat();
-                showMsg(msg, '<strong>Periksa kembali:</strong><br>• ' + list.join('<br>• '));
+                showErrorModal(list);
             } else {
-                showMsg(msg, data.message || 'Terjadi kesalahan.');
+                showErrorModal([data.message || 'Terjadi kesalahan.']);
             }
         } catch (err) {
             console.error('[daftar] Error:', err);
-            showMsg(msg, 'Gagal mengirim. Coba lagi.');
+            showErrorModal(['Gagal mengirim. Periksa koneksi Anda dan coba lagi.']);
         } finally {
             btn.disabled = false;
             btn.querySelector('span').textContent = 'Kirim Pendaftaran';
@@ -990,27 +1075,21 @@
             if (data.success) {
                 const d = data.data;
 
-                // Info dasar
                 $('result-number').textContent = d.nomor_pendaftaran;
                 $('result-nama').textContent = d.nama_lengkap;
                 $('result-jenjang').textContent = d.jenjang;
 
-                // Verifikasi
                 $('result-verification').textContent = d.status_verifikasi;
 
-                // Ujian — status + tanggal + nilai
                 $('result-exam').textContent = d.status_ujian;
                 $('result-exam-date').textContent = d.tanggal_ujian ? '📅 ' + d.tanggal_ujian : '';
                 $('result-exam-score').textContent = d.nilai_ujian ? 'Nilai: ' + d.nilai_ujian : '';
 
-                // Kelulusan
                 $('result-graduation').textContent = d.status_kelulusan;
 
-                // Daftar ulang
                 $('result-reregistration').textContent = d.status_daftar_ulang;
                 $('result-reregistration-date').textContent = d.tanggal_daftar_ulang ? '📅 ' + d.tanggal_daftar_ulang : '';
 
-                // Highlight nilai ujian
                 const score = $('result-score');
                 if (d.nilai_ujian) {
                     score.textContent = 'Nilai ujian: ' + d.nilai_ujian;
@@ -1019,7 +1098,6 @@
                     score.classList.add('hidden');
                 }
 
-                // TOMBOL LANJUT DAFTAR ULANG
                 const cta = $('reregistration-cta');
                 const ctaLink = $('reregistration-link');
 
@@ -1047,7 +1125,7 @@
             showMsg(msg, 'Gagal memuat data.');
             msg.className = 'mt-4 rounded-lg px-4 py-3 text-sm border border-[#f2c1ae] bg-[#fff0ea] text-[#963d21]';
         }
-    });;
+    });
 
     // ============================================
     // MODAL BUTTONS (delegated)
@@ -1066,13 +1144,25 @@
             return;
         }
 
+        if (e.target.closest('[data-close-error-modal]')) {
+            hideErrorModal();
+            return;
+        }
+
         if (e.target.id === 'success-modal') {
             hideModal('success-modal');
+        }
+
+        if (e.target.id === 'error-modal') {
+            hideErrorModal();
         }
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') hideModal('success-modal');
+        if (e.key === 'Escape') {
+            hideModal('success-modal');
+            hideErrorModal();
+        }
     });
 })();
 </script>

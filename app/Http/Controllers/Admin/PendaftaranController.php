@@ -262,7 +262,9 @@ class PendaftaranController extends Controller
 
     public function edit(Pendaftaran $pendaftaran)
     {
-        $pendaftaran->load(['jenjang', 'gelombang']);
+        // Tambahkan 'berkas' di load()
+        $pendaftaran->load(['jenjang', 'gelombang', 'berkas']);
+
         $jenjangs = Jenjang::with(['gelombang' => function ($q) {
             $q->where('aktif', true)->orderBy('tanggal_mulai');
         }])->where('aktif', true)->get();

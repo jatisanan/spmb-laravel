@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Route;
 
 // ============ PUBLIK ============
 Route::get('/', [WelcomeController::class, 'index'])->name('landing');
-
+Route::get('/pengumuman', [\App\Http\Controllers\PengumumanPublikController::class, 'index'])->name('pengumuman.index');
+Route::get('/pengumuman/{pengumuman}', [\App\Http\Controllers\PengumumanPublikController::class, 'show'])->name('pengumuman.show');
 Route::post('/daftar', [PendaftaranController::class, 'store'])->name('daftar.store');
 Route::post('/cek-status', [PendaftaranController::class, 'cekStatus'])->name('cek-status');
 Route::get('/gelombang/{jenjangId}', [PendaftaranController::class, 'getGelombang'])->name('gelombang.by-jenjang');
