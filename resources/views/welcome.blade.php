@@ -70,6 +70,36 @@
         .status-success { background: #e8f4df; color: #175b31; }
         .status-neutral { background: #edf1ec; color: #42604c; }
         .status-danger { background: #fff0ea; color: #963d21; }
+
+        /* ===== JENJANG PICKER & FORM WRAPPER ===== */
+        #form-wrapper {
+            animation: slideDown .45s cubic-bezier(.22,.9,.32,1) both;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .jenjang-card {
+            position: relative;
+            transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease, background .25s ease;
+        }
+        .jenjang-card:hover { transform: translateY(-3px); }
+        .jenjang-card.active {
+            box-shadow: 0 0 0 3px rgba(93,159,63,.18), 0 10px 25px -12px rgba(13,74,54,.35);
+        }
+        .jenjang-card[data-jenjang-kode="smp"]:hover,
+        .jenjang-card[data-jenjang-kode="smp"].active {
+            border-color: #5d9f3f;
+            background: #f4f8ee;
+        }
+        .jenjang-card[data-jenjang-kode="sma"]:hover,
+        .jenjang-card[data-jenjang-kode="sma"].active {
+            border-color: #d8ae45;
+            background: #fffaf0;
+        }
+        .jenjang-card[data-jenjang-kode="sma"].active {
+            box-shadow: 0 0 0 3px rgba(216,174,69,.20), 0 10px 25px -12px rgba(13,74,54,.35);
+        }
     </style>
 </head>
 <body class="w-full min-h-screen pattern-bg">
@@ -203,7 +233,7 @@
             </p>
             <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
                 <a href="#daftar" class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#d8ae45] px-5 py-3 font-bold text-[#073528] shadow-lg hover:bg-[#f0d271]">
-                    <span>{{ \App\Models\PengaturanSitus::get('hero_cta_text', 'Isi Formulir Pendaftaran') }}</span>
+                    <span>Pilih Jenjang &amp; Daftar</span>
                     <i data-lucide="arrow-down" class="h-5 w-5"></i>
                 </a>
                 <a href="#tentang" class="inline-flex items-center justify-center gap-2 rounded-lg border border-white/50 px-5 py-3 font-semibold text-white hover:bg-white/10">
@@ -333,16 +363,16 @@
                         @foreach ($j->gelombang as $g)
                             @php $aktif = $g->aktif; @endphp
                             <div class="rounded-xl p-3.5 sm:p-4 transition
-                                {{ $aktif 
-                                    ? 'bg-[#f4f8ee] border border-[#dce6d3]' 
+                                {{ $aktif
+                                    ? 'bg-[#f4f8ee] border border-[#dce6d3]'
                                     : 'bg-[#f6f6f6] border border-dashed border-[#d6dccf] opacity-75' }}">
-                                
+
                                 <div class="flex flex-wrap items-center justify-between gap-2">
                                     <div class="flex flex-wrap items-center gap-2">
                                         <strong class="text-sm sm:text-base {{ $aktif ? 'text-[#0d4a36]' : 'text-[#617064]' }}">
                                             {{ $g->nama }}
                                         </strong>
-                                        
+
                                         @if ($aktif)
                                             <span class="inline-flex items-center gap-1 rounded-full bg-[#e8f4df] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#175b31]">
                                                 <span class="relative flex h-1.5 w-1.5">
@@ -447,178 +477,257 @@
             </p>
         </div>
 
-        <aside class="mb-8 mt-8 sm:mt-10 rounded-2xl border border-[#dce6d3] bg-[#f4f8ee] p-4 sm:p-5 md:p-7 shadow-sm">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0d4a36]">
-                    <i data-lucide="folder-open" class="h-5 w-5 text-[#d8ae45]"></i>
-                </div>
-                <h3 class="display-font text-lg sm:text-xl font-bold text-[#0d4a36]">
-                    Dokumen yang Perlu Disiapkan
+        {{-- ============================================ --}}
+        {{-- STEP 1: PILIH JENJANG --}}
+        {{-- ============================================ --}}
+        <div id="jenjang-picker" class="mx-auto mt-8 sm:mt-10 max-w-3xl">
+            <p class="mb-4 text-center text-sm font-bold uppercase tracking-[.14em] text-[#699944]">
+                Langkah 1 — Pilih Jenjang
+            </p>
+
+            <div class="grid gap-4 sm:gap-6 sm:grid-cols-2">
+                @foreach ($jenjangs as $j)
+                    @php
+                        $isSma = $j->kode === 'sma';
+                        $accentText = $isSma ? 'text-[#b58a1e]' : 'text-[#5d9f3f]';
+                        $accentBg   = $isSma ? 'bg-[#fff8e8]' : 'bg-[#f4f8ee]';
+                        $iconName   = $isSma ? 'graduation-cap' : 'book-open';
+                        $logoKey    = 'jenjang_' . $j->kode . '_logo';
+                        $logoFallback = 'images/logo-' . $j->kode . '.png';
+                    @endphp
+                    <button type="button"
+                            data-jenjang-id="{{ $j->id }}"
+                            data-jenjang-nama="{{ $j->nama }}"
+                            data-jenjang-kode="{{ $j->kode }}"
+                            data-jenjang-deskripsi="{{ \Illuminate\Support\Str::limit($j->deskripsi, 120) }}"
+                            class="jenjang-card group relative overflow-hidden rounded-2xl border-2 border-[#d8e3d0] bg-white p-5 sm:p-6 text-left focus-ring">
+                        <div class="absolute -right-8 -top-8 h-24 w-24 rounded-full {{ $accentBg }} transition"></div>
+
+                        <div class="relative flex items-center gap-4">
+                            <img src="{{ \App\Models\PengaturanSitus::getImage($logoKey, $logoFallback) }}"
+                                 alt="Logo {{ $j->nama }}"
+                                 class="h-14 w-14 sm:h-16 sm:w-16 object-contain shrink-0">
+                            <div class="min-w-0">
+                                <p class="text-[10px] sm:text-xs font-bold uppercase tracking-[.14em] {{ $accentText }}">
+                                    {{ $j->label }}
+                                </p>
+                                <h3 class="mt-1 text-base sm:text-lg font-bold text-[#0d4a36]">
+                                    Daftar {{ $j->nama }}
+                                </h3>
+                            </div>
+                        </div>
+
+                        <p class="relative mt-3 sm:mt-4 text-xs sm:text-sm leading-6 text-[#536057] line-clamp-2">
+                            {{ \Illuminate\Support\Str::limit($j->deskripsi, 110) }}
+                        </p>
+
+                        <div class="relative mt-4 inline-flex items-center gap-2 text-sm font-bold {{ $accentText }}">
+                            <i data-lucide="{{ $iconName }}" class="h-4 w-4"></i>
+                            <span>Isi Formulir</span>
+                            <i data-lucide="arrow-right" class="h-4 w-4 transition group-hover:translate-x-1"></i>
+                        </div>
+                    </button>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- ============================================ --}}
+        {{-- STEP 2: FORM (Tersembunyi sampai jenjang dipilih) --}}
+        {{-- ============================================ --}}
+        <div id="form-wrapper" class="hidden">
+
+            {{-- Judul dinamis --}}
+            <div class="mb-5 sm:mb-6 rounded-xl bg-[#f4f8ee] border border-[#dce6d3] px-4 sm:px-5 py-4">
+                <p class="text-xs font-bold uppercase tracking-[.14em] text-[#699944]">Langkah 2 — Isi Formulir</p>
+                <h3 id="form-jenjang-title" class="display-font mt-1 text-xl sm:text-2xl font-bold text-[#0d4a36]">
+                    Formulir Pendaftaran
                 </h3>
+                <p id="form-jenjang-subtitle" class="mt-1 text-xs sm:text-sm text-[#536057] leading-6"></p>
             </div>
 
-            <ol class="grid gap-3 sm:grid-cols-2">
-                {{-- 1. Akta Kelahiran --}}
-                <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">1</span>
-                    <div class="min-w-0">
-                        <p class="text-sm font-bold text-[#244535]">Akta Kelahiran</p>
-                        <p class="text-xs text-[#617064] mt-0.5">Asli dan FC sebanyak 3 lembar</p>
+            <aside class="mb-8 rounded-2xl border border-[#dce6d3] bg-[#f4f8ee] p-4 sm:p-5 md:p-7 shadow-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0d4a36]">
+                        <i data-lucide="folder-open" class="h-5 w-5 text-[#d8ae45]"></i>
                     </div>
-                </li>
+                    <h3 class="display-font text-lg sm:text-xl font-bold text-[#0d4a36]">
+                        Dokumen yang Perlu Disiapkan
+                    </h3>
+                </div>
 
-                {{-- 2. KTP Ayah & Ibu --}}
-                <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">2</span>
-                    <div class="min-w-0">
-                        <p class="text-sm font-bold text-[#244535]">KTP Ayah dan Ibu/Wali</p>
-                        <p class="text-xs text-[#617064] mt-0.5">Asli dan FC sebanyak 3 lembar</p>
-                    </div>
-                </li>
-
-                {{-- 3. Kartu Keluarga --}}
-                <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">3</span>
-                    <div class="min-w-0">
-                        <p class="text-sm font-bold text-[#244535]">Kartu Keluarga</p>
-                        <p class="text-xs text-[#617064] mt-0.5">Asli dan FC sebanyak 3 lembar</p>
-                    </div>
-                </li>
-
-                {{-- 4. FC Identitas Rapor --}}
-                <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">4</span>
-                    <div class="min-w-0">
-                        <p class="text-sm font-bold text-[#244535]">FC Data Identitas Murid pada Rapor</p>
-                        <p class="text-xs text-[#617064] mt-0.5">2 lembar</p>
-                    </div>
-                </li>
-
-                {{-- 5. SKL / Ijazah (Opsional) --}}
-                <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">5</span>
-                    <div class="min-w-0">
-                        <div class="flex flex-wrap items-center gap-1.5">
-                            <p class="text-sm font-bold text-[#244535]">Surat Keterangan Lulus (SKL)</p>
-                            <span class="text-xs font-bold uppercase tracking-wide text-[#805500] bg-[#fff2ca] rounded-full px-2 py-0.5">Opsional</span>
+                <ol class="grid gap-3 sm:grid-cols-2">
+                    <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">1</span>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-[#244535]">Akta Kelahiran</p>
+                            <p class="text-xs text-[#617064] mt-0.5">Asli dan FC sebanyak 3 lembar</p>
                         </div>
-                        <p class="text-xs text-[#617064] mt-0.5">Atau FC Ijazah</p>
-                    </div>
-                </li>
+                    </li>
 
-                {{-- 6. Sertifikat TKA (Opsional) --}}
-                <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">6</span>
-                    <div class="min-w-0">
-                        <div class="flex flex-wrap items-center gap-1.5">
-                            <p class="text-sm font-bold text-[#244535]">Sertifikat TKA</p>
-                            <span class="text-xs font-bold uppercase tracking-wide text-[#805500] bg-[#fff2ca] rounded-full px-2 py-0.5">Opsional</span>
+                    <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">2</span>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-[#244535]">KTP Ayah dan Ibu/Wali</p>
+                            <p class="text-xs text-[#617064] mt-0.5">Asli dan FC sebanyak 3 lembar</p>
                         </div>
-                    </div>
-                </li>
-            </ol>
-        </aside>
+                    </li>
 
-        <form id="registration-form" class="form-shell rounded-2xl border border-[#e2e4d8] bg-white p-5 sm:p-6 md:p-9" novalidate>
-            @csrf
-            <div class="grid gap-5 md:grid-cols-2">
-                <div>
-                    <label for="nama-lengkap" class="mb-2 block text-sm font-bold text-[#244535]">Nama Lengkap</label>
-                    <input id="nama-lengkap" name="nama_lengkap" type="text" required class="field-control">
-                </div>
-                <div>
-                    <label for="jenis-kelamin" class="mb-2 block text-sm font-bold text-[#244535]">Jenis Kelamin</label>
-                    <select id="jenis-kelamin" name="jenis_kelamin" required class="field-control">
-                        <option value="" selected disabled>Pilih jenis kelamin</option>
-                        <option value="Laki-laki">Laki-laki</option>
-                        <option value="Perempuan">Perempuan</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="nisn" class="mb-2 block text-sm font-bold text-[#244535]">NISN (10 digit)</label>
-                    <input id="nisn" name="nisn" type="text" inputmode="numeric" pattern="[0-9]{10}" minlength="10" maxlength="10" required class="field-control">
-                </div>
-                <div>
-                    <label for="tempat-lahir" class="mb-2 block text-sm font-bold text-[#244535]">Tempat Lahir</label>
-                    <input id="tempat-lahir" name="tempat_lahir" type="text" required class="field-control">
-                </div>
-                <div>
-                    <label for="tanggal-lahir" class="mb-2 block text-sm font-bold text-[#244535]">Tanggal Lahir</label>
-                    <input id="tanggal-lahir" name="tanggal_lahir" type="date" required class="field-control">
-                </div>
-                <div>
-                    <label for="asal-sekolah" class="mb-2 block text-sm font-bold text-[#244535]">Asal Sekolah</label>
-                    <input id="asal-sekolah" name="asal_sekolah" type="text" required class="field-control">
-                </div>
-                <div>
-                    <label for="jenjang-id" class="mb-2 block text-sm font-bold text-[#244535]">Jenjang Pendaftaran</label>
-                    <select id="jenjang-id" name="jenjang_id" required class="field-control">
-                        <option value="" selected disabled>Pilih jenjang</option>
-                        @foreach ($jenjangs as $j)
-                            <option value="{{ $j->id }}" data-kode="{{ $j->kode }}">{{ $j->nama }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label for="gelombang-id" class="mb-2 block text-sm font-bold text-[#244535]">Gelombang</label>
-                    <select id="gelombang-id" name="gelombang_id" required class="field-control" disabled>
-                        <option value="">Pilih jenjang terlebih dahulu</option>
-                    </select>
-                    <p id="gelombang-info" class="mt-1 text-xs text-[#699944]"></p>
-                </div>
-                <div>
-                    <label for="nama-ayah" class="mb-2 block text-sm font-bold text-[#244535]">Nama Ayah</label>
-                    <input id="nama-ayah" name="nama_ayah" type="text" required class="field-control">
-                </div>
-                <div>
-                    <label for="nama-ibu" class="mb-2 block text-sm font-bold text-[#244535]">Nama Ibu</label>
-                    <input id="nama-ibu" name="nama_ibu" type="text" required class="field-control">
-                </div>
-                <div>
-                    <label for="nama-wali" class="mb-2 block text-sm font-bold text-[#244535]">Nama Wali (opsional)</label>
-                    <input id="nama-wali" name="nama_wali" type="text" class="field-control">
-                </div>
-                <div>
-                    <label for="no-whatsapp" class="mb-2 block text-sm font-bold text-[#244535]">No. WhatsApp</label>
-                    <input id="no-whatsapp" name="no_whatsapp" type="tel"
-                        inputmode="numeric"
-                        pattern="[0-9]{11,12}"
-                        minlength="11"
-                        maxlength="12"
-                        required
-                        title="Nomor WhatsApp harus 11–12 digit angka. Contoh: 081234567890"
-                        class="field-control"
-                        placeholder="08xxxxxxxxxx">
-                    <p class="mt-1 text-xs text-[#69786e]">11–12 digit angka, contoh: 081234567890</p>
-                </div>
-                <div class="md:col-span-2">
-                    <label for="email" class="mb-2 block text-sm font-bold text-[#244535]">Email Aktif</label>
-                    <input id="email" name="email" type="email" required autocomplete="email"
-                           title="Masukkan alamat email yang valid. Contoh: nama@email.com"
-                           class="field-control" placeholder="nama@email.com">
-                    <p class="mt-1 text-xs leading-5 text-[#69786e]">
-                        Email ini akan digunakan untuk membuat akun login. Password awal adalah tanggal lahir Anda (ddmmyyyy).
-                    </p>
-                </div>
-                <div class="md:col-span-2">
-                    <label for="alamat" class="mb-2 block text-sm font-bold text-[#244535]">Alamat Lengkap</label>
-                    <textarea id="alamat" name="alamat" rows="4" required class="field-control resize-y"></textarea>
-                </div>
-            </div>
+                    <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">3</span>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-[#244535]">Kartu Keluarga</p>
+                            <p class="text-xs text-[#617064] mt-0.5">Asli dan FC sebanyak 3 lembar</p>
+                        </div>
+                    </li>
 
-            <div class="mt-7 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-t border-[#ebeee6] pt-6">
-                <p class="max-w-xl text-xs leading-5 text-[#69786e]">
-                    {{ \App\Models\PengaturanSitus::get('form_note') }}
-                </p>
-                <button id="submit-button" type="submit" class="inline-flex w-full sm:w-auto shrink-0 items-center justify-center gap-2 rounded-lg bg-[#0d4a36] px-6 py-3 font-bold text-white transition hover:bg-[#176346] disabled:cursor-wait disabled:opacity-70">
-                    <i data-lucide="send" class="h-4 w-4"></i>
-                    <span>Kirim Pendaftaran</span>
+                    <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">4</span>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-[#244535]">FC Data Identitas Murid pada Rapor</p>
+                            <p class="text-xs text-[#617064] mt-0.5">2 lembar</p>
+                        </div>
+                    </li>
+
+                    <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">5</span>
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <p class="text-sm font-bold text-[#244535]">Surat Keterangan Lulus (SKL)</p>
+                                <span class="text-xs font-bold uppercase tracking-wide text-[#805500] bg-[#fff2ca] rounded-full px-2 py-0.5">Opsional</span>
+                            </div>
+                            <p class="text-xs text-[#617064] mt-0.5">Atau FC Ijazah</p>
+                        </div>
+                    </li>
+
+                    <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
+                        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">6</span>
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <p class="text-sm font-bold text-[#244535]">Sertifikat TKA</p>
+                                <span class="text-xs font-bold uppercase tracking-wide text-[#805500] bg-[#fff2ca] rounded-full px-2 py-0.5">Opsional</span>
+                            </div>
+                        </div>
+                    </li>
+                </ol>
+            </aside>
+
+            {{-- Tombol kembali --}}
+            <div class="mt-8 sm:mt-10 mb-4">
+                <button type="button" id="back-to-picker"
+                        class="inline-flex items-center gap-2 rounded-lg border border-[#d6dccf] bg-white px-4 py-2 text-sm font-semibold text-[#0d4a36] hover:bg-[#f4f8ee] transition">
+                    <i data-lucide="arrow-left" class="h-4 w-4"></i>
+                    Ganti Jenjang
                 </button>
             </div>
 
-            <div id="form-message" class="mt-5 hidden rounded-lg px-4 py-3 text-sm"></div>
-        </form>
+            <form id="registration-form" class="form-shell rounded-2xl border border-[#e2e4d8] bg-white p-5 sm:p-6 md:p-9" novalidate>
+                @csrf
+                <div class="grid gap-5 md:grid-cols-2">
+                    <div>
+                        <label for="nama-lengkap" class="mb-2 block text-sm font-bold text-[#244535]">Nama Lengkap</label>
+                        <input id="nama-lengkap" name="nama_lengkap" type="text" required class="field-control">
+                    </div>
+                    <div>
+                        <label for="jenis-kelamin" class="mb-2 block text-sm font-bold text-[#244535]">Jenis Kelamin</label>
+                        <select id="jenis-kelamin" name="jenis_kelamin" required class="field-control">
+                            <option value="" selected disabled>Pilih jenis kelamin</option>
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="nisn" class="mb-2 block text-sm font-bold text-[#244535]">NISN (10 digit)</label>
+                        <input id="nisn" name="nisn" type="text" inputmode="numeric" pattern="[0-9]{10}" minlength="10" maxlength="10" required class="field-control">
+                    </div>
+                    <div>
+                        <label for="tempat-lahir" class="mb-2 block text-sm font-bold text-[#244535]">Tempat Lahir</label>
+                        <input id="tempat-lahir" name="tempat_lahir" type="text" required class="field-control">
+                    </div>
+                    <div>
+                        <label for="tanggal-lahir" class="mb-2 block text-sm font-bold text-[#244535]">Tanggal Lahir</label>
+                        <input id="tanggal-lahir" name="tanggal_lahir" type="date" required class="field-control">
+                    </div>
+                    <div>
+                        <label for="asal-sekolah" class="mb-2 block text-sm font-bold text-[#244535]">Asal Sekolah</label>
+                        <input id="asal-sekolah" name="asal_sekolah" type="text" required class="field-control">
+                    </div>
 
+                    {{-- Jenjang (auto dari picker, readonly) --}}
+                    <div>
+                        <label for="jenjang-id" class="mb-2 block text-sm font-bold text-[#244535]">Jenjang Pendaftaran</label>
+                        <select id="jenjang-id" name="jenjang_id" required class="field-control bg-[#f8faf5] cursor-not-allowed text-[#4b5d53]" aria-readonly="true">
+                            <option value="" selected disabled>Pilih jenjang di atas</option>
+                            @foreach ($jenjangs as $j)
+                                <option value="{{ $j->id }}" data-kode="{{ $j->kode }}">{{ $j->nama }}</option>
+                            @endforeach
+                        </select>
+                        <p class="mt-1 text-xs text-[#69786e]">Jenjang dipilih dari tombol di atas. Klik "Ganti Jenjang" untuk mengubah.</p>
+                    </div>
+
+                    <div>
+                        <label for="gelombang-id" class="mb-2 block text-sm font-bold text-[#244535]">Gelombang</label>
+                        <select id="gelombang-id" name="gelombang_id" required class="field-control" disabled>
+                            <option value="">Pilih jenjang terlebih dahulu</option>
+                        </select>
+                        <p id="gelombang-info" class="mt-1 text-xs text-[#699944]"></p>
+                    </div>
+                    <div>
+                        <label for="nama-ayah" class="mb-2 block text-sm font-bold text-[#244535]">Nama Ayah</label>
+                        <input id="nama-ayah" name="nama_ayah" type="text" required class="field-control">
+                    </div>
+                    <div>
+                        <label for="nama-ibu" class="mb-2 block text-sm font-bold text-[#244535]">Nama Ibu</label>
+                        <input id="nama-ibu" name="nama_ibu" type="text" required class="field-control">
+                    </div>
+                    <div>
+                        <label for="nama-wali" class="mb-2 block text-sm font-bold text-[#244535]">Nama Wali (opsional)</label>
+                        <input id="nama-wali" name="nama_wali" type="text" class="field-control">
+                    </div>
+                    <div>
+                        <label for="no-whatsapp" class="mb-2 block text-sm font-bold text-[#244535]">No. WhatsApp</label>
+                        <input id="no-whatsapp" name="no_whatsapp" type="tel"
+                            inputmode="numeric"
+                            pattern="[0-9]{11,12}"
+                            minlength="11"
+                            maxlength="12"
+                            required
+                            title="Nomor WhatsApp harus 11–12 digit angka. Contoh: 081234567890"
+                            class="field-control"
+                            placeholder="08xxxxxxxxxx">
+                        <p class="mt-1 text-xs text-[#69786e]">11–12 digit angka, contoh: 081234567890</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="email" class="mb-2 block text-sm font-bold text-[#244535]">Email Aktif</label>
+                        <input id="email" name="email" type="email" required autocomplete="email"
+                               title="Masukkan alamat email yang valid. Contoh: nama@email.com"
+                               class="field-control" placeholder="nama@email.com">
+                        <p class="mt-1 text-xs leading-5 text-[#69786e]">
+                            Email ini akan digunakan untuk membuat akun login. Password awal adalah tanggal lahir Anda (ddmmyyyy).
+                        </p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="alamat" class="mb-2 block text-sm font-bold text-[#244535]">Alamat Lengkap</label>
+                        <textarea id="alamat" name="alamat" rows="4" required class="field-control resize-y"></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-7 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-t border-[#ebeee6] pt-6">
+                    <p class="max-w-xl text-xs leading-5 text-[#69786e]">
+                        {{ \App\Models\PengaturanSitus::get('form_note') }}
+                    </p>
+                    <button id="submit-button" type="submit" class="inline-flex w-full sm:w-auto shrink-0 items-center justify-center gap-2 rounded-lg bg-[#0d4a36] px-6 py-3 font-bold text-white transition hover:bg-[#176346] disabled:cursor-wait disabled:opacity-70">
+                        <i data-lucide="send" class="h-4 w-4"></i>
+                        <span>Kirim Pendaftaran</span>
+                    </button>
+                </div>
+
+                <div id="form-message" class="mt-5 hidden rounded-lg px-4 py-3 text-sm"></div>
+            </form>
+        </div>{{-- /#form-wrapper --}}
+
+        {{-- ============================================ --}}
+        {{-- CEK STATUS --}}
+        {{-- ============================================ --}}
         <section class="mt-10 rounded-2xl border border-[#dce6d3] bg-[#f4f8ee] p-5 sm:p-6 md:p-8">
             <div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
                 <div>
@@ -652,15 +761,12 @@
                 </div>
                 <p id="result-nama" class="mt-3 text-sm font-bold text-[#244535]"></p>
 
-                {{-- Grid status --}}
                 <div class="mt-5 grid gap-3 grid-cols-2 lg:grid-cols-4">
-                    {{-- Verifikasi --}}
                     <div class="rounded-lg bg-[#f6f8f3] p-3">
                         <p class="text-xs text-[#617064]">Verifikasi</p>
                         <p id="result-verification" class="mt-1 text-sm font-bold text-[#244535]"></p>
                     </div>
 
-                    {{-- Ujian (dengan tanggal & nilai) --}}
                     <div class="rounded-lg bg-[#f6f8f3] p-3">
                         <p class="text-xs text-[#617064]">Ujian</p>
                         <p id="result-exam" class="mt-1 text-sm font-bold text-[#244535]"></p>
@@ -668,13 +774,11 @@
                         <p id="result-exam-score" class="mt-0.5 text-xs font-bold text-[#0d4a36]"></p>
                     </div>
 
-                    {{-- Kelulusan --}}
                     <div class="rounded-lg bg-[#f6f8f3] p-3">
                         <p class="text-xs text-[#617064]">Kelulusan</p>
                         <p id="result-graduation" class="mt-1 text-sm font-bold text-[#244535]"></p>
                     </div>
 
-                    {{-- Daftar Ulang --}}
                     <div class="rounded-lg bg-[#f6f8f3] p-3">
                         <p class="text-xs text-[#617064]">Daftar Ulang</p>
                         <p id="result-reregistration" class="mt-1 text-sm font-bold text-[#244535]"></p>
@@ -682,10 +786,8 @@
                     </div>
                 </div>
 
-                {{-- Nilai ujian highlight --}}
                 <p id="result-score" class="mt-4 hidden rounded-lg bg-[#fff8dd] px-3 py-2 text-sm text-[#76530d]"></p>
 
-                {{-- Tombol Lanjut Daftar Ulang --}}
                 <div id="reregistration-cta" class="mt-5 hidden">
                     <div class="rounded-xl border-2 border-dashed border-[#b9dca8] bg-[#e8f4df] p-4 sm:p-5">
                         <div class="flex items-start gap-3">
@@ -722,7 +824,6 @@
 <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-3 sm:p-4">
     <div class="w-full max-w-lg rounded-2xl bg-white shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
 
-        {{-- Header --}}
         <div class="bg-[#d8ae45] px-5 sm:px-6 py-4 sm:py-5 text-center text-[#073528] shrink-0">
             <div class="mx-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-white mb-3">
                 <i data-lucide="clipboard-check" class="h-7 w-7 sm:h-8 sm:w-8 text-[#0d4a36]"></i>
@@ -731,7 +832,6 @@
             <p class="text-sm mt-1 text-[#5c4818]">Periksa kembali sebelum data dikirim</p>
         </div>
 
-        {{-- Body --}}
         <div class="px-5 sm:px-6 py-4 sm:py-5 overflow-y-auto space-y-3">
 
             <p class="text-xs leading-5 text-[#617064]">
@@ -739,41 +839,33 @@
                 harus menghubungi admin untuk perbaikan.
             </p>
 
-            {{-- Ringkasan Data --}}
             <div class="rounded-xl bg-[#f4f8ee] border border-[#dce6d3] p-4 space-y-3 text-sm">
-
-                {{-- Nama Lengkap --}}
                 <div>
                     <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">Nama Lengkap</p>
                     <p id="confirm-nama" class="mt-0.5 font-bold text-[#0d4a36] break-words">—</p>
                 </div>
 
-                {{-- Tempat, Tanggal Lahir --}}
                 <div>
                     <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">Tempat, Tanggal Lahir</p>
                     <p id="confirm-ttl" class="mt-0.5 font-bold text-[#0d4a36] break-words">—</p>
                 </div>
 
-                {{-- NISN --}}
                 <div>
                     <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">NISN</p>
                     <p id="confirm-nisn" class="mt-0.5 font-mono font-bold text-[#0d4a36] break-all">—</p>
                 </div>
 
-                {{-- No. WhatsApp --}}
                 <div>
                     <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">No. WhatsApp</p>
                     <p id="confirm-wa" class="mt-0.5 font-mono font-bold text-[#0d4a36] break-all">—</p>
                 </div>
 
-                {{-- Email --}}
                 <div>
                     <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">Email</p>
                     <p id="confirm-email" class="mt-0.5 font-mono font-bold text-[#0d4a36] break-all">—</p>
                 </div>
             </div>
 
-            {{-- Warning Password --}}
             <p class="text-xs leading-5 text-[#963d21] bg-[#fff0ea] rounded-lg p-3 border border-[#f2c1ae]">
                 <i data-lucide="alert-triangle" class="inline h-3.5 w-3.5"></i>
                 <strong>Perhatian:</strong> Password awal akun Anda adalah <strong>tanggal lahir (ddmmyyyy)</strong>.
@@ -781,7 +873,6 @@
             </p>
         </div>
 
-        {{-- Footer --}}
         <div class="px-5 sm:px-6 py-4 bg-[#f8faf5] border-t border-[#e1e9da] flex flex-col-reverse sm:flex-row sm:justify-end gap-2 shrink-0">
             <button type="button" data-close-confirm
                     class="inline-flex items-center justify-center gap-2 rounded-lg border border-[#d6dccf] px-4 py-2.5 text-sm font-semibold text-[#244535] hover:bg-white w-full sm:w-auto">
@@ -867,7 +958,7 @@
                     <i data-lucide="alert-triangle" class="inline h-3 w-3"></i>
                     <strong>Penting:</strong> Segera ganti password setelah login pertama.
                 </p>
-                {{-- Info Pembayaran --}}
+
                 <div class="border-t border-[#e1e9da] pt-4 mt-4">
                     <p class="text-xs font-bold uppercase tracking-[.14em] text-[#699944] mb-3">Langkah Selanjutnya</p>
 
@@ -898,7 +989,6 @@
                         </li>
                     </ol>
                 </div>
-
             </div>
         </div>
 
@@ -1136,6 +1226,68 @@
     }
 
     // ============================================
+    // JENJANG PICKER — Tampilkan Form Setelah Pilih
+    // ============================================
+    const jenjangPicker = $('jenjang-picker');
+    const formWrapper   = $('form-wrapper');
+    const jenjangSelect = $('jenjang-id');
+    const formTitle     = $('form-jenjang-title');
+    const formSubtitle  = $('form-jenjang-subtitle');
+
+    function showFormForJenjang(id, nama, kode, deskripsi) {
+        // Set dropdown jenjang
+        jenjangSelect.value = id;
+        jenjangSelect.dispatchEvent(new Event('change')); // trigger load gelombang
+
+        // Update judul + subjudul
+        formTitle.textContent = 'Formulir Pendaftaran ' + nama;
+        formSubtitle.textContent = deskripsi || '';
+
+        // Sembunyikan picker, tampilkan form
+        jenjangPicker.classList.add('hidden');
+        formWrapper.classList.remove('hidden');
+
+        // Scroll + focus
+        setTimeout(() => {
+            formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (window.lucide) lucide.createIcons();
+            setTimeout(() => $('nama-lengkap')?.focus(), 350);
+        }, 50);
+    }
+
+    document.querySelectorAll('.jenjang-card').forEach((card) => {
+        card.addEventListener('click', function () {
+            document.querySelectorAll('.jenjang-card').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+
+            showFormForJenjang(
+                this.dataset.jenjangId,
+                this.dataset.jenjangNama,
+                this.dataset.jenjangKode,
+                this.dataset.jenjangDeskripsi
+            );
+        });
+    });
+
+    // Tombol "Ganti Jenjang"
+    $('back-to-picker')?.addEventListener('click', function () {
+        formWrapper.classList.add('hidden');
+        jenjangPicker.classList.remove('hidden');
+        document.querySelectorAll('.jenjang-card').forEach(c => c.classList.remove('active'));
+
+        // Reset dropdown jenjang & gelombang
+        jenjangSelect.value = '';
+        const gelombangSelect = $('gelombang-id');
+        gelombangSelect.innerHTML = '<option value="">Pilih jenjang terlebih dahulu</option>';
+        gelombangSelect.disabled = true;
+        $('gelombang-info').textContent = '';
+
+        setTimeout(() => {
+            jenjangPicker.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 50);
+    });
+
+    // ============================================
     // DROPDOWN GELOMBANG
     // ============================================
     $('jenjang-id').addEventListener('change', async function () {
@@ -1158,9 +1310,8 @@
                 const opt = document.createElement('option');
                 opt.value = g.id;
 
-                // Kalau nonaktif → disable + kasih label "Tutup"
                 const isAktif = g.aktif === true || g.aktif === 1 || g.aktif === '1';
-                
+
                 if (isAktif) {
                     opt.textContent = `${g.nama} — Rp${Number(g.biaya).toLocaleString('id-ID')}`;
                 } else {
@@ -1209,22 +1360,16 @@
     let isValidated = false;
 
     // ============================================
-    // SUBMIT STEP 1 — Validasi HTML5 + Tampilkan Modal Konfirmasi
-    // ============================================
-    // ============================================
     // SUBMIT STEP 1 — Validasi HTML5 + Validasi Server
-    // Kalau lolos → tampilkan modal konfirmasi
     // ============================================
     $('registration-form').addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        // 1. Validasi HTML5 (pattern, required, type=email, dll)
         if (!this.checkValidity()) {
             this.reportValidity();
             return;
         }
 
-        // 2. Loading state
         const form = this;
         const btn = $('submit-button');
         const originalBtnText = btn.querySelector('span').textContent;
@@ -1232,7 +1377,6 @@
         btn.querySelector('span').textContent = 'Memeriksa data...';
 
         try {
-            // 3. Kirim ke /daftar/validasi (validasi saja, tidak simpan)
             const fd = new FormData(form);
             const res = await fetch(ROUTES.validasi, {
                 method: 'POST',
@@ -1243,7 +1387,6 @@
             const data = await res.json();
 
             if (data.success) {
-                // ✅ Lolos validasi server → tampilkan modal konfirmasi
                 isValidated = true;
 
                 const tglLahir = fd.get('tanggal_lahir') || '';
@@ -1258,7 +1401,6 @@
                 if (window.lucide) lucide.createIcons();
 
             } else if (data.errors) {
-                // ❌ Gagal validasi → modal error
                 const list = Object.values(data.errors).flat();
                 showErrorModal(list);
             } else {
@@ -1276,24 +1418,20 @@
 
     // ============================================
     // SUBMIT STEP 2 — User Klik "Ya, Data Benar"
-    // Baru benar-benar simpan ke /daftar
     // ============================================
     $('confirm-submit').addEventListener('click', async function () {
         if (isSubmitting || !pendingForm || !isValidated) return;
 
         isSubmitting = true;
 
-        // Update tombol konfirmasi
         const confirmBtn = this;
         const confirmText = $('confirm-submit-text');
         const originalConfirmText = confirmText.textContent;
         confirmBtn.disabled = true;
         confirmText.textContent = 'Menyimpan...';
 
-        // Tutup modal konfirmasi
         hideModal('confirm-modal');
 
-        // Siapkan tombol submit utama
         const btn = $('submit-button');
         const msg = $('form-message');
         btn.disabled = true;
@@ -1315,7 +1453,6 @@
             if (data.success) {
                 const d = data.data;
 
-                // Isi modal sukses
                 $('modal-nomor').textContent     = d.nomor_pendaftaran;
                 $('modal-nama').textContent      = d.nama_lengkap;
                 $('modal-jenjang').textContent   = d.jenjang;
@@ -1335,6 +1472,12 @@
                 pendingForm = null;
                 isValidated = false;
 
+                // Reset ke picker
+                jenjangSelect.value = '';
+                formWrapper.classList.add('hidden');
+                jenjangPicker.classList.remove('hidden');
+                document.querySelectorAll('.jenjang-card').forEach(c => c.classList.remove('active'));
+
             } else if (data.errors) {
                 const list = Object.values(data.errors).flat();
                 showErrorModal(list);
@@ -1346,12 +1489,8 @@
             showErrorModal(['Gagal menyimpan. Periksa koneksi Anda dan coba lagi.']);
         } finally {
             isSubmitting = false;
-
-            // Reset tombol konfirmasi
             confirmBtn.disabled = false;
             confirmText.textContent = originalConfirmText;
-
-            // Reset tombol submit utama
             btn.disabled = false;
             btn.querySelector('span').textContent = 'Kirim Pendaftaran';
         }
@@ -1438,7 +1577,6 @@
     // ============================================
     document.addEventListener('click', function (e) {
 
-        // --- Copy button ---
         const copyBtn = e.target.closest('[data-copy]');
         if (copyBtn) {
             const el = $(copyBtn.dataset.copy);
@@ -1447,23 +1585,20 @@
             return;
         }
 
-        // --- Close success modal ---
         if (e.target.closest('[data-close-modal]')) {
             hideModal('success-modal');
             return;
         }
 
-        // --- Close error modal ---
         if (e.target.closest('[data-close-error-modal]')) {
             hideErrorModal();
             return;
         }
 
-        // --- Close confirm modal (Batal / Kembali & Edit) ---
         if (e.target.closest('[data-close-confirm]')) {
             hideModal('confirm-modal');
             pendingForm = null;
-            isValidated = false;  // ← tambah ini
+            isValidated = false;
             setTimeout(() => {
                 const firstField = $('nama-lengkap');
                 if (firstField) {
@@ -1474,7 +1609,6 @@
             return;
         }
 
-        // --- Klik overlay modal ---
         if (e.target.id === 'success-modal') hideModal('success-modal');
         if (e.target.id === 'error-modal')   hideErrorModal();
         if (e.target.id === 'confirm-modal') {
