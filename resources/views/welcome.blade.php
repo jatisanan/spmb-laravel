@@ -654,13 +654,20 @@
 
                     {{-- Jenjang (auto dari picker, readonly) --}}
                     <div>
-                        <label for="jenjang-id" class="mb-2 block text-sm font-bold text-[#244535]">Jenjang Pendaftaran</label>
-                        <select id="jenjang-id" name="jenjang_id" required class="field-control bg-[#f8faf5] cursor-not-allowed text-[#4b5d53]" aria-readonly="true">
-                            <option value="" selected disabled>Pilih jenjang di atas</option>
-                            @foreach ($jenjangs as $j)
-                                <option value="{{ $j->id }}" data-kode="{{ $j->kode }}">{{ $j->nama }}</option>
-                            @endforeach
-                        </select>
+                        <label for="jenjang-display" class="mb-2 block text-sm font-bold text-[#244535]">Jenjang Pendaftaran</label>
+
+                        {{-- Yang dikirim ke server --}}
+                        <input type="hidden" id="jenjang-id" name="jenjang_id" value="">
+
+                        {{-- Yang ditampilkan ke user (readonly, tidak bisa diklik) --}}
+                        <input type="text"
+                            id="jenjang-display"
+                            readonly
+                            tabindex="-1"
+                            class="field-control bg-[#f0f4ec] cursor-not-allowed text-[#0d4a36] font-bold pointer-events-none"
+                            placeholder="Pilih jenjang di atas"
+                            value="">
+
                         <p class="mt-1 text-xs text-[#69786e]">Jenjang dipilih dari tombol di atas. Klik "Ganti Jenjang" untuk mengubah.</p>
                     </div>
 
@@ -1235,9 +1242,12 @@
     const formSubtitle  = $('form-jenjang-subtitle');
 
     function showFormForJenjang(id, nama, kode, deskripsi) {
-        // Set dropdown jenjang
+        // Set value di hidden input (yang dikirim ke server)
         jenjangSelect.value = id;
-        jenjangSelect.dispatchEvent(new Event('change')); // trigger load gelombang
+
+        // Set tampilan di input readonly
+        const display = $('jenjang-display');
+        if (display) display.value = nama;
 
         // Update judul + subjudul
         formTitle.textContent = 'Formulir Pendaftaran ' + nama;
@@ -1246,6 +1256,9 @@
         // Sembunyikan picker, tampilkan form
         jenjangPicker.classList.add('hidden');
         formWrapper.classList.remove('hidden');
+
+        // Load gelombang secara manual (karena hidden input tidak trigger 'change')
+        loadGelombang(id);
 
         // Scroll + focus
         setTimeout(() => {
@@ -1275,8 +1288,12 @@
         jenjangPicker.classList.remove('hidden');
         document.querySelectorAll('.jenjang-card').forEach(c => c.classList.remove('active'));
 
-        // Reset dropdown jenjang & gelombang
+        // Reset hidden input & display
         jenjangSelect.value = '';
+        const display = $('jenjang-display');
+        if (display) display.value = '';
+
+        // Reset gelombang
         const gelombangSelect = $('gelombang-id');
         gelombangSelect.innerHTML = '<option value="">Pilih jenjang terlebih dahulu</option>';
         gelombangSelect.disabled = true;
@@ -1288,14 +1305,18 @@
     });
 
     // ============================================
-    // DROPDOWN GELOMBANG
+    // LOAD GELOMBANG (dipanggil dari picker & ganti jenjang)
     // ============================================
-    $('jenjang-id').addEventListener('change', async function () {
-        const jenjangId = this.value;
+    async function loadGelombang(jenjangId) {
         const gelombangSelect = $('gelombang-id');
         const info = $('gelombang-info');
 
-        if (!jenjangId) return;
+        if (!jenjangId) {
+            gelombangSelect.innerHTML = '<option value="">Pilih jenjang terlebih dahulu</option>';
+            gelombangSelect.disabled = true;
+            info.textContent = '';
+            return;
+        }
 
         gelombangSelect.disabled = true;
         gelombangSelect.innerHTML = '<option>Memuat...</option>';
@@ -1330,7 +1351,7 @@
         } catch (e) {
             info.textContent = 'Gagal memuat gelombang.';
         }
-    });
+    }
 
     $('gelombang-id').addEventListener('change', function () {
         const opt = this.options[this.selectedIndex];
@@ -1474,10 +1495,12 @@
 
                 // Reset ke picker
                 jenjangSelect.value = '';
+                const jenjangDisplay = $('jenjang-display');
+                if (jenjangDisplay) jenjangDisplay.value = '';
                 formWrapper.classList.add('hidden');
                 jenjangPicker.classList.remove('hidden');
                 document.querySelectorAll('.jenjang-card').forEach(c => c.classList.remove('active'));
-
+                
             } else if (data.errors) {
                 const list = Object.values(data.errors).flat();
                 showErrorModal(list);
