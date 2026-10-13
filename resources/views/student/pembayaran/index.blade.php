@@ -21,31 +21,170 @@
 {{-- FLASH MESSAGE --}}
 {{-- ============================================ --}}
 @if (session('success'))
-    <div class="mb-5 rounded-lg border border-[#b9dca8] bg-[#e8f4df] px-4 py-3 text-sm text-[#175b31] flex items-start gap-2">
+    <div class="mb-5 rounded-lg border border-green-300 bg-green-100 px-4 py-3 text-sm text-green-800 flex items-start gap-2">
         <i data-lucide="check-circle" class="inline h-4 w-4 mt-0.5 shrink-0"></i>
         <span>{{ session('success') }}</span>
     </div>
 @endif
 
 @if (session('error'))
-    <div class="mb-5 rounded-lg border border-[#f2c1ae] bg-[#fff0ea] px-4 py-3 text-sm text-[#963d21] flex items-start gap-2">
+    <div class="mb-5 rounded-lg border border-red-300 bg-red-100 px-4 py-3 text-sm text-red-800 flex items-start gap-2">
         <i data-lucide="alert-circle" class="inline h-4 w-4 mt-0.5 shrink-0"></i>
         <span>{{ session('error') }}</span>
     </div>
 @endif
 
+@php
+    // ============================================
+    // KONFIGURASI WARNA STATUS
+    // ============================================
+    $statusConfig = match($pembayaran->status) {
+        'Terverifikasi' => [
+            'chip'        => 'bg-green-100 text-green-800 border border-green-300',
+            'card_bg'     => 'bg-green-100',
+            'card_border' => 'border-green-400',
+            'eyebrow'     => 'text-green-700',
+            'title'       => 'text-green-900',
+            'text'        => 'text-green-800',
+        ],
+        'Menunggu Verifikasi' => [
+            'chip'        => 'bg-amber-100 text-amber-800 border border-amber-300',
+            'card_bg'     => 'bg-amber-100',
+            'card_border' => 'border-amber-400',
+            'eyebrow'     => 'text-amber-700',
+            'title'       => 'text-amber-900',
+            'text'        => 'text-amber-800',
+        ],
+        'Gagal' => [
+            'chip'        => 'bg-red-100 text-red-800 border border-red-300',
+            'card_bg'     => 'bg-red-100',
+            'card_border' => 'border-red-400',
+            'eyebrow'     => 'text-red-700',
+            'title'       => 'text-red-900',
+            'text'        => 'text-red-800',
+        ],
+        default => [  // Belum Bayar
+            'chip'        => 'bg-slate-100 text-slate-700 border border-slate-300',
+            'card_bg'     => 'bg-slate-100',
+            'card_border' => 'border-slate-300',
+            'eyebrow'     => 'text-slate-600',
+            'title'       => 'text-slate-900',
+            'text'        => 'text-slate-700',
+        ],
+    };
+@endphp
+
 <div class="grid gap-5 lg:grid-cols-3">
 
     {{-- ============================================ --}}
-    {{-- KOLOM KIRI --}}
+    {{-- KOLOM KANAN: Upload Bukti (di mobile jadi DI ATAS) --}}
     {{-- ============================================ --}}
-    <div class="lg:col-span-2 space-y-5">
+    <div class="space-y-5 order-1 lg:order-2">
+
+        {{-- Status Card — WARNA SOLID SESUAI STATUS --}}
+        <div class="rounded-2xl {{ $statusConfig['card_bg'] }} border {{ $statusConfig['card_border'] }} p-5 shadow-sm">
+            <p class="text-xs font-bold uppercase tracking-[.14em] {{ $statusConfig['eyebrow'] }}">Status Pembayaran</p>
+            <p class="display-font mt-2 text-xl font-bold {{ $statusConfig['title'] }}">{{ $pembayaran->status }}</p>
+            @if ($pembayaran->uploaded_at)
+                <p class="text-xs {{ $statusConfig['text'] }} mt-1">
+                    <i data-lucide="upload" class="inline h-3 w-3"></i>
+                    Upload: {{ $pembayaran->uploaded_at->isoFormat('D MMM Y, HH:mm') }}
+                </p>
+            @endif
+            @if ($pembayaran->verified_at)
+                <p class="text-xs {{ $statusConfig['text'] }} mt-1">
+                    <i data-lucide="check-circle" class="inline h-3 w-3"></i>
+                    Verifikasi: {{ $pembayaran->verified_at->isoFormat('D MMM Y, HH:mm') }}
+                </p>
+            @endif
+        </div>
+
+        {{-- Upload Form --}}
+        @if ($pembayaran->status !== 'Terverifikasi')
+            <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm">
+                <h3 class="font-bold text-[#0d4a36] mb-3">
+                    {{ $pembayaran->bukti_path ? 'Upload Ulang Bukti' : 'Upload Bukti Bayar' }}
+                </h3>
+
+                @if ($pembayaran->status === 'Gagal' && $pembayaran->catatan_admin)
+                    <div class="mb-3 rounded-lg border border-red-300 bg-red-100 p-3 text-xs text-red-800">
+                        <p class="font-bold mb-1">Alasan penolakan:</p>
+                        <p>{{ $pembayaran->catatan_admin }}</p>
+                    </div>
+                @endif
+
+                @if ($pembayaran->status === 'Menunggu Verifikasi')
+                    <div class="rounded-lg border border-amber-300 bg-amber-100 p-3 text-xs text-amber-800">
+                        <i data-lucide="clock" class="inline h-3 w-3"></i>
+                        Bukti bayar sedang menunggu verifikasi admin. Tunggu maks 1×24 jam.
+                    </div>
+                @else
+                    @if ($pembayaran->bukti_path)
+                        <div class="mb-3 rounded-lg bg-[#f8faf5] border border-[#e1e9da] p-3">
+                            <p class="text-xs text-[#617064] mb-1">Bukti terakhir:</p>
+                            <a href="{{ asset('storage/' . $pembayaran->bukti_path) }}"
+                               target="_blank"
+                               class="text-xs text-[#0d4a36] font-semibold hover:underline inline-flex items-center gap-1">
+                                <i data-lucide="file-text" class="h-3 w-3"></i>
+                                {{ $pembayaran->bukti_nama_asli }}
+                            </a>
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('student.pembayaran.upload') }}"
+                          enctype="multipart/form-data" class="space-y-3">
+                        @csrf
+
+                        <div>
+                            <label class="mb-1.5 block text-xs font-bold text-[#244535]">Metode Pembayaran</label>
+                            <select name="metode" required class="field-control">
+                                <option value="">Pilih metode</option>
+                                <option value="offline" @selected($pembayaran->metode === 'offline')>Offline (Kantor)</option>
+                                <option value="transfer" @selected($pembayaran->metode === 'transfer')>Transfer Bank</option>
+                                <option value="qris" @selected($pembayaran->metode === 'qris')>QRIS</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="mb-1.5 block text-xs font-bold text-[#244535]">Bukti Bayar</label>
+                            <input type="file" name="bukti" required accept=".jpg,.jpeg,.png,.pdf"
+                                   class="field-control text-xs">
+                            <p class="mt-1 text-xs text-[#617064]">JPG, PNG, atau PDF. Maks 2MB.</p>
+                        </div>
+
+                        @error('bukti')  <p class="text-xs text-red-700">{{ $message }}</p> @enderror
+                        @error('metode') <p class="text-xs text-red-700">{{ $message }}</p> @enderror
+
+                        <button type="submit"
+                                class="w-full rounded-lg bg-[#0d4a36] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#176346]">
+                            <i data-lucide="upload" class="inline h-4 w-4 mr-1"></i>
+                            Kirim Bukti
+                        </button>
+                    </form>
+                @endif
+            </div>
+        @else
+            <div class="rounded-2xl border-2 border-green-400 bg-green-100 p-5 text-center">
+                <i data-lucide="check-circle-2" class="mx-auto h-10 w-10 text-green-700 mb-2"></i>
+                <p class="font-bold text-green-900">Pembayaran Terverifikasi</p>
+                <p class="text-xs text-green-800 mt-1">Terima kasih. Lanjutkan proses berikutnya.</p>
+            </div>
+        @endif
+
+    </div>
+
+    {{-- ============================================ --}}
+    {{-- KOLOM KIRI: Info (di mobile jadi DI BAWAH) --}}
+    {{-- ============================================ --}}
+    <div class="lg:col-span-2 space-y-5 order-2 lg:order-1">
 
         {{-- === INFO TAGIHAN === --}}
         <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="display-font text-lg font-bold text-[#0d4a36]">Tagihan Pembayaran</h3>
-                <span class="status-chip {{ $pembayaran->status_badge }}">{{ $pembayaran->status }}</span>
+                <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold {{ $statusConfig['chip'] }}">
+                    {{ $pembayaran->status }}
+                </span>
             </div>
 
             <dl class="grid gap-3 sm:grid-cols-2 text-sm">
@@ -194,103 +333,6 @@
                 </div>
             @endif
         </div>
-
-    </div>
-
-    {{-- ============================================ --}}
-    {{-- KOLOM KANAN: Upload Bukti --}}
-    {{-- ============================================ --}}
-    <div class="space-y-5">
-
-        {{-- Status Card --}}
-        <div class="rounded-2xl bg-[#0d4a36] text-white p-5 shadow-sm">
-            <p class="text-xs font-bold uppercase tracking-[.14em] text-[#d8ae45]">Status Pembayaran</p>
-            <p class="display-font mt-2 text-xl font-bold">{{ $pembayaran->status }}</p>
-            @if ($pembayaran->uploaded_at)
-                <p class="text-xs text-[#d6e3d0] mt-1">
-                    <i data-lucide="upload" class="inline h-3 w-3"></i>
-                    Upload: {{ $pembayaran->uploaded_at->isoFormat('D MMM Y, HH:mm') }}
-                </p>
-            @endif
-            @if ($pembayaran->verified_at)
-                <p class="text-xs text-[#d6e3d0] mt-1">
-                    <i data-lucide="check-circle" class="inline h-3 w-3"></i>
-                    Verifikasi: {{ $pembayaran->verified_at->isoFormat('D MMM Y, HH:mm') }}
-                </p>
-            @endif
-        </div>
-
-        {{-- Upload Form --}}
-        @if ($pembayaran->status !== 'Terverifikasi')
-            <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm">
-                <h3 class="font-bold text-[#0d4a36] mb-3">
-                    {{ $pembayaran->bukti_path ? 'Upload Ulang Bukti' : 'Upload Bukti Bayar' }}
-                </h3>
-
-                @if ($pembayaran->status === 'Gagal' && $pembayaran->catatan_admin)
-                    <div class="mb-3 rounded-lg border border-[#f2c1ae] bg-[#fff0ea] p-3 text-xs text-[#963d21]">
-                        <p class="font-bold mb-1">Alasan penolakan:</p>
-                        <p>{{ $pembayaran->catatan_admin }}</p>
-                    </div>
-                @endif
-
-                @if ($pembayaran->status === 'Menunggu Verifikasi')
-                    <div class="rounded-lg border border-[#f0e0a8] bg-[#fff8dd] p-3 text-xs text-[#805500]">
-                        <i data-lucide="clock" class="inline h-3 w-3"></i>
-                        Bukti bayar sedang menunggu verifikasi admin. Tunggu maks 1×24 jam.
-                    </div>
-                @else
-                    @if ($pembayaran->bukti_path)
-                        <div class="mb-3 rounded-lg bg-[#f8faf5] border border-[#e1e9da] p-3">
-                            <p class="text-xs text-[#617064] mb-1">Bukti terakhir:</p>
-                            <a href="{{ asset('storage/' . $pembayaran->bukti_path) }}"
-                               target="_blank"
-                               class="text-xs text-[#0d4a36] font-semibold hover:underline inline-flex items-center gap-1">
-                                <i data-lucide="file-text" class="h-3 w-3"></i>
-                                {{ $pembayaran->bukti_nama_asli }}
-                            </a>
-                        </div>
-                    @endif
-
-                    <form method="POST" action="{{ route('student.pembayaran.upload') }}"
-                          enctype="multipart/form-data" class="space-y-3">
-                        @csrf
-
-                        <div>
-                            <label class="mb-1.5 block text-xs font-bold text-[#244535]">Metode Pembayaran</label>
-                            <select name="metode" required class="field-control">
-                                <option value="">Pilih metode</option>
-                                <option value="offline" @selected($pembayaran->metode === 'offline')>Offline (Kantor)</option>
-                                <option value="transfer" @selected($pembayaran->metode === 'transfer')>Transfer Bank</option>
-                                <option value="qris" @selected($pembayaran->metode === 'qris')>QRIS</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="mb-1.5 block text-xs font-bold text-[#244535]">Bukti Bayar</label>
-                            <input type="file" name="bukti" required accept=".jpg,.jpeg,.png,.pdf"
-                                   class="field-control text-xs">
-                            <p class="mt-1 text-xs text-[#617064]">JPG, PNG, atau PDF. Maks 2MB.</p>
-                        </div>
-
-                        @error('bukti')  <p class="text-xs text-[#963d21]">{{ $message }}</p> @enderror
-                        @error('metode') <p class="text-xs text-[#963d21]">{{ $message }}</p> @enderror
-
-                        <button type="submit"
-                                class="w-full rounded-lg bg-[#0d4a36] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#176346]">
-                            <i data-lucide="upload" class="inline h-4 w-4 mr-1"></i>
-                            Kirim Bukti
-                        </button>
-                    </form>
-                @endif
-            </div>
-        @else
-            <div class="rounded-2xl border-2 border-[#b9dca8] bg-[#e8f4df] p-5 text-center">
-                <i data-lucide="check-circle-2" class="mx-auto h-10 w-10 text-[#175b31] mb-2"></i>
-                <p class="font-bold text-[#175b31]">Pembayaran Terverifikasi</p>
-                <p class="text-xs text-[#175b31] mt-1">Terima kasih. Lanjutkan proses berikutnya.</p>
-            </div>
-        @endif
 
     </div>
 </div>

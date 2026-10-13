@@ -41,135 +41,284 @@
     </div>
 
     {{-- ============================================ --}}
-    {{-- RINGKASAN PEMBAYARAN --}}
+    {{-- CARD PEMBAYARAN — KONTEKSTUAL (WARNA SOFT) --}}
     {{-- ============================================ --}}
     @php
         $pembayaran = $pendaftaran->pembayaran;
         $statusBayar = $pembayaran?->status ?? 'Belum Bayar';
-        $clsBayar = match($statusBayar) {
-            'Terverifikasi'       => 'status-success',
-            'Menunggu Verifikasi' => 'status-pending',
-            'Gagal'               => 'status-danger',
-            default               => 'status-neutral',
-        };
         $jumlahBayar = $pembayaran?->jumlah ?? $pendaftaran->gelombang?->biaya ?? 0;
+
+        // Konfigurasi card dengan WARNA SOLID
+        $cardConfig = match($statusBayar) {
+            'Terverifikasi' => [
+                'bg'        => 'bg-green-100',
+                'border'    => 'border-green-400',
+                'icon_bg'   => 'bg-green-600',
+                'icon'      => 'check-circle-2',
+                'icon_fg'   => 'text-white',
+                'eyebrow'   => 'text-green-700',
+                'title'     => 'text-green-900',
+                'desc'      => 'text-green-800',
+                'chip_bg'   => 'bg-green-600',
+                'chip_text' => 'text-white',
+                'cta_bg'    => 'bg-green-700',
+                'cta_hover' => 'hover:bg-green-800',
+                'cta_text'  => 'Lihat Detail Pembayaran',
+                'cta_icon'  => 'arrow-right',
+                'headline'  => 'Pembayaran Berhasil',
+                'message'   => 'Pembayaran Anda sudah diverifikasi. Lanjutkan proses berikutnya.',
+            ],
+            'Menunggu Verifikasi' => [
+                'bg'        => 'bg-amber-100',
+                'border'    => 'border-amber-400',
+                'icon_bg'   => 'bg-amber-500',
+                'icon'      => 'clock',
+                'icon_fg'   => 'text-white',
+                'eyebrow'   => 'text-amber-700',
+                'title'     => 'text-amber-900',
+                'desc'      => 'text-amber-800',
+                'chip_bg'   => 'bg-amber-500',
+                'chip_text' => 'text-white',
+                'cta_bg'    => 'bg-amber-600',
+                'cta_hover' => 'hover:bg-amber-700',
+                'cta_text'  => 'Lihat Status',
+                'cta_icon'  => 'arrow-right',
+                'headline'  => 'Menunggu Verifikasi',
+                'message'   => 'Bukti bayar Anda sedang diverifikasi admin. Tunggu maks 1×24 jam.',
+            ],
+            'Gagal' => [
+                'bg'        => 'bg-red-100',
+                'border'    => 'border-red-400',
+                'icon_bg'   => 'bg-red-600',
+                'icon'      => 'alert-circle',
+                'icon_fg'   => 'text-white',
+                'eyebrow'   => 'text-red-700',
+                'title'     => 'text-red-900',
+                'desc'      => 'text-red-800',
+                'chip_bg'   => 'bg-red-600',
+                'chip_text' => 'text-white',
+                'cta_bg'    => 'bg-red-600',
+                'cta_hover' => 'hover:bg-red-700',
+                'cta_text'  => 'Upload Ulang Bukti',
+                'cta_icon'  => 'upload',
+                'headline'  => 'Pembayaran Ditolak',
+                'message'   => 'Bukti bayar ditolak admin. Silakan periksa dan upload ulang.',
+            ],
+            default => [  // Belum Bayar — slate solid
+                'bg'        => 'bg-slate-100',
+                'border'    => 'border-slate-300',
+                'icon_bg'   => 'bg-slate-500',
+                'icon'      => 'wallet',
+                'icon_fg'   => 'text-white',
+                'eyebrow'   => 'text-slate-600',
+                'title'     => 'text-slate-900',
+                'desc'      => 'text-slate-700',
+                'chip_bg'   => 'bg-slate-500',
+                'chip_text' => 'text-white',
+                'cta_bg'    => 'bg-[#0d4a36]',
+                'cta_hover' => 'hover:bg-[#176346]',
+                'cta_text'  => 'Bayar Sekarang',
+                'cta_icon'  => 'arrow-right',
+                'headline'  => 'Segera Lakukan Pembayaran',
+                'message'   => 'Selesaikan pembayaran biaya pendaftaran untuk melanjutkan proses.',
+            ],
+        };
     @endphp
 
     <a href="{{ route('student.pembayaran.index') }}"
-       class="block rounded-2xl bg-white border border-[#dce6d3] p-5 sm:p-6 shadow-sm mb-5 hover:border-[#d8ae45] hover:shadow-md transition">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-            <div class="flex items-center gap-3">
-                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#fff8dd]">
-                    <i data-lucide="wallet" class="h-5 w-5 text-[#805500]"></i>
+       class="block rounded-2xl {{ $cardConfig['bg'] }} border {{ $cardConfig['border'] }} p-5 sm:p-6 shadow-sm mb-5 hover:shadow-md hover:-translate-y-0.5 transition-all">
+        <div class="flex flex-wrap items-start justify-between gap-3 mb-4">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full {{ $cardConfig['icon_bg'] }}">
+                    <i data-lucide="{{ $cardConfig['icon'] }}" class="h-6 w-6 {{ $cardConfig['icon_fg'] }}"></i>
                 </div>
-                <div>
-                    <p class="text-xs font-bold uppercase tracking-[.14em] text-[#699944]">Pembayaran</p>
-                    <p class="display-font text-lg font-bold text-[#0d4a36]">
-                        Rp{{ number_format($jumlahBayar, 0, ',', '.') }}
+                <div class="min-w-0">
+                    <p class="text-[10px] font-bold uppercase tracking-[.14em] {{ $cardConfig['eyebrow'] }}">
+                        Pembayaran Pendaftaran
+                    </p>
+                    <p class="display-font mt-0.5 text-lg sm:text-xl font-bold {{ $cardConfig['title'] }}">
+                        {{ $cardConfig['headline'] }}
                     </p>
                 </div>
             </div>
-            <span class="status-chip {{ $clsBayar }}">{{ $statusBayar }}</span>
+            <span class="inline-flex items-center rounded-full bg-white/70 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide {{ $cardConfig['eyebrow'] }}">
+                {{ $statusBayar }}
+            </span>
         </div>
-        <p class="text-xs text-[#617064] inline-flex items-center gap-1">
-            Lihat detail &amp; upload bukti bayar
-            <i data-lucide="arrow-right" class="h-3 w-3"></i>
+
+        <p class="text-sm leading-6 {{ $cardConfig['desc'] }} mb-4">
+            {{ $cardConfig['message'] }}
         </p>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t {{ $cardConfig['border'] }}">
+            <div>
+                <p class="text-[10px] uppercase tracking-wide {{ $cardConfig['eyebrow'] }}">Total Tagihan</p>
+                <p class="display-font text-xl font-bold {{ $cardConfig['title'] }}">
+                    Rp{{ number_format($jumlahBayar, 0, ',', '.') }}
+                </p>
+            </div>
+            <span class="inline-flex items-center gap-1.5 rounded-lg {{ $cardConfig['cta_bg'] }} {{ $cardConfig['cta_hover'] }} px-4 py-2 text-xs font-bold text-white shadow-md transition">
+                {{ $cardConfig['cta_text'] }}
+                <i data-lucide="{{ $cardConfig['cta_icon'] }}" class="h-3.5 w-3.5"></i>
+            </span>
+        </div>
     </a>
 
     {{-- ============================================ --}}
-    {{-- STATUS RINGKAS (5 KARTU) --}}
+    {{-- STATUS RINGKAS (4 KARTU) — DENGAN PRASYARAT --}}
     {{-- ============================================ --}}
+    @php
+        // Prasyarat tiap tahap
+        $pembayaranLunas     = $statusBayar === 'Terverifikasi';
+        $verifikasiSelesai   = $pendaftaran->status_verifikasi === 'Terverifikasi';
+        $ujianSelesai        = $pendaftaran->status_ujian === 'Sudah Ujian';
+        $kelulusanLulus      = $pendaftaran->status_kelulusan === 'Lulus';
+
+        // Apakah tiap card bisa "aktif"?
+        $verifikasiAktif  = $pembayaranLunas;
+        $ujianAktif       = $verifikasiSelesai;
+        $kelulusanAktif   = $ujianSelesai;
+        $daftarUlangAktif = $kelulusanLulus;
+    @endphp
+
     <h2 class="display-font text-lg sm:text-xl font-bold text-[#0d4a36] mb-3">Status Pendaftaran</h2>
 
-    <div class="grid gap-4 grid-cols-2 lg:grid-cols-5 mb-5">
+    <div class="grid gap-4 grid-cols-2 lg:grid-cols-4 mb-5">
 
-        {{-- Pembayaran --}}
-        <div class="rounded-2xl bg-white border border-[#dce6d3] p-4 sm:p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-bold uppercase tracking-[.1em] text-[#617064]">Pembayaran</p>
-                <i data-lucide="wallet" class="h-4 w-4 text-[#805500]"></i>
+        {{-- ========== VERIFIKASI ========== --}}
+        @if ($verifikasiAktif)
+            @php
+                $clsVerif = match($pendaftaran->status_verifikasi) {
+                    'Terverifikasi'   => 'status-success',
+                    'Perlu Perbaikan' => 'status-danger',
+                    default           => 'status-pending',
+                };
+            @endphp
+            <div class="rounded-2xl bg-white border border-[#dce6d3] p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-bold uppercase tracking-[.1em] text-[#617064]">Verifikasi</p>
+                    <i data-lucide="file-check" class="h-4 w-4 text-[#5d9f3f]"></i>
+                </div>
+                <span class="status-chip {{ $clsVerif }}">{{ $pendaftaran->status_verifikasi }}</span>
+                @if ($pendaftaran->catatan_verifikasi)
+                    <p class="mt-2 text-xs text-[#963d21] leading-5">{{ $pendaftaran->catatan_verifikasi }}</p>
+                @endif
             </div>
-            <span class="status-chip {{ $clsBayar }}">{{ $statusBayar }}</span>
-            <p class="mt-2 text-xs text-[#617064]">
-                Rp{{ number_format($jumlahBayar, 0, ',', '.') }}
-            </p>
-        </div>
-
-        {{-- Verifikasi --}}
-        @php
-            $clsVerif = match($pendaftaran->status_verifikasi) {
-                'Terverifikasi'   => 'status-success',
-                'Perlu Perbaikan' => 'status-danger',
-                default           => 'status-pending',
-            };
-        @endphp
-        <div class="rounded-2xl bg-white border border-[#dce6d3] p-4 sm:p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-bold uppercase tracking-[.1em] text-[#617064]">Verifikasi</p>
-                <i data-lucide="file-check" class="h-4 w-4 text-[#5d9f3f]"></i>
-            </div>
-            <span class="status-chip {{ $clsVerif }}">{{ $pendaftaran->status_verifikasi }}</span>
-            @if ($pendaftaran->catatan_verifikasi)
-                <p class="mt-2 text-xs text-[#963d21] leading-5">{{ $pendaftaran->catatan_verifikasi }}</p>
-            @endif
-        </div>
-
-        {{-- Ujian --}}
-        <div class="rounded-2xl bg-white border border-[#dce6d3] p-4 sm:p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-bold uppercase tracking-[.1em] text-[#617064]">Ujian</p>
-                <i data-lucide="clipboard-list" class="h-4 w-4 text-[#5d9f3f]"></i>
-            </div>
-            <span class="status-chip status-neutral">{{ $pendaftaran->status_ujian }}</span>
-            @if ($pendaftaran->tanggal_ujian)
-                <p class="mt-2 text-xs text-[#617064]">
-                    <i data-lucide="calendar" class="inline h-3 w-3"></i>
-                    {{ $pendaftaran->tanggal_ujian->isoFormat('D MMMM Y') }}
+        @else
+            <div class="rounded-2xl bg-[#f8fafc] border border-dashed border-[#cbd5e1] p-4 sm:p-5 opacity-60">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-bold uppercase tracking-[.1em] text-[#94a3b8]">Verifikasi</p>
+                    <i data-lucide="lock" class="h-4 w-4 text-[#94a3b8]"></i>
+                </div>
+                <span class="inline-flex items-center gap-1 rounded-full bg-[#e2e8f0] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#64748b]">
+                    Terkunci
+                </span>
+                <p class="mt-2 text-xs text-[#94a3b8] leading-5">
+                    Menunggu pembayaran terverifikasi
                 </p>
-            @endif
-            @if ($pendaftaran->nilai_ujian)
-                <p class="mt-2 text-xs font-bold text-[#0d4a36]">Nilai: {{ $pendaftaran->nilai_ujian }}</p>
-            @endif
-        </div>
-
-        {{-- Kelulusan --}}
-        @php
-            $clsLulus = match($pendaftaran->status_kelulusan) {
-                'Lulus'       => 'status-success',
-                'Tidak Lulus' => 'status-danger',
-                default       => 'status-pending',
-            };
-        @endphp
-        <div class="rounded-2xl bg-white border border-[#dce6d3] p-4 sm:p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-bold uppercase tracking-[.1em] text-[#617064]">Kelulusan</p>
-                <i data-lucide="award" class="h-4 w-4 text-[#d8ae45]"></i>
             </div>
-            <span class="status-chip {{ $clsLulus }}">{{ $pendaftaran->status_kelulusan }}</span>
-        </div>
+        @endif
 
-        {{-- Daftar Ulang --}}
-        @php
-            $clsDaftar = match($pendaftaran->status_daftar_ulang) {
-                'Sudah Daftar Ulang' => 'status-success',
-                'Belum Daftar Ulang' => 'status-danger',
-                default              => 'status-neutral',
-            };
-        @endphp
-        <div class="rounded-2xl bg-white border border-[#dce6d3] p-4 sm:p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-2">
-                <p class="text-xs font-bold uppercase tracking-[.1em] text-[#617064]">Daftar Ulang</p>
-                <i data-lucide="user-check" class="h-4 w-4 text-[#5d9f3f]"></i>
+        {{-- ========== UJIAN ========== --}}
+        @if ($ujianAktif)
+            <div class="rounded-2xl bg-white border border-[#dce6d3] p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-bold uppercase tracking-[.1em] text-[#617064]">Ujian</p>
+                    <i data-lucide="clipboard-list" class="h-4 w-4 text-[#5d9f3f]"></i>
+                </div>
+                <span class="status-chip status-neutral">{{ $pendaftaran->status_ujian }}</span>
+                @if ($pendaftaran->tanggal_ujian)
+                    <p class="mt-2 text-xs text-[#617064]">
+                        <i data-lucide="calendar" class="inline h-3 w-3"></i>
+                        {{ $pendaftaran->tanggal_ujian->isoFormat('D MMMM Y') }}
+                    </p>
+                @endif
+                @if ($pendaftaran->nilai_ujian)
+                    <p class="mt-2 text-xs font-bold text-[#0d4a36]">Nilai: {{ $pendaftaran->nilai_ujian }}</p>
+                @endif
             </div>
-            <span class="status-chip {{ $clsDaftar }}">{{ $pendaftaran->status_daftar_ulang }}</span>
-            @if ($pendaftaran->tanggal_daftar_ulang)
-                <p class="mt-2 text-xs text-[#617064]">
-                    <i data-lucide="calendar" class="inline h-3 w-3"></i>
-                    {{ $pendaftaran->tanggal_daftar_ulang->isoFormat('D MMMM Y') }}
+        @else
+            <div class="rounded-2xl bg-[#f8fafc] border border-dashed border-[#cbd5e1] p-4 sm:p-5 opacity-60">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-bold uppercase tracking-[.1em] text-[#94a3b8]">Ujian</p>
+                    <i data-lucide="lock" class="h-4 w-4 text-[#94a3b8]"></i>
+                </div>
+                <span class="inline-flex items-center gap-1 rounded-full bg-[#e2e8f0] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#64748b]">
+                    Terkunci
+                </span>
+                <p class="mt-2 text-xs text-[#94a3b8] leading-5">
+                    Menunggu verifikasi berkas
                 </p>
-            @endif
-        </div>
+            </div>
+        @endif
+
+        {{-- ========== KELULUSAN ========== --}}
+        @if ($kelulusanAktif)
+            @php
+                $clsLulus = match($pendaftaran->status_kelulusan) {
+                    'Lulus'       => 'status-success',
+                    'Tidak Lulus' => 'status-danger',
+                    default       => 'status-pending',
+                };
+            @endphp
+            <div class="rounded-2xl bg-white border border-[#dce6d3] p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-bold uppercase tracking-[.1em] text-[#617064]">Kelulusan</p>
+                    <i data-lucide="award" class="h-4 w-4 text-[#d8ae45]"></i>
+                </div>
+                <span class="status-chip {{ $clsLulus }}">{{ $pendaftaran->status_kelulusan }}</span>
+            </div>
+        @else
+            <div class="rounded-2xl bg-[#f8fafc] border border-dashed border-[#cbd5e1] p-4 sm:p-5 opacity-60">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-bold uppercase tracking-[.1em] text-[#94a3b8]">Kelulusan</p>
+                    <i data-lucide="lock" class="h-4 w-4 text-[#94a3b8]"></i>
+                </div>
+                <span class="inline-flex items-center gap-1 rounded-full bg-[#e2e8f0] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#64748b]">
+                    Terkunci
+                </span>
+                <p class="mt-2 text-xs text-[#94a3b8] leading-5">
+                    Menunggu ujian selesai
+                </p>
+            </div>
+        @endif
+
+        {{-- ========== DAFTAR ULANG ========== --}}
+        @if ($daftarUlangAktif)
+            @php
+                $clsDaftar = match($pendaftaran->status_daftar_ulang) {
+                    'Sudah Daftar Ulang' => 'status-success',
+                    'Belum Daftar Ulang' => 'status-danger',
+                    default              => 'status-neutral',
+                };
+            @endphp
+            <div class="rounded-2xl bg-white border border-[#dce6d3] p-4 sm:p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-bold uppercase tracking-[.1em] text-[#617064]">Daftar Ulang</p>
+                    <i data-lucide="user-check" class="h-4 w-4 text-[#5d9f3f]"></i>
+                </div>
+                <span class="status-chip {{ $clsDaftar }}">{{ $pendaftaran->status_daftar_ulang }}</span>
+                @if ($pendaftaran->tanggal_daftar_ulang)
+                    <p class="mt-2 text-xs text-[#617064]">
+                        <i data-lucide="calendar" class="inline h-3 w-3"></i>
+                        {{ $pendaftaran->tanggal_daftar_ulang->isoFormat('D MMMM Y') }}
+                    </p>
+                @endif
+            </div>
+        @else
+            <div class="rounded-2xl bg-[#f8fafc] border border-dashed border-[#cbd5e1] p-4 sm:p-5 opacity-60">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-bold uppercase tracking-[.1em] text-[#94a3b8]">Daftar Ulang</p>
+                    <i data-lucide="lock" class="h-4 w-4 text-[#94a3b8]"></i>
+                </div>
+                <span class="inline-flex items-center gap-1 rounded-full bg-[#e2e8f0] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#64748b]">
+                    Terkunci
+                </span>
+                <p class="mt-2 text-xs text-[#94a3b8] leading-5">
+                    Menunggu kelulusan
+                </p>
+            </div>
+        @endif
     </div>
 
     {{-- ============================================ --}}
