@@ -9,9 +9,22 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [WelcomeController::class, 'index'])->name('landing');
 Route::get('/pengumuman', [\App\Http\Controllers\PengumumanPublikController::class, 'index'])->name('pengumuman.index');
 Route::get('/pengumuman/{pengumuman}', [\App\Http\Controllers\PengumumanPublikController::class, 'show'])->name('pengumuman.show');
-Route::post('/daftar', [PendaftaranController::class, 'store'])->name('daftar.store');
-Route::post('/cek-status', [PendaftaranController::class, 'cekStatus'])->name('cek-status');
-Route::get('/gelombang/{jenjangId}', [PendaftaranController::class, 'getGelombang'])->name('gelombang.by-jenjang');
+
+// Pendaftaran — 2 endpoint dengan throttle
+Route::post('/daftar/validasi', [PendaftaranController::class, 'validasi'])
+    ->middleware('throttle:10,1')
+    ->name('daftar.validasi');
+
+Route::post('/daftar', [PendaftaranController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('daftar.store');
+
+Route::post('/cek-status', [PendaftaranController::class, 'cekStatus'])
+    ->middleware('throttle:20,1')
+    ->name('cek-status');
+
+Route::get('/gelombang/{jenjangId}', [PendaftaranController::class, 'getGelombang'])
+    ->name('gelombang.by-jenjang');
 
 // ============ SETELAH LOGIN ============
 Route::get('/dashboard', function () {
@@ -80,6 +93,15 @@ Route::middleware(['auth', 'admin'])
         Route::patch('/pengguna/{pengguna}/toggle', [\App\Http\Controllers\Admin\PenggunaController::class, 'toggle'])->name('pengguna.toggle');
         Route::delete('/pengguna/{pengguna}', [\App\Http\Controllers\Admin\PenggunaController::class, 'destroy'])->name('pengguna.destroy');
 
+        // ---------- Pembayaran ----------
+        Route::get('/pembayaran', [\App\Http\Controllers\Admin\PembayaranController::class, 'index'])->name('pembayaran.index');
+        Route::get('/pembayaran/{pendaftaran}', [\App\Http\Controllers\Admin\PembayaranController::class, 'show'])->name('pembayaran.show');
+        Route::patch('/pembayaran/{pembayaran}/verifikasi', [\App\Http\Controllers\Admin\PembayaranController::class, 'verifikasi'])->name('pembayaran.verifikasi');
+
+        // ---------- Info Pembayaran ----------
+        Route::get('/info-pembayaran', [\App\Http\Controllers\Admin\InfoPembayaranController::class, 'index'])->name('info-pembayaran.index');
+        Route::get('/info-pembayaran/{gelombang}/edit', [\App\Http\Controllers\Admin\InfoPembayaranController::class, 'edit'])->name('info-pembayaran.edit');
+        Route::patch('/info-pembayaran/{gelombang}', [\App\Http\Controllers\Admin\InfoPembayaranController::class, 'update'])->name('info-pembayaran.update');
     });
 
 // ============ STUDENT ============
@@ -89,9 +111,11 @@ Route::middleware(['auth', 'student'])
     ->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
 
-        // Download kartu ujian
+        // Pembayaran
+        Route::get('/pembayaran', [\App\Http\Controllers\Student\PembayaranController::class, 'index'])->name('pembayaran.index');
+        Route::post('/pembayaran/upload', [\App\Http\Controllers\Student\PembayaranController::class, 'uploadBukti'])->name('pembayaran.upload');
+
         Route::get('/kartu/download', [\App\Http\Controllers\Student\KartuController::class, 'download'])->name('kartu.download');
     });
 
-    
 require __DIR__.'/auth.php';

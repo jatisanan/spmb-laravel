@@ -331,18 +331,45 @@
                     <h3 class="display-font text-xl sm:text-2xl font-bold text-[#0d4a36]">{{ $j->nama }}</h3>
                     <div class="mt-4 sm:mt-5 space-y-3">
                         @foreach ($j->gelombang as $g)
-                            <div class="rounded-xl bg-[#f4f8ee] p-3.5 sm:p-4">
-                                <div class="flex flex-wrap justify-between gap-2">
-                                    <strong class="text-sm sm:text-base text-[#0d4a36]">{{ $g->nama }}</strong>
-                                    <span class="text-xs sm:text-sm text-[#506056]">
+                            @php $aktif = $g->aktif; @endphp
+                            <div class="rounded-xl p-3.5 sm:p-4 transition
+                                {{ $aktif 
+                                    ? 'bg-[#f4f8ee] border border-[#dce6d3]' 
+                                    : 'bg-[#f6f6f6] border border-dashed border-[#d6dccf] opacity-75' }}">
+                                
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <strong class="text-sm sm:text-base {{ $aktif ? 'text-[#0d4a36]' : 'text-[#617064]' }}">
+                                            {{ $g->nama }}
+                                        </strong>
+                                        
+                                        @if ($aktif)
+                                            <span class="inline-flex items-center gap-1 rounded-full bg-[#e8f4df] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#175b31]">
+                                                <span class="relative flex h-1.5 w-1.5">
+                                                    <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#5d9f3f] opacity-75"></span>
+                                                    <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#5d9f3f]"></span>
+                                                </span>
+                                                Buka
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 rounded-full bg-[#edf1ec] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#617064]">
+                                                <i data-lucide="lock" class="h-2.5 w-2.5"></i>
+                                                Tutup
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    <span class="text-xs sm:text-sm {{ $aktif ? 'text-[#506056]' : 'text-[#8a9490]' }}">
                                         {{ $g->tanggal_mulai->isoFormat('D MMM') }} – {{ $g->tanggal_selesai->isoFormat('D MMM Y') }}
                                     </span>
                                 </div>
-                                <p class="mt-2 text-xs sm:text-sm text-[#506056]">
+
+                                <p class="mt-2 text-xs sm:text-sm {{ $aktif ? 'text-[#506056]' : 'text-[#8a9490]' }}">
                                     Biaya pendaftaran: <strong>Rp{{ number_format($g->biaya, 0, ',', '.') }}</strong>
                                 </p>
+
                                 @if($g->tanggal_ujian)
-                                    <p class="mt-1 text-xs sm:text-sm text-[#699944]">
+                                    <p class="mt-1 text-xs sm:text-sm {{ $aktif ? 'text-[#699944]' : 'text-[#a5b0a8]' }}">
                                         Ujian: {{ $g->tanggal_ujian->isoFormat('D MMMM Y') }}
                                     </p>
                                 @endif
@@ -690,6 +717,87 @@
 </section>
 
 {{-- ============================================ --}}
+{{-- MODAL KONFIRMASI DATA --}}
+{{-- ============================================ --}}
+<div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-3 sm:p-4">
+    <div class="w-full max-w-lg rounded-2xl bg-white shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+
+        {{-- Header --}}
+        <div class="bg-[#d8ae45] px-5 sm:px-6 py-4 sm:py-5 text-center text-[#073528] shrink-0">
+            <div class="mx-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-white mb-3">
+                <i data-lucide="clipboard-check" class="h-7 w-7 sm:h-8 sm:w-8 text-[#0d4a36]"></i>
+            </div>
+            <h3 class="display-font text-xl sm:text-2xl font-bold">Konfirmasi Data</h3>
+            <p class="text-sm mt-1 text-[#5c4818]">Periksa kembali sebelum data dikirim</p>
+        </div>
+
+        {{-- Body --}}
+        <div class="px-5 sm:px-6 py-4 sm:py-5 overflow-y-auto space-y-3">
+
+            <p class="text-xs leading-5 text-[#617064]">
+                Pastikan data di bawah ini sudah benar. Setelah dikirim, data <strong>tidak dapat diubah sendiri</strong> —
+                harus menghubungi admin untuk perbaikan.
+            </p>
+
+            {{-- Ringkasan Data --}}
+            <div class="rounded-xl bg-[#f4f8ee] border border-[#dce6d3] p-4 space-y-3 text-sm">
+
+                {{-- Nama Lengkap --}}
+                <div>
+                    <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">Nama Lengkap</p>
+                    <p id="confirm-nama" class="mt-0.5 font-bold text-[#0d4a36] break-words">—</p>
+                </div>
+
+                {{-- Tempat, Tanggal Lahir --}}
+                <div>
+                    <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">Tempat, Tanggal Lahir</p>
+                    <p id="confirm-ttl" class="mt-0.5 font-bold text-[#0d4a36] break-words">—</p>
+                </div>
+
+                {{-- NISN --}}
+                <div>
+                    <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">NISN</p>
+                    <p id="confirm-nisn" class="mt-0.5 font-mono font-bold text-[#0d4a36] break-all">—</p>
+                </div>
+
+                {{-- No. WhatsApp --}}
+                <div>
+                    <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">No. WhatsApp</p>
+                    <p id="confirm-wa" class="mt-0.5 font-mono font-bold text-[#0d4a36] break-all">—</p>
+                </div>
+
+                {{-- Email --}}
+                <div>
+                    <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">Email</p>
+                    <p id="confirm-email" class="mt-0.5 font-mono font-bold text-[#0d4a36] break-all">—</p>
+                </div>
+            </div>
+
+            {{-- Warning Password --}}
+            <p class="text-xs leading-5 text-[#963d21] bg-[#fff0ea] rounded-lg p-3 border border-[#f2c1ae]">
+                <i data-lucide="alert-triangle" class="inline h-3.5 w-3.5"></i>
+                <strong>Perhatian:</strong> Password awal akun Anda adalah <strong>tanggal lahir (ddmmyyyy)</strong>.
+                Pastikan tanggal lahir di atas sudah benar — kalau salah, Anda tidak bisa login.
+            </p>
+        </div>
+
+        {{-- Footer --}}
+        <div class="px-5 sm:px-6 py-4 bg-[#f8faf5] border-t border-[#e1e9da] flex flex-col-reverse sm:flex-row sm:justify-end gap-2 shrink-0">
+            <button type="button" data-close-confirm
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-[#d6dccf] px-4 py-2.5 text-sm font-semibold text-[#244535] hover:bg-white w-full sm:w-auto">
+                <i data-lucide="arrow-left" class="h-4 w-4"></i>
+                Kembali &amp; Edit
+            </button>
+            <button type="button" id="confirm-submit"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0d4a36] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#176346] disabled:opacity-50 disabled:cursor-wait w-full sm:w-auto">
+                <i data-lucide="check" class="h-4 w-4"></i>
+                <span id="confirm-submit-text">Ya, Data Benar</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- ============================================ --}}
 {{-- MODAL SUKSES --}}
 {{-- ============================================ --}}
 <div id="success-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-3 sm:p-4">
@@ -759,6 +867,38 @@
                     <i data-lucide="alert-triangle" class="inline h-3 w-3"></i>
                     <strong>Penting:</strong> Segera ganti password setelah login pertama.
                 </p>
+                {{-- Info Pembayaran --}}
+                <div class="border-t border-[#e1e9da] pt-4 mt-4">
+                    <p class="text-xs font-bold uppercase tracking-[.14em] text-[#699944] mb-3">Langkah Selanjutnya</p>
+
+                    <div class="rounded-xl bg-[#fff8dd] border border-[#f0e0a8] p-4 mb-3 text-center">
+                        <p class="text-xs text-[#805500] font-semibold">Biaya Pendaftaran</p>
+                        <p class="display-font mt-1 text-2xl font-bold text-[#0d4a36]">
+                            Rp<span id="modal-biaya">0</span>
+                        </p>
+                        <p class="text-xs text-[#805500] mt-1">Login untuk melihat cara pembayaran & upload bukti.</p>
+                    </div>
+
+                    <ol class="space-y-2 text-sm text-[#244535]">
+                        <li class="flex items-start gap-2">
+                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-[10px] font-bold text-white">1</span>
+                            <span>Login dengan akun di atas</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-[10px] font-bold text-white">2</span>
+                            <span>Buka menu <strong>Pembayaran</strong> di dashboard</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-[10px] font-bold text-white">3</span>
+                            <span>Pilih metode: <strong>Offline / Transfer / QRIS</strong></span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-[10px] font-bold text-white">4</span>
+                            <span>Upload bukti bayar, tunggu verifikasi admin</span>
+                        </li>
+                    </ol>
+                </div>
+
             </div>
         </div>
 
@@ -843,6 +983,14 @@
     // ============================================
     const CSRF = document.querySelector('meta[name="csrf-token"]').content;
 
+    const ROUTES = {
+        validasi:  '{{ route("daftar.validasi") }}',
+        daftar:    '{{ route("daftar.store") }}',
+        cekStatus: '{{ route("cek-status") }}',
+    };
+
+    const $ = (id) => document.getElementById(id);
+
     // ============================================
     // AUTO UPPERCASE — SEMUA INPUT FORM
     // ============================================
@@ -868,13 +1016,26 @@
         });
     });
 
-    const ROUTES = {
-        daftar: '{{ route("daftar.store") }}',
-        cekStatus: '{{ route("cek-status") }}',
-    };
+    // ============================================
+    // AUTO LOWERCASE — KHUSUS EMAIL
+    // ============================================
+    const lowercaseFields = ['email'];
 
-    const $ = (id) => document.getElementById(id);
+    lowercaseFields.forEach((name) => {
+        const el = document.querySelector(`[name="${name}"]`);
+        if (!el) return;
 
+        el.addEventListener('input', function () {
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            this.value = this.value.toLowerCase();
+            this.setSelectionRange(start, end);
+        });
+    });
+
+    // ============================================
+    // HELPER: Show / Hide Message
+    // ============================================
     function showMsg(el, text, type = 'error') {
         el.className = 'mt-5 rounded-lg px-4 py-3 text-sm border ' + (
             type === 'error'
@@ -890,6 +1051,9 @@
         el.innerHTML = '';
     }
 
+    // ============================================
+    // HELPER: Show / Hide Modal
+    // ============================================
     function showModal(id) {
         const m = $(id);
         if (m) {
@@ -908,6 +1072,9 @@
         }
     }
 
+    // ============================================
+    // HELPER: Error Modal
+    // ============================================
     function showErrorModal(messages) {
         const modal = $('error-modal');
         const list  = $('error-modal-list');
@@ -936,6 +1103,9 @@
         }
     }
 
+    // ============================================
+    // HELPER: Copy Text
+    // ============================================
     function copyText(text, btn) {
         navigator.clipboard.writeText(text).then(() => {
             const original = btn.innerHTML;
@@ -946,6 +1116,23 @@
                 if (window.lucide) lucide.createIcons();
             }, 1500);
         });
+    }
+
+    // ============================================
+    // HELPER: Format Tanggal Indonesia
+    // ============================================
+    function formatTanggalIndonesia(isoDate) {
+        if (!isoDate) return '—';
+        try {
+            const d = new Date(isoDate + 'T00:00:00');
+            return d.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+            });
+        } catch (e) {
+            return isoDate;
+        }
     }
 
     // ============================================
@@ -966,13 +1153,27 @@
             const data = await res.json();
 
             gelombangSelect.innerHTML = '<option value="">Pilih gelombang</option>';
+
             data.forEach((g) => {
                 const opt = document.createElement('option');
                 opt.value = g.id;
-                opt.textContent = `${g.nama} — Rp${Number(g.biaya).toLocaleString('id-ID')}`;
+
+                // Kalau nonaktif → disable + kasih label "Tutup"
+                const isAktif = g.aktif === true || g.aktif === 1 || g.aktif === '1';
+                
+                if (isAktif) {
+                    opt.textContent = `${g.nama} — Rp${Number(g.biaya).toLocaleString('id-ID')}`;
+                } else {
+                    opt.textContent = `${g.nama} (TUTUP) — Rp${Number(g.biaya).toLocaleString('id-ID')}`;
+                    opt.disabled = true;
+                    opt.className = 'text-[#a5b0a8]';
+                }
+
                 opt.dataset.biaya = g.biaya;
+                opt.dataset.aktif = isAktif ? '1' : '0';
                 gelombangSelect.appendChild(opt);
             });
+
             gelombangSelect.disabled = false;
             info.textContent = '';
         } catch (e) {
@@ -983,31 +1184,123 @@
     $('gelombang-id').addEventListener('change', function () {
         const opt = this.options[this.selectedIndex];
         const info = $('gelombang-info');
-        info.textContent = opt.dataset.biaya
-            ? `Biaya: Rp${Number(opt.dataset.biaya).toLocaleString('id-ID')}`
-            : '';
+
+        if (!opt || !opt.value) {
+            info.textContent = '';
+            return;
+        }
+
+        if (opt.dataset.aktif === '0') {
+            info.textContent = '⚠️ Gelombang ini sudah ditutup.';
+            info.className = 'mt-1 text-xs text-[#963d21]';
+        } else {
+            info.textContent = opt.dataset.biaya
+                ? `Biaya: Rp${Number(opt.dataset.biaya).toLocaleString('id-ID')}`
+                : '';
+            info.className = 'mt-1 text-xs text-[#699944]';
+        }
     });
 
     // ============================================
-    // SUBMIT — FORM PENDAFTARAN
+    // STATE: Form yang Menunggu Konfirmasi
+    // ============================================
+    let pendingForm = null;
+    let isSubmitting = false;
+    let isValidated = false;
+
+    // ============================================
+    // SUBMIT STEP 1 — Validasi HTML5 + Tampilkan Modal Konfirmasi
+    // ============================================
+    // ============================================
+    // SUBMIT STEP 1 — Validasi HTML5 + Validasi Server
+    // Kalau lolos → tampilkan modal konfirmasi
     // ============================================
     $('registration-form').addEventListener('submit', async function (e) {
         e.preventDefault();
 
-        // Validasi HTML5 dulu (biar pattern WhatsApp & email jalan)
+        // 1. Validasi HTML5 (pattern, required, type=email, dll)
         if (!this.checkValidity()) {
             this.reportValidity();
             return;
         }
 
+        // 2. Loading state
+        const form = this;
+        const btn = $('submit-button');
+        const originalBtnText = btn.querySelector('span').textContent;
+        btn.disabled = true;
+        btn.querySelector('span').textContent = 'Memeriksa data...';
+
+        try {
+            // 3. Kirim ke /daftar/validasi (validasi saja, tidak simpan)
+            const fd = new FormData(form);
+            const res = await fetch(ROUTES.validasi, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+                body: fd,
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                // ✅ Lolos validasi server → tampilkan modal konfirmasi
+                isValidated = true;
+
+                const tglLahir = fd.get('tanggal_lahir') || '';
+                $('confirm-nama').textContent  = (fd.get('nama_lengkap') || '—').trim();
+                $('confirm-ttl').textContent   = `${(fd.get('tempat_lahir') || '—').trim()}, ${formatTanggalIndonesia(tglLahir)}`;
+                $('confirm-nisn').textContent  = (fd.get('nisn') || '—').trim();
+                $('confirm-wa').textContent    = (fd.get('no_whatsapp') || '—').trim();
+                $('confirm-email').textContent = (fd.get('email') || '—').trim();
+
+                pendingForm = form;
+                showModal('confirm-modal');
+                if (window.lucide) lucide.createIcons();
+
+            } else if (data.errors) {
+                // ❌ Gagal validasi → modal error
+                const list = Object.values(data.errors).flat();
+                showErrorModal(list);
+            } else {
+                showErrorModal([data.message || 'Validasi gagal.']);
+            }
+
+        } catch (err) {
+            console.error('[validasi] Error:', err);
+            showErrorModal(['Gagal memeriksa data. Periksa koneksi Anda.']);
+        } finally {
+            btn.disabled = false;
+            btn.querySelector('span').textContent = originalBtnText;
+        }
+    });
+
+    // ============================================
+    // SUBMIT STEP 2 — User Klik "Ya, Data Benar"
+    // Baru benar-benar simpan ke /daftar
+    // ============================================
+    $('confirm-submit').addEventListener('click', async function () {
+        if (isSubmitting || !pendingForm || !isValidated) return;
+
+        isSubmitting = true;
+
+        // Update tombol konfirmasi
+        const confirmBtn = this;
+        const confirmText = $('confirm-submit-text');
+        const originalConfirmText = confirmText.textContent;
+        confirmBtn.disabled = true;
+        confirmText.textContent = 'Menyimpan...';
+
+        // Tutup modal konfirmasi
+        hideModal('confirm-modal');
+
+        // Siapkan tombol submit utama
         const btn = $('submit-button');
         const msg = $('form-message');
-
         btn.disabled = true;
-        btn.querySelector('span').textContent = 'Mengirim...';
+        btn.querySelector('span').textContent = 'Menyimpan...';
         hideMsg(msg);
 
-        const formData = new FormData(this);
+        const formData = new FormData(pendingForm);
 
         try {
             const res = await fetch(ROUTES.daftar, {
@@ -1022,20 +1315,26 @@
             if (data.success) {
                 const d = data.data;
 
-                $('modal-nomor').textContent = d.nomor_pendaftaran;
-                $('modal-nama').textContent = d.nama_lengkap;
-                $('modal-jenjang').textContent = d.jenjang;
+                // Isi modal sukses
+                $('modal-nomor').textContent     = d.nomor_pendaftaran;
+                $('modal-nama').textContent      = d.nama_lengkap;
+                $('modal-jenjang').textContent   = d.jenjang;
                 $('modal-gelombang').textContent = d.gelombang;
-                $('modal-email').value = d.email;
-                $('modal-password').value = d.password;
+                $('modal-email').value           = d.email;
+                $('modal-password').value        = d.password;
+                $('modal-biaya').textContent = Number(d.biaya || 0).toLocaleString('id-ID');
 
                 showModal('success-modal');
                 if (window.lucide) lucide.createIcons();
 
-                this.reset();
+                // Reset form
+                pendingForm.reset();
                 $('gelombang-id').innerHTML = '<option value="">Pilih jenjang terlebih dahulu</option>';
                 $('gelombang-id').disabled = true;
                 $('gelombang-info').textContent = '';
+                pendingForm = null;
+                isValidated = false;
+
             } else if (data.errors) {
                 const list = Object.values(data.errors).flat();
                 showErrorModal(list);
@@ -1044,8 +1343,15 @@
             }
         } catch (err) {
             console.error('[daftar] Error:', err);
-            showErrorModal(['Gagal mengirim. Periksa koneksi Anda dan coba lagi.']);
+            showErrorModal(['Gagal menyimpan. Periksa koneksi Anda dan coba lagi.']);
         } finally {
+            isSubmitting = false;
+
+            // Reset tombol konfirmasi
+            confirmBtn.disabled = false;
+            confirmText.textContent = originalConfirmText;
+
+            // Reset tombol submit utama
             btn.disabled = false;
             btn.querySelector('span').textContent = 'Kirim Pendaftaran';
         }
@@ -1076,7 +1382,7 @@
                 const d = data.data;
 
                 $('result-number').textContent = d.nomor_pendaftaran;
-                $('result-nama').textContent = d.nama_lengkap;
+                $('result-nama').textContent   = d.nama_lengkap;
                 $('result-jenjang').textContent = d.jenjang;
 
                 $('result-verification').textContent = d.status_verifikasi;
@@ -1128,9 +1434,11 @@
     });
 
     // ============================================
-    // MODAL BUTTONS (delegated)
+    // DELEGATED CLICKS — SEMUA MODAL
     // ============================================
     document.addEventListener('click', function (e) {
+
+        // --- Copy button ---
         const copyBtn = e.target.closest('[data-copy]');
         if (copyBtn) {
             const el = $(copyBtn.dataset.copy);
@@ -1139,31 +1447,54 @@
             return;
         }
 
+        // --- Close success modal ---
         if (e.target.closest('[data-close-modal]')) {
             hideModal('success-modal');
             return;
         }
 
+        // --- Close error modal ---
         if (e.target.closest('[data-close-error-modal]')) {
             hideErrorModal();
             return;
         }
 
-        if (e.target.id === 'success-modal') {
-            hideModal('success-modal');
+        // --- Close confirm modal (Batal / Kembali & Edit) ---
+        if (e.target.closest('[data-close-confirm]')) {
+            hideModal('confirm-modal');
+            pendingForm = null;
+            isValidated = false;  // ← tambah ini
+            setTimeout(() => {
+                const firstField = $('nama-lengkap');
+                if (firstField) {
+                    firstField.focus();
+                    firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 100);
+            return;
         }
 
-        if (e.target.id === 'error-modal') {
-            hideErrorModal();
+        // --- Klik overlay modal ---
+        if (e.target.id === 'success-modal') hideModal('success-modal');
+        if (e.target.id === 'error-modal')   hideErrorModal();
+        if (e.target.id === 'confirm-modal') {
+            hideModal('confirm-modal');
+            pendingForm = null;
         }
     });
 
+    // ============================================
+    // ESCAPE KEY — TUTUP SEMUA MODAL
+    // ============================================
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             hideModal('success-modal');
             hideErrorModal();
+            hideModal('confirm-modal');
+            pendingForm = null;
         }
     });
+
 })();
 </script>
 

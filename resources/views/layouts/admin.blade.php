@@ -136,6 +136,19 @@
                 <i data-lucide="graduation-cap" class="h-4 w-4 shrink-0"></i>
                 <span class="sidebar-label">Jenjang & Gelombang</span>
             </a>
+            <a href="{{ route('admin.pembayaran.index') }}"
+            class="sidebar-link {{ request()->routeIs('admin.pembayaran.*') ? 'active' : '' }}"
+            title="Pembayaran">
+                <i data-lucide="wallet" class="h-4 w-4 shrink-0"></i>
+                <span class="sidebar-label">Pembayaran</span>
+            </a>
+
+            <a href="{{ route('admin.info-pembayaran.index') }}"
+            class="sidebar-link {{ request()->routeIs('admin.info-pembayaran.*') ? 'active' : '' }}"
+            title="Info Pembayaran">
+                <i data-lucide="settings-2" class="h-4 w-4 shrink-0"></i>
+                <span class="sidebar-label">Info Pembayaran</span>
+            </a>
             <a href="{{ route('admin.pengumuman.index') }}"
                class="sidebar-link {{ request()->routeIs('admin.pengumuman.*') ? 'active' : '' }}"
                title="Pengumuman">

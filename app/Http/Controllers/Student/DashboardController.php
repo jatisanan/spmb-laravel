@@ -10,11 +10,13 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $user = Auth::user();
-        $pendaftaran = $user->pendaftaran?->load(['jenjang', 'gelombang']);
+        $user = auth()->user();
 
-        // Pengumuman untuk santri
-        $pengumuman = Pengumuman::published()
+        $pendaftaran = $user->pendaftaran()
+            ->with(['jenjang', 'gelombang', 'pembayaran'])  // ← tambah 'pembayaran'
+            ->first();
+
+        $pengumuman = \App\Models\Pengumuman::published()
             ->whereIn('target', ['semua', 'student'])
             ->latest('published_at')
             ->take(5)

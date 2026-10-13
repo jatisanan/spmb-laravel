@@ -96,126 +96,262 @@
     </div>
 </form>
 
-{{-- Table --}}
-<div class="rounded-2xl border border-[#e1e9da] bg-white shadow-sm overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="admin-table" style="min-width: 1100px;">
-            <thead>
-                <tr>
-                    <th>Nomor</th>
-                    <th>Nama</th>
-                    <th>NISN</th>
-                    <th>Jenjang</th>
-                    <th>Verifikasi</th>
-                    <th>Ujian</th>
-                    <th>Kelulusan</th>
-                    <th>Daftar Ulang</th>
-                    <th class="text-right">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($pendaftarans as $p)
-                    <tr data-pendaftaran-id="{{ $p->id }}">
-                        <td class="font-mono font-bold text-[#0d4a36]">{{ $p->nomor_pendaftaran }}</td>
-                        <td>
-                            <p class="font-semibold text-[#0d4a36]">{{ $p->nama_lengkap }}</p>
-                            <p class="text-xs text-[#617064]">{{ $p->jenis_kelamin }}</p>
-                        </td>
-                        <td class="font-mono">{{ $p->nisn }}</td>
-                        <td>{{ $p->jenjang->nama }}</td>
-                        <td data-cell="verifikasi">
-                            <span class="status-chip {{ $p->status_verifikasi === 'Terverifikasi' ? 'status-success' : ($p->status_verifikasi === 'Perlu Perbaikan' ? 'status-danger' : 'status-pending') }}">
-                                {{ $p->status_verifikasi }}
-                            </span>
-                        </td>
-                        <td data-cell="ujian">
-                            @if ($p->nilai_ujian)
-                                <span class="font-bold text-[#0d4a36]">{{ $p->nilai_ujian }}</span>
-                            @else
-                                <span class="text-xs text-[#617064]">{{ $p->status_ujian }}</span>
-                            @endif
-                        </td>
-                        <td data-cell="kelulusan">
-                            <span class="status-chip {{ $p->status_kelulusan === 'Lulus' ? 'status-success' : ($p->status_kelulusan === 'Tidak Lulus' ? 'status-danger' : 'status-pending') }}">
-                                {{ $p->status_kelulusan }}
-                            </span>
-                        </td>
-                        <td data-cell="daftar-ulang">
-                            <span class="status-chip {{ $p->status_daftar_ulang === 'Sudah Daftar Ulang' ? 'status-success' : ($p->status_daftar_ulang === 'Belum Daftar Ulang' ? 'status-danger' : 'status-neutral') }}">
-                                {{ $p->status_daftar_ulang }}
-                            </span>
-                        </td>
-                        <td>
-                            <div class="flex items-center justify-end gap-1.5">
-                                @php
-                                    $bisaUjian = $p->status_verifikasi === 'Terverifikasi';
-                                    $bisaLulus = $p->status_ujian === 'Sudah Ujian';
-                                    $bisaDaftarUlang = $p->status_kelulusan === 'Lulus';
-                                @endphp
+{{-- ============================================ --}}
+{{-- TABLE (DIPISAH PER JENJANG) --}}
+{{-- ============================================ --}}
+@php
+    $grouped = $pendaftarans->getCollection()->groupBy(function ($p) {
+        return $p->jenjang->nama ?? 'Tanpa Jenjang';
+    });
 
-                                <button type="button"
-                                        class="btn-quick-action inline-flex items-center justify-center rounded-lg bg-[#d8ae45] p-1.5 text-[#073528] hover:bg-[#efd175]"
-                                        title="Aksi Cepat"
-                                        data-id="{{ $p->id }}"
-                                        data-nomor="{{ $p->nomor_pendaftaran }}"
-                                        data-nama="{{ $p->nama_lengkap }}"
-                                        data-verifikasi="{{ $p->status_verifikasi }}"
-                                        data-catatan="{{ $p->catatan_verifikasi }}"
-                                        data-ujian="{{ $p->status_ujian }}"
-                                        data-tanggal-ujian="{{ $p->tanggal_ujian?->format('Y-m-d') }}"
-                                        data-nilai="{{ $p->nilai_ujian }}"
-                                        data-kelulusan="{{ $p->status_kelulusan }}"
-                                        data-daftar-ulang="{{ $p->status_daftar_ulang }}"
-                                        data-tanggal-daftar-ulang="{{ $p->tanggal_daftar_ulang?->format('Y-m-d') }}"
-                                        data-link-daftar-ulang="{{ $p->link_daftar_ulang }}"
-                                        data-bisa-ujian="{{ $bisaUjian ? '1' : '0' }}"
-                                        data-bisa-lulus="{{ $bisaLulus ? '1' : '0' }}"
-                                        data-bisa-daftar-ulang="{{ $bisaDaftarUlang ? '1' : '0' }}">
-                                    <i data-lucide="zap" class="h-3.5 w-3.5"></i>
-                                </button>
+    $grouped = $grouped->sortBy(function ($items, $nama) {
+        $lower = strtolower($nama);
+        if (str_contains($lower, 'smp')) return 1;
+        if (str_contains($lower, 'sma')) return 2;
+        return 3;
+    });
+@endphp
 
-                                <a href="{{ route('admin.pendaftaran.show', $p) }}"
-                                   class="inline-flex items-center gap-1 rounded-lg bg-[#0d4a36] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#176346]"
-                                   title="Detail">
-                                    Detail
-                                    <i data-lucide="arrow-right" class="h-3 w-3"></i>
-                                </a>
+@forelse ($grouped as $namaJenjang => $items)
+    @php
+        $lower = strtolower($namaJenjang);
 
-                                <a href="{{ route('admin.pendaftaran.edit', $p) }}"
-                                   class="inline-flex items-center justify-center rounded-lg border border-[#d6dccf] p-1.5 text-[#0d4a36] hover:bg-[#f4f8ee]"
-                                   title="Edit">
-                                    <i data-lucide="pencil" class="h-3.5 w-3.5"></i>
-                                </a>
+        if (str_contains($lower, 'smp')) {
+            $bgHeader   = 'bg-[#d9e9f5]';
+            $borderCard = 'border-[#c5d9e8]';
+            $chipColor  = 'bg-[#1e4d75] text-white';
+        } elseif (str_contains($lower, 'sma')) {
+            $bgHeader   = 'bg-[#e3e6de]';
+            $borderCard = 'border-[#d6dccf]';
+            $chipColor  = 'bg-[#4b5347] text-white';
+        } else {
+            $bgHeader   = 'bg-[#f8fbf5]';
+            $borderCard = 'border-[#e1e9da]';
+            $chipColor  = 'bg-[#edf1ec] text-[#42604c]';
+        }
+    @endphp
 
-                                <button type="button"
-                                        class="btn-delete inline-flex items-center justify-center rounded-lg border border-[#f2c1ae] bg-[#fff0ea] p-1.5 text-[#963d21] hover:bg-[#ffe0d1]"
-                                        title="Hapus"
-                                        data-id="{{ $p->id }}"
-                                        data-nomor="{{ $p->nomor_pendaftaran }}"
-                                        data-nama="{{ $p->nama_lengkap }}">
-                                    <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="9" class="text-center py-10 text-[#617064]">
-                            <i data-lucide="inbox" class="mx-auto h-10 w-10 mb-2"></i>
-                            Belum ada data pendaftar.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    @if ($pendaftarans->hasPages())
-        <div class="px-4 sm:px-5 py-4 border-t border-[#e1e9da]">
-            {{ $pendaftarans->links() }}
+    <div class="rounded-2xl border {{ $borderCard }} bg-white shadow-sm overflow-hidden mb-5">
+        {{-- Header Jenjang --}}
+        <div class="{{ $bgHeader }} px-5 py-3 border-b {{ $borderCard }} flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <h3 class="display-font text-base font-bold text-[#0d4a36]">{{ $namaJenjang }}</h3>
+                <span class="inline-flex items-center rounded-full {{ $chipColor }} px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide">
+                    {{ $items->count() }} pendaftar
+                </span>
+            </div>
         </div>
-    @endif
-</div>
+
+        {{-- Tabel --}}
+        <div class="overflow-x-auto">
+            <table class="admin-table" style="min-width: 1300px;">
+                <thead>
+                    <tr>
+                        <th class="whitespace-nowrap">Nomor</th>
+                        <th class="whitespace-nowrap">Nama</th>
+                        <th class="whitespace-nowrap">NISN</th>
+                        <th class="whitespace-nowrap">Pembayaran</th>
+                        <th class="whitespace-nowrap">Verifikasi</th>
+                        <th class="whitespace-nowrap">Ujian</th>
+                        <th class="whitespace-nowrap">Kelulusan</th>
+                        <th class="whitespace-nowrap">Daftar Ulang</th>
+                        <th class="whitespace-nowrap text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($items as $p)
+                        @php
+                            $statusPembayaran = $p->pembayaran?->status ?? 'Belum Bayar';
+
+                            $bisaVerifikasi = $statusPembayaran === 'Terverifikasi';
+                            $bisaUjian = $p->status_verifikasi === 'Terverifikasi';
+                            $bisaLulus = $p->status_ujian === 'Sudah Ujian';
+                            $bisaDaftarUlang = $p->status_kelulusan === 'Lulus';
+
+                            // Data attribute umum untuk semua tombol quick-action
+                            $commonData = [
+                                'id' => $p->id,
+                                'nomor' => $p->nomor_pendaftaran,
+                                'nama' => $p->nama_lengkap,
+                                'status-pembayaran' => $statusPembayaran,
+                                'verifikasi' => $p->status_verifikasi,
+                                'catatan' => $p->catatan_verifikasi ?? '',
+                                'ujian' => $p->status_ujian,
+                                'tanggal-ujian' => $p->tanggal_ujian?->format('Y-m-d') ?? '',
+                                'nilai' => $p->nilai_ujian ?? '',
+                                'kelulusan' => $p->status_kelulusan,
+                                'daftar-ulang' => $p->status_daftar_ulang,
+                                'tanggal-daftar-ulang' => $p->tanggal_daftar_ulang?->format('Y-m-d') ?? '',
+                                'link-daftar-ulang' => $p->link_daftar_ulang ?? '',
+                                'bisa-verifikasi' => $bisaVerifikasi ? '1' : '0',
+                                'bisa-ujian' => $bisaUjian ? '1' : '0',
+                                'bisa-lulus' => $bisaLulus ? '1' : '0',
+                                'bisa-daftar-ulang' => $bisaDaftarUlang ? '1' : '0',
+                            ];
+                        @endphp
+                        <tr data-pendaftaran-id="{{ $p->id }}">
+                            <td class="font-mono font-bold text-[#0d4a36] whitespace-nowrap align-middle">
+                                {{ $p->nomor_pendaftaran }}
+                            </td>
+                            <td class="whitespace-nowrap align-middle">
+                                <p class="font-semibold text-[#0d4a36]">{{ $p->nama_lengkap }}</p>
+                                <p class="text-xs text-[#617064]">{{ $p->jenis_kelamin }}</p>
+                            </td>
+                            <td class="font-mono whitespace-nowrap align-middle">{{ $p->nisn }}</td>
+
+                            {{-- Pembayaran (link ke detail) --}}
+                            <td class="whitespace-nowrap align-middle" data-cell="pembayaran">
+                                <a href="{{ route('admin.pembayaran.show', $p) }}"
+                                   class="inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-xs font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all
+                                          {{
+                                              $statusPembayaran === 'Terverifikasi'
+                                                  ? 'bg-[#e8f4df] border-[#b9dca8] text-[#175b31]'
+                                                  : ($statusPembayaran === 'Gagal'
+                                                      ? 'bg-[#fff0ea] border-[#f2c1ae] text-[#963d21]'
+                                                      : ($statusPembayaran === 'Menunggu Verifikasi'
+                                                          ? 'bg-[#fff2ca] border-[#f0e0a8] text-[#805500]'
+                                                          : 'bg-[#edf1ec] border-[#d6dccf] text-[#617064]'))
+                                          }}"
+                                   title="Lihat detail pembayaran">
+                                    <i data-lucide="wallet" class="h-3.5 w-3.5"></i>
+                                    {{ $statusPembayaran }}
+                                </a>
+                            </td>
+
+                            {{-- Verifikasi --}}
+                            <td data-cell="verifikasi" class="whitespace-nowrap align-middle">
+                                @if ($bisaVerifikasi)
+                                    <button type="button"
+                                            class="btn-quick-action inline-flex items-center gap-1.5 rounded-lg bg-[#d8ae45] border-2 border-[#b8902f] px-3 py-1.5 text-xs font-bold text-[#3a2a00] shadow-md hover:bg-[#efd175] hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                                            title="Klik untuk verifikasi"
+                                            data-quick-tab-target="verifikasi"
+                                            @foreach ($commonData as $key => $val) data-{{ $key }}="{{ $val }}" @endforeach>
+                                        <i data-lucide="file-check" class="h-3.5 w-3.5"></i>
+                                        {{ $p->status_verifikasi }}
+                                    </button>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-[#edf1ec] border-2 border-[#d6dccf] px-3 py-1.5 text-xs font-bold text-[#617064] cursor-not-allowed"
+                                          title="Pembayaran belum terverifikasi">
+                                        <i data-lucide="lock" class="h-3.5 w-3.5"></i>
+                                        {{ $p->status_verifikasi }}
+                                    </span>
+                                @endif
+                            </td>
+
+                            {{-- Ujian --}}
+                            <td data-cell="ujian" class="whitespace-nowrap align-middle">
+                                @if ($bisaUjian)
+                                    <button type="button"
+                                            class="btn-quick-action inline-flex items-center gap-1.5 rounded-lg bg-[#d8ae45] border-2 border-[#b8902f] px-3 py-1.5 text-xs font-bold text-[#3a2a00] shadow-md hover:bg-[#efd175] hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                                            title="Klik untuk atur ujian"
+                                            data-quick-tab-target="ujian"
+                                            @foreach ($commonData as $key => $val) data-{{ $key }}="{{ $val }}" @endforeach>
+                                        <i data-lucide="clipboard-list" class="h-3.5 w-3.5"></i>
+                                        @if ($p->nilai_ujian)
+                                            Nilai {{ $p->nilai_ujian }}
+                                        @else
+                                            {{ $p->status_ujian }}
+                                        @endif
+                                    </button>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-[#edf1ec] border-2 border-[#d6dccf] px-3 py-1.5 text-xs font-bold text-[#617064] cursor-not-allowed"
+                                          title="Verifikasi berkas dulu">
+                                        <i data-lucide="lock" class="h-3.5 w-3.5"></i>
+                                        {{ $p->status_ujian }}
+                                    </span>
+                                @endif
+                            </td>
+
+                            {{-- Kelulusan --}}
+                            <td data-cell="kelulusan" class="whitespace-nowrap align-middle">
+                                @if ($bisaLulus)
+                                    <button type="button"
+                                            class="btn-quick-action inline-flex items-center gap-1.5 rounded-lg bg-[#d8ae45] border-2 border-[#b8902f] px-3 py-1.5 text-xs font-bold text-[#3a2a00] shadow-md hover:bg-[#efd175] hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                                            title="Klik untuk atur kelulusan"
+                                            data-quick-tab-target="kelulusan"
+                                            @foreach ($commonData as $key => $val) data-{{ $key }}="{{ $val }}" @endforeach>
+                                        <i data-lucide="award" class="h-3.5 w-3.5"></i>
+                                        {{ $p->status_kelulusan }}
+                                    </button>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-[#edf1ec] border-2 border-[#d6dccf] px-3 py-1.5 text-xs font-bold text-[#617064] cursor-not-allowed"
+                                          title="Ujian belum selesai">
+                                        <i data-lucide="lock" class="h-3.5 w-3.5"></i>
+                                        {{ $p->status_kelulusan }}
+                                    </span>
+                                @endif
+                            </td>
+
+                            {{-- Daftar Ulang --}}
+                            <td data-cell="daftar-ulang" class="whitespace-nowrap align-middle">
+                                @if ($bisaDaftarUlang)
+                                    <button type="button"
+                                            class="btn-quick-action inline-flex items-center gap-1.5 rounded-lg bg-[#d8ae45] border-2 border-[#b8902f] px-3 py-1.5 text-xs font-bold text-[#3a2a00] shadow-md hover:bg-[#efd175] hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                                            title="Klik untuk atur daftar ulang"
+                                            data-quick-tab-target="daftar-ulang"
+                                            @foreach ($commonData as $key => $val) data-{{ $key }}="{{ $val }}" @endforeach>
+                                        <i data-lucide="user-check" class="h-3.5 w-3.5"></i>
+                                        {{ $p->status_daftar_ulang }}
+                                    </button>
+                                @else
+                                    <span class="inline-flex items-center gap-1.5 rounded-lg bg-[#edf1ec] border-2 border-[#d6dccf] px-3 py-1.5 text-xs font-bold text-[#617064] cursor-not-allowed"
+                                          title="Pendaftar belum lulus">
+                                        <i data-lucide="lock" class="h-3.5 w-3.5"></i>
+                                        {{ $p->status_daftar_ulang }}
+                                    </span>
+                                @endif
+                            </td>
+
+                            {{-- Aksi: Detail + Edit + Hapus --}}
+                            <td class="whitespace-nowrap align-middle">
+                                <div class="flex items-center justify-end gap-1.5">
+                                    <a href="{{ route('admin.pendaftaran.show', $p) }}"
+                                       class="inline-flex items-center gap-1 rounded-lg bg-[#0d4a36] border-2 border-[#0d4a36] px-3 py-1.5 text-xs font-bold text-white shadow-md hover:bg-[#176346] hover:border-[#176346] hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                                       title="Detail">
+                                        Detail
+                                    </a>
+
+                                    <a href="{{ route('admin.pendaftaran.edit', $p) }}"
+                                       class="inline-flex items-center justify-center rounded-lg border border-[#d6dccf] p-1.5 text-[#0d4a36] hover:bg-[#f4f8ee]"
+                                       title="Edit">
+                                        <i data-lucide="pencil" class="h-3.5 w-3.5"></i>
+                                    </a>
+
+                                    <button type="button"
+                                            class="btn-delete inline-flex items-center justify-center rounded-lg border border-[#f2c1ae] bg-[#fff0ea] p-1.5 text-[#963d21] hover:bg-[#ffe0d1]"
+                                            title="Hapus"
+                                            data-id="{{ $p->id }}"
+                                            data-nomor="{{ $p->nomor_pendaftaran }}"
+                                            data-nama="{{ $p->nama_lengkap }}">
+                                        <i data-lucide="trash-2" class="h-3.5 w-3.5"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+@empty
+    <div class="rounded-2xl border border-dashed border-[#d6dccf] bg-white p-8 text-center">
+        <i data-lucide="inbox" class="mx-auto h-10 w-10 text-[#d6dccf] mb-2"></i>
+        <p class="text-sm text-[#617064]">Belum ada data pendaftar.</p>
+    </div>
+@endforelse
+
+{{-- Keterangan --}}
+<p class="mt-3 text-[10px] text-[#617064]">
+    <i data-lucide="info" class="inline h-3 w-3"></i>
+    Klik tombol <strong>kuning</strong> di kolom status untuk mengubah data. Tombol <strong>abu-abu</strong> berarti masih terkunci (menunggu tahap sebelumnya).
+</p>
+
+{{-- Pagination --}}
+@if ($pendaftarans->hasPages())
+    <div class="mt-3">
+        {{ $pendaftarans->links() }}
+    </div>
+@endif
 
 <p class="mt-3 text-xs text-[#617064]">
     Menampilkan {{ $pendaftarans->firstItem() ?? 0 }}–{{ $pendaftarans->lastItem() ?? 0 }}
@@ -256,7 +392,7 @@
         </div>
 
         <div class="bg-[#f8faf5] border-b border-[#e1e9da] px-3 pt-3 flex gap-1 overflow-x-auto shrink-0">
-            <button type="button" data-quick-tab="verifikasi" class="quick-tab-btn">
+            <button type="button" data-quick-tab="verifikasi" class="quick-tab-btn" id="tab-verifikasi">
                 <i data-lucide="file-check" class="h-3.5 w-3.5"></i> Verifikasi
             </button>
             <button type="button" data-quick-tab="ujian" class="quick-tab-btn" id="tab-ujian">
@@ -274,6 +410,11 @@
 
             {{-- Tab: Verifikasi --}}
             <div data-quick-content="verifikasi" class="quick-tab-content hidden">
+                <div id="quick-verifikasi-warning" class="hidden mb-4 rounded-lg bg-[#fff0ea] border border-[#f2c1ae] p-3 text-xs text-[#963d21]">
+                    <i data-lucide="info" class="inline h-3.5 w-3.5"></i>
+                    Pembayaran harus <strong>Terverifikasi</strong> terlebih dahulu. Status saat ini:
+                    <strong id="quick-verifikasi-pembayaran">—</strong>
+                </div>
                 <form id="quick-form-verifikasi" class="space-y-4 ajax-form">
                     @csrf @method('PATCH')
                     <div>
@@ -417,9 +558,6 @@
 
     const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
 
-    // ============================================
-    // ROUTES
-    // ============================================
     const ROUTES = {
         verifikasi: '{{ route("admin.pendaftaran.verifikasi", ":id") }}',
         ujian: '{{ route("admin.pendaftaran.ujian", ":id") }}',
@@ -428,9 +566,6 @@
         destroy: '{{ route("admin.pendaftaran.destroy", ":id") }}',
     };
 
-    // ============================================
-    // TOAST
-    // ============================================
     const toast = document.getElementById('toast');
     const toastIcon = document.getElementById('toast-icon');
     const toastMessage = document.getElementById('toast-message');
@@ -449,9 +584,12 @@
         toastTimeout = setTimeout(() => toast.classList.add('hidden'), 3500);
     }
 
-    // ============================================
-    // CHIP HELPERS
-    // ============================================
+    function clsPembayaran(s) {
+        return s === 'Terverifikasi' ? 'status-success'
+             : s === 'Gagal' ? 'status-danger'
+             : s === 'Menunggu Verifikasi' ? 'status-pending'
+             : 'status-neutral';
+    }
     function clsVerif(s) {
         return s === 'Terverifikasi' ? 'status-success'
              : s === 'Perlu Perbaikan' ? 'status-danger'
@@ -468,68 +606,122 @@
              : 'status-neutral';
     }
 
-    // ============================================
-    // UPDATE ROW
-    // ============================================
     function updateRow(id, data) {
         const row = document.querySelector(`tr[data-pendaftaran-id="${id}"]`);
         if (!row) return;
 
+        if (data.status_pembayaran !== undefined) {
+            const cell = row.querySelector('[data-cell="pembayaran"]');
+            if (cell) {
+                const a = cell.querySelector('a');
+                if (a) {
+                    a.className = a.className.replace(/bg-\[\#[a-f0-9]+\]|border-\[\#[a-f0-9]+\]|text-\[\#[a-f0-9]+\]/g, '');
+                    const cls = data.status_pembayaran === 'Terverifikasi' ? 'bg-[#e8f4df] border-[#b9dca8] text-[#175b31]'
+                              : data.status_pembayaran === 'Gagal' ? 'bg-[#fff0ea] border-[#f2c1ae] text-[#963d21]'
+                              : data.status_pembayaran === 'Menunggu Verifikasi' ? 'bg-[#fff2ca] border-[#f0e0a8] text-[#805500]'
+                              : 'bg-[#edf1ec] border-[#d6dccf] text-[#617064]';
+                    a.className = 'inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-xs font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all ' + cls;
+                    a.innerHTML = `<i data-lucide="wallet" class="h-3.5 w-3.5"></i> ${data.status_pembayaran}`;
+                }
+            }
+        }
+
         if (data.status_verifikasi !== undefined) {
-            const chip = row.querySelector('[data-cell="verifikasi"] .status-chip');
-            if (chip) {
-                chip.textContent = data.status_verifikasi;
-                chip.className = 'status-chip ' + clsVerif(data.status_verifikasi);
+            const cell = row.querySelector('[data-cell="verifikasi"]');
+            if (cell) {
+                const btn = cell.querySelector('.btn-quick-action');
+                if (btn) {
+                    btn.innerHTML = `<i data-lucide="file-check" class="h-3.5 w-3.5"></i> ${data.status_verifikasi}`;
+                }
+                if (window.lucide) lucide.createIcons();
             }
         }
 
         if (data.status_ujian !== undefined) {
             const cell = row.querySelector('[data-cell="ujian"]');
             if (cell) {
-                cell.innerHTML = data.nilai_ujian
-                    ? `<span class="font-bold text-[#0d4a36]">${data.nilai_ujian}</span>`
-                    : `<span class="text-xs text-[#617064]">${data.status_ujian}</span>`;
+                const btn = cell.querySelector('.btn-quick-action');
+                if (btn) {
+                    const label = data.nilai_ujian ? `Nilai ${data.nilai_ujian}` : data.status_ujian;
+                    btn.innerHTML = `<i data-lucide="clipboard-list" class="h-3.5 w-3.5"></i> ${label}`;
+                }
+                if (window.lucide) lucide.createIcons();
             }
         }
 
         if (data.status_kelulusan !== undefined) {
-            const chip = row.querySelector('[data-cell="kelulusan"] .status-chip');
-            if (chip) {
-                chip.textContent = data.status_kelulusan;
-                chip.className = 'status-chip ' + clsLulus(data.status_kelulusan);
+            const cell = row.querySelector('[data-cell="kelulusan"]');
+            if (cell) {
+                const btn = cell.querySelector('.btn-quick-action');
+                if (btn) {
+                    btn.innerHTML = `<i data-lucide="award" class="h-3.5 w-3.5"></i> ${data.status_kelulusan}`;
+                }
+                if (window.lucide) lucide.createIcons();
             }
         }
 
         if (data.status_daftar_ulang !== undefined) {
-            const chip = row.querySelector('[data-cell="daftar-ulang"] .status-chip');
-            if (chip) {
-                chip.textContent = data.status_daftar_ulang;
-                chip.className = 'status-chip ' + clsDaftarUlang(data.status_daftar_ulang);
+            const cell = row.querySelector('[data-cell="daftar-ulang"]');
+            if (cell) {
+                const btn = cell.querySelector('.btn-quick-action');
+                if (btn) {
+                    btn.innerHTML = `<i data-lucide="user-check" class="h-3.5 w-3.5"></i> ${data.status_daftar_ulang}`;
+                }
+                if (window.lucide) lucide.createIcons();
             }
         }
 
-        const btn = row.querySelector('.btn-quick-action');
-        if (btn) {
-            if (data.status_verifikasi !== undefined) btn.dataset.verifikasi = data.status_verifikasi;
-            if (data.status_ujian !== undefined) btn.dataset.ujian = data.status_ujian;
-            if (data.status_kelulusan !== undefined) btn.dataset.kelulusan = data.status_kelulusan;
-            if (data.status_daftar_ulang !== undefined) btn.dataset.daftarUlang = data.status_daftar_ulang;
-            if (data.nilai_ujian !== undefined) btn.dataset.nilai = data.nilai_ujian || '';
-
-            btn.dataset.bisaUjian = data.status_verifikasi === 'Terverifikasi' ? '1' : '0';
-            btn.dataset.bisaLulus = data.status_ujian === 'Sudah Ujian' ? '1' : '0';
-            btn.dataset.bisaDaftarUlang = data.status_kelulusan === 'Lulus' ? '1' : '0';
+        // Update dataset tombol quick-action
+        const anyBtn = row.querySelector('.btn-quick-action');
+        if (anyBtn) {
+            if (data.status_pembayaran !== undefined) {
+                anyBtn.dataset.statusPembayaran = data.status_pembayaran;
+                anyBtn.dataset.bisaVerifikasi = data.status_pembayaran === 'Terverifikasi' ? '1' : '0';
+            }
+            if (data.status_verifikasi !== undefined) {
+                anyBtn.dataset.verifikasi = data.status_verifikasi;
+                anyBtn.dataset.bisaUjian = data.status_verifikasi === 'Terverifikasi' ? '1' : '0';
+            }
+            if (data.status_ujian !== undefined) {
+                anyBtn.dataset.ujian = data.status_ujian;
+                anyBtn.dataset.bisaLulus = data.status_ujian === 'Sudah Ujian' ? '1' : '0';
+            }
+            if (data.status_kelulusan !== undefined) {
+                anyBtn.dataset.kelulusan = data.status_kelulusan;
+                anyBtn.dataset.bisaDaftarUlang = data.status_kelulusan === 'Lulus' ? '1' : '0';
+            }
+            if (data.status_daftar_ulang !== undefined) {
+                anyBtn.dataset.daftarUlang = data.status_daftar_ulang;
+            }
+            if (data.nilai_ujian !== undefined) {
+                anyBtn.dataset.nilai = data.nilai_ujian || '';
+            }
         }
     }
 
-    // ============================================
-    // UPDATE TAB DISABLED STATE (biar langsung bisa lanjut)
-    // ============================================
     function updateTabStates(data) {
+        const tabVerifikasi = document.getElementById('tab-verifikasi');
         const tabUjian = document.getElementById('tab-ujian');
         const tabKelulusan = document.getElementById('tab-kelulusan');
         const tabDaftarUlang = document.getElementById('tab-daftar-ulang');
 
+        if (data.status_pembayaran !== undefined) {
+            tabVerifikasi.disabled = data.status_pembayaran !== 'Terverifikasi';
+            tabVerifikasi.title = tabVerifikasi.disabled
+                ? 'Pembayaran harus Terverifikasi dulu (status: ' + data.status_pembayaran + ')'
+                : '';
+
+            const warning = document.getElementById('quick-verifikasi-warning');
+            const warningText = document.getElementById('quick-verifikasi-pembayaran');
+            if (warning && warningText) {
+                if (data.status_pembayaran !== 'Terverifikasi') {
+                    warningText.textContent = data.status_pembayaran;
+                    warning.classList.remove('hidden');
+                } else {
+                    warning.classList.add('hidden');
+                }
+            }
+        }
         if (data.status_verifikasi !== undefined) {
             tabUjian.disabled = data.status_verifikasi !== 'Terverifikasi';
             tabUjian.title = tabUjian.disabled ? 'Verifikasi harus Terverifikasi dulu' : '';
@@ -544,9 +736,6 @@
         }
     }
 
-    // ============================================
-    // MODAL HAPUS
-    // ============================================
     const deleteModal = document.getElementById('delete-modal');
     const deleteForm = document.getElementById('delete-form');
     const delNomor = document.getElementById('del-nomor');
@@ -567,9 +756,6 @@
         document.body.style.overflow = '';
     }
 
-    // ============================================
-    // MODAL AKSI CEPAT
-    // ============================================
     const quickModal = document.getElementById('quick-modal');
     const quickTitle = document.getElementById('quick-title');
     const quickTabBtns = document.querySelectorAll('[data-quick-tab]');
@@ -601,12 +787,28 @@
         document.getElementById('quick-tanggal-daftar-ulang').value = data.tanggalDaftarUlang || '';
         document.getElementById('quick-link-daftar-ulang').value = data.linkDaftarUlang || '';
 
+        const warning = document.getElementById('quick-verifikasi-warning');
+        const warningText = document.getElementById('quick-verifikasi-pembayaran');
+        if (warning && warningText) {
+            if (data.statusPembayaran && data.statusPembayaran !== 'Terverifikasi') {
+                warningText.textContent = data.statusPembayaran;
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+        }
+
+        const tabVerifikasi = document.getElementById('tab-verifikasi');
         const tabUjian = document.getElementById('tab-ujian');
         const tabKelulusan = document.getElementById('tab-kelulusan');
         const tabDaftarUlang = document.getElementById('tab-daftar-ulang');
+
+        tabVerifikasi.disabled = data.bisaVerifikasi !== '1';
         tabUjian.disabled = data.bisaUjian !== '1';
         tabKelulusan.disabled = data.bisaLulus !== '1';
         tabDaftarUlang.disabled = data.bisaDaftarUlang !== '1';
+
+        tabVerifikasi.title = data.bisaVerifikasi === '1' ? '' : 'Pembayaran harus Terverifikasi dulu';
         tabUjian.title = data.bisaUjian === '1' ? '' : 'Verifikasi harus Terverifikasi dulu';
         tabKelulusan.title = data.bisaLulus === '1' ? '' : 'Ujian harus Sudah Ujian dulu';
         tabDaftarUlang.title = data.bisaDaftarUlang === '1' ? '' : 'Kelulusan harus Lulus dulu';
@@ -614,7 +816,16 @@
         quickModal.classList.remove('hidden');
         quickModal.classList.add('flex');
         document.body.style.overflow = 'hidden';
-        activateQuickTab('verifikasi');
+
+        // Prioritas: tab yang diklik dari tabel, kalau ada & enabled
+        if (data.targetTab && !document.getElementById('tab-' + data.targetTab).disabled) {
+            activateQuickTab(data.targetTab);
+        } else if (data.bisaVerifikasi === '1') activateQuickTab('verifikasi');
+        else if (data.bisaUjian === '1') activateQuickTab('ujian');
+        else if (data.bisaLulus === '1') activateQuickTab('kelulusan');
+        else if (data.bisaDaftarUlang === '1') activateQuickTab('daftar-ulang');
+        else activateQuickTab('verifikasi');
+
         if (window.lucide) lucide.createIcons();
     }
 
@@ -625,9 +836,6 @@
         currentPendaftaranId = null;
     }
 
-    // ============================================
-    // AJAX FORM SUBMIT — MODAL TETAP TERBUKA
-    // ============================================
     document.querySelectorAll('.ajax-form').forEach(form => {
         form.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -652,18 +860,9 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    // 1. Update baris tabel (tanpa reload)
                     updateRow(currentPendaftaranId, data.data);
-
-                    // 2. Update tab states — biar bisa lanjut ke tab berikutnya
                     updateTabStates(data.data);
-
-                    // 3. Notif toast
                     showToast(data.message || 'Berhasil disimpan', 'success');
-
-                    // 4. MODAL TETAP TERBUKA ✅
-                    // (tidak panggil closeQuickModal)
-
                 } else {
                     showToast(data.message || 'Gagal menyimpan', 'error');
                 }
@@ -677,9 +876,6 @@
         });
     });
 
-    // ============================================
-    // DELEGATED CLICKS
-    // ============================================
     document.addEventListener('click', function (e) {
         const delBtn = e.target.closest('.btn-delete');
         if (delBtn) {
@@ -695,6 +891,7 @@
                 id: quickBtn.dataset.id,
                 nomor: quickBtn.dataset.nomor,
                 nama: quickBtn.dataset.nama,
+                statusPembayaran: quickBtn.dataset.statusPembayaran,
                 verifikasi: quickBtn.dataset.verifikasi,
                 catatan: quickBtn.dataset.catatan,
                 ujian: quickBtn.dataset.ujian,
@@ -704,9 +901,11 @@
                 daftarUlang: quickBtn.dataset.daftarUlang,
                 tanggalDaftarUlang: quickBtn.dataset.tanggalDaftarUlang,
                 linkDaftarUlang: quickBtn.dataset.linkDaftarUlang,
+                bisaVerifikasi: quickBtn.dataset.bisaVerifikasi,
                 bisaUjian: quickBtn.dataset.bisaUjian,
                 bisaLulus: quickBtn.dataset.bisaLulus,
                 bisaDaftarUlang: quickBtn.dataset.bisaDaftarUlang,
+                targetTab: quickBtn.dataset.quickTabTarget,
             });
             return;
         }

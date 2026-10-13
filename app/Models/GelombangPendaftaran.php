@@ -24,6 +24,11 @@ class GelombangPendaftaran extends Model
         return $this->belongsTo(Jenjang::class);
     }
 
+    public function infoPembayaran()
+    {
+        return $this->hasOne(InfoPembayaran::class, 'gelombang_id');
+    }
+
     public function pendaftarans()
     {
         return $this->hasMany(Pendaftaran::class, 'gelombang_id');

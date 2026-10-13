@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Jenjang;
 use App\Models\Pendaftaran;
+use App\Models\Pembayaran;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -12,7 +13,8 @@ class PendaftaranController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Pendaftaran::with(['jenjang', 'gelombang']);
+        // Eager load 'pembayaran' biar tidak N+1 query
+        $query = Pendaftaran::with(['jenjang', 'gelombang', 'pembayaran']);
 
         if ($request->filled('q')) {
             $query->search($request->q);
@@ -33,19 +35,46 @@ class PendaftaranController extends Controller
         return view('admin.pendaftaran.index', compact('pendaftarans', 'jenjangs'));
     }
 
+    // ============================================
+    // SHOW — detail PENDAFTARAN
+    // ============================================
     public function show(Pendaftaran $pendaftaran)
     {
-        $pendaftaran->load(['jenjang', 'gelombang', 'berkas']);
-        $jenjangs = Jenjang::all();
+        // Load relasi
+        $pendaftaran->load(['jenjang', 'gelombang', 'pembayaran.verifier', 'berkas']);
 
-        return view('admin.pendaftaran.show', compact('pendaftaran', 'jenjangs'));
+        // Auto-create record pembayaran kalau belum ada
+        if (!$pendaftaran->pembayaran) {
+            $jumlah = $pendaftaran->gelombang?->biaya ?? 0;
+            Pembayaran::create([
+                'pendaftaran_id' => $pendaftaran->id,
+                'jumlah'         => $jumlah,
+                'status'         => 'Belum Bayar',
+            ]);
+            $pendaftaran->refresh();
+            $pendaftaran->load(['pembayaran.verifier']);
+        }
+
+        return view('admin.pendaftaran.show', compact('pendaftaran'));
     }
 
     // ============================================
     // UPDATE VERIFIKASI
+    // Guard: Pembayaran harus Terverifikasi dulu
     // ============================================
     public function updateVerifikasi(Request $request, Pendaftaran $pendaftaran)
     {
+        // Baca status pembayaran dari RELASI (single source of truth)
+        $statusPembayaran = $pendaftaran->pembayaran?->status ?? 'Belum Bayar';
+
+        if ($statusPembayaran !== 'Terverifikasi') {
+            $msg = 'Verifikasi pendaftaran belum bisa dilakukan. Pembayaran belum Terverifikasi (Status Pembayaran: ' . $statusPembayaran . ').';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return back()->with('error', $msg);
+        }
+
         $request->validate([
             'status_verifikasi' => 'required|in:Menunggu Verifikasi,Terverifikasi,Perlu Perbaikan',
             'catatan_verifikasi' => 'nullable|string|max:500',
@@ -175,6 +204,7 @@ class PendaftaranController extends Controller
 
     /**
      * Data ringkas untuk update baris tabel via AJAX.
+     * Ambil status pembayaran dari RELASI.
      */
     private function rowData(Pendaftaran $p): array
     {
@@ -185,6 +215,7 @@ class PendaftaranController extends Controller
             'status_kelulusan' => $p->status_kelulusan,
             'status_daftar_ulang' => $p->status_daftar_ulang,
             'nilai_ujian' => $p->nilai_ujian,
+            'status_pembayaran' => $p->pembayaran?->status ?? 'Belum Bayar',
         ];
     }
 
@@ -200,7 +231,7 @@ class PendaftaranController extends Controller
 
     public function export(Request $request): StreamedResponse
     {
-        $query = Pendaftaran::with(['jenjang', 'gelombang']);
+        $query = Pendaftaran::with(['jenjang', 'gelombang', 'pembayaran']);
 
         if ($request->filled('q')) $query->search($request->q);
         if ($request->filled('jenjang_id')) $query->where('jenjang_id', $request->jenjang_id);
@@ -221,6 +252,7 @@ class PendaftaranController extends Controller
                 'Jenjang', 'Gelombang',
                 'Nama Ayah', 'Nama Ibu', 'Nama Wali',
                 'No WhatsApp', 'Email', 'Alamat',
+                'Status Pembayaran',
                 'Status Verifikasi', 'Status Ujian', 'Tanggal Ujian', 'Nilai Ujian',
                 'Status Kelulusan', 'Status Daftar Ulang', 'Tanggal Daftar Ulang',
                 'Tanggal Daftar',
@@ -236,13 +268,14 @@ class PendaftaranController extends Controller
                     $p->tanggal_lahir?->format('Y-m-d'),
                     $p->asal_sekolah,
                     $p->jenjang->nama,
-                    $p->gelombang->nama,
+                    $p->gelombang?->nama ?? '—',
                     $p->nama_ayah,
                     $p->nama_ibu,
                     $p->nama_wali,
                     $p->no_whatsapp,
                     $p->email,
                     $p->alamat,
+                    $p->pembayaran?->status ?? 'Belum Bayar',
                     $p->status_verifikasi,
                     $p->status_ujian,
                     $p->tanggal_ujian?->format('Y-m-d'),
@@ -262,8 +295,7 @@ class PendaftaranController extends Controller
 
     public function edit(Pendaftaran $pendaftaran)
     {
-        // Tambahkan 'berkas' di load()
-        $pendaftaran->load(['jenjang', 'gelombang', 'berkas']);
+        $pendaftaran->load(['jenjang', 'gelombang', 'berkas', 'pembayaran']);
 
         $jenjangs = Jenjang::with(['gelombang' => function ($q) {
             $q->where('aktif', true)->orderBy('tanggal_mulai');

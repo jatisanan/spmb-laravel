@@ -6,12 +6,101 @@
 
 @section('content')
 
+@php
+    // Ambil status pembayaran dari RELASI (single source of truth)
+    $statusPembayaran = $pendaftaran->pembayaran?->status ?? 'Belum Bayar';
+@endphp
+
 <div class="mb-5">
     <a href="{{ route('admin.pendaftaran.index') }}"
        class="inline-flex items-center gap-2 text-sm font-semibold text-[#0d4a36] hover:underline">
         <i data-lucide="arrow-left" class="h-4 w-4"></i>
         Kembali ke daftar
     </a>
+</div>
+
+{{-- ============================================ --}}
+{{-- STATUS RINGKAS (SLIM CARDS, RESPONSIVE) --}}
+{{-- ============================================ --}}
+<div class="rounded-2xl bg-[#0d4a36] text-white p-4 shadow-sm mb-5">
+    <p class="text-[10px] font-bold uppercase tracking-[.14em] text-[#d8ae45] mb-3">Status Ringkas</p>
+
+    <div class="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+
+        {{-- Pembayaran --}}
+        <div class="rounded-lg bg-white/5 border border-white/10 px-3 py-2.5">
+            <div class="flex items-center gap-1.5 mb-1">
+                <i data-lucide="wallet" class="h-3 w-3 text-[#d6e3d0] shrink-0"></i>
+                <p class="text-[9px] font-bold uppercase tracking-wide text-[#d6e3d0] truncate">Pembayaran</p>
+            </div>
+            <p class="text-xs font-bold leading-tight {{ $statusPembayaran === 'Terverifikasi' ? 'text-[#a3e08c]' : 'text-[#f0cf6f]' }}">
+                {{ $statusPembayaran }}
+            </p>
+        </div>
+
+        {{-- Verifikasi --}}
+        <div class="rounded-lg bg-white/5 border border-white/10 px-3 py-2.5">
+            <div class="flex items-center gap-1.5 mb-1">
+                <i data-lucide="file-check" class="h-3 w-3 text-[#d6e3d0] shrink-0"></i>
+                <p class="text-[9px] font-bold uppercase tracking-wide text-[#d6e3d0] truncate">Verifikasi</p>
+            </div>
+            <p class="text-xs font-bold leading-tight">{{ $pendaftaran->status_verifikasi }}</p>
+            @if ($pendaftaran->catatan_verifikasi)
+                <p class="text-[9px] text-[#f0cf6f] mt-0.5 leading-3 line-clamp-1">{{ $pendaftaran->catatan_verifikasi }}</p>
+            @endif
+        </div>
+
+        {{-- Ujian --}}
+        <div class="rounded-lg bg-white/5 border border-white/10 px-3 py-2.5">
+            <div class="flex items-center gap-1.5 mb-1">
+                <i data-lucide="clipboard-list" class="h-3 w-3 text-[#d6e3d0] shrink-0"></i>
+                <p class="text-[9px] font-bold uppercase tracking-wide text-[#d6e3d0] truncate">Ujian</p>
+            </div>
+            <p class="text-xs font-bold leading-tight">{{ $pendaftaran->status_ujian }}</p>
+            @if ($pendaftaran->tanggal_ujian)
+                <p class="text-[9px] text-[#d6e3d0] mt-0.5 leading-3">
+                    {{ $pendaftaran->tanggal_ujian->isoFormat('D MMM Y') }}
+                </p>
+            @endif
+            @if ($pendaftaran->nilai_ujian)
+                <p class="text-[9px] font-bold text-[#f0cf6f] mt-0.5">Nilai: {{ $pendaftaran->nilai_ujian }}</p>
+            @endif
+        </div>
+
+        {{-- Kelulusan --}}
+        <div class="rounded-lg bg-white/5 border border-white/10 px-3 py-2.5">
+            <div class="flex items-center gap-1.5 mb-1">
+                <i data-lucide="award" class="h-3 w-3 text-[#d6e3d0] shrink-0"></i>
+                <p class="text-[9px] font-bold uppercase tracking-wide text-[#d6e3d0] truncate">Kelulusan</p>
+            </div>
+            <p class="text-xs font-bold leading-tight">{{ $pendaftaran->status_kelulusan }}</p>
+        </div>
+
+        {{-- Daftar Ulang --}}
+        <div class="rounded-lg bg-white/5 border border-white/10 px-3 py-2.5">
+            <div class="flex items-center gap-1.5 mb-1">
+                <i data-lucide="user-check" class="h-3 w-3 text-[#d6e3d0] shrink-0"></i>
+                <p class="text-[9px] font-bold uppercase tracking-wide text-[#d6e3d0] truncate">Daftar Ulang</p>
+            </div>
+            <p class="text-xs font-bold leading-tight">{{ $pendaftaran->status_daftar_ulang }}</p>
+            @if ($pendaftaran->tanggal_daftar_ulang)
+                <p class="text-[9px] text-[#d6e3d0] mt-0.5 leading-3">
+                    {{ $pendaftaran->tanggal_daftar_ulang->isoFormat('D MMM Y') }}
+                </p>
+            @endif
+        </div>
+    </div>
+
+    {{-- Link daftar ulang (kalau ada) --}}
+    @if ($pendaftaran->link_daftar_ulang)
+        <div class="mt-3 pt-3 border-t border-white/10">
+            <a href="{{ $pendaftaran->link_daftar_ulang }}" target="_blank" rel="noopener noreferrer"
+               class="text-[10px] font-bold text-[#f0cf6f] hover:underline inline-flex items-center gap-1">
+                <i data-lucide="external-link" class="h-3 w-3"></i>
+                Form Daftar Ulang
+            </a>
+        </div>
+    @endif
 </div>
 
 <div class="grid gap-5 lg:grid-cols-3">
@@ -56,7 +145,7 @@
                 </div>
                 <div>
                     <dt class="text-xs text-[#617064]">Gelombang</dt>
-                    <dd class="text-[#244535]">{{ $pendaftaran->gelombang->nama }}</dd>
+                    <dd class="text-[#244535]">{{ $pendaftaran->gelombang?->nama ?? '—' }}</dd>
                 </div>
                 <div>
                     <dt class="text-xs text-[#617064]">Email</dt>
@@ -153,8 +242,29 @@
         </div>
 
         {{-- Form Update Verifikasi --}}
-        <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm">
-            <h3 class="display-font text-lg font-bold text-[#0d4a36] mb-4">Verifikasi Berkas</h3>
+        <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm
+            {{ $statusPembayaran !== 'Terverifikasi' ? 'opacity-60' : '' }}">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="display-font text-lg font-bold text-[#0d4a36]">Verifikasi Berkas</h3>
+                @if ($statusPembayaran !== 'Terverifikasi')
+                    <span class="status-chip status-pending">
+                        <i data-lucide="lock" class="inline h-3 w-3 mr-1"></i>
+                        Terkunci
+                    </span>
+                @endif
+            </div>
+
+            @if ($statusPembayaran !== 'Terverifikasi')
+                <p class="mb-3 text-xs text-[#963d21] bg-[#fff0ea] rounded-lg p-3 border border-[#f2c1ae]">
+                    <i data-lucide="info" class="inline h-3 w-3"></i>
+                    Pembayaran harus <strong>Terverifikasi</strong> terlebih dahulu sebelum berkas pendaftaran bisa diverifikasi.
+                    Status pembayaran saat ini:
+                    <a href="{{ $pendaftaran->pembayaran ? route('admin.pembayaran.show', $pendaftaran->pembayaran) : '#' }}"
+                       class="font-bold underline">
+                        {{ $statusPembayaran }}
+                    </a>
+                </p>
+            @endif
 
             @if ($pendaftaran->catatan_verifikasi)
                 <div class="mb-4 rounded-lg border border-[#dce6d3] bg-[#f4f8ee] p-3">
@@ -169,7 +279,8 @@
                 <div class="space-y-3">
                     <div>
                         <label class="mb-1.5 block text-xs font-bold text-[#244535]">Status Verifikasi</label>
-                        <select name="status_verifikasi" class="field-control">
+                        <select name="status_verifikasi" class="field-control"
+                            {{ $statusPembayaran !== 'Terverifikasi' ? 'disabled' : '' }}>
                             @foreach (['Menunggu Verifikasi', 'Terverifikasi', 'Perlu Perbaikan'] as $s)
                                 <option value="{{ $s }}" @selected($pendaftaran->status_verifikasi === $s)>{{ $s }}</option>
                             @endforeach
@@ -177,9 +288,12 @@
                     </div>
                     <div>
                         <label class="mb-1.5 block text-xs font-bold text-[#244535]">Catatan (opsional)</label>
-                        <textarea name="catatan_verifikasi" rows="2" class="field-control">{{ $pendaftaran->catatan_verifikasi }}</textarea>
+                        <textarea name="catatan_verifikasi" rows="2" class="field-control"
+                            {{ $statusPembayaran !== 'Terverifikasi' ? 'disabled' : '' }}>{{ $pendaftaran->catatan_verifikasi }}</textarea>
                     </div>
-                    <button type="submit" class="rounded-lg bg-[#0d4a36] px-4 py-2 text-sm font-bold text-white hover:bg-[#176346]">
+                    <button type="submit"
+                        class="rounded-lg bg-[#0d4a36] px-4 py-2 text-sm font-bold text-white hover:bg-[#176346] disabled:opacity-50 disabled:cursor-not-allowed"
+                        {{ $statusPembayaran !== 'Terverifikasi' ? 'disabled' : '' }}>
                         Simpan Verifikasi
                     </button>
                 </div>
@@ -242,79 +356,76 @@
 
     </div>
 
-    {{-- Kolom Kanan: Status & Aksi --}}
+    {{-- Kolom Kanan: Aksi --}}
     <div class="space-y-5">
 
-        {{-- Status Ringkas --}}
-        <div class="rounded-2xl bg-[#0d4a36] text-white p-5 shadow-sm">
-            <p class="text-xs font-bold uppercase tracking-[.14em] text-[#d8ae45]">Status Ringkas</p>
-            <div class="mt-3 space-y-3 text-sm">
-
-                {{-- Verifikasi --}}
-                <div class="flex justify-between gap-2">
-                    <span class="text-[#d6e3d0]">Verifikasi</span>
-                    <span class="font-bold">{{ $pendaftaran->status_verifikasi }}</span>
-                </div>
-
-                {{-- Ujian --}}
-                <div class="flex justify-between gap-2">
-                    <span class="text-[#d6e3d0]">Ujian</span>
-                    <span class="font-bold">{{ $pendaftaran->status_ujian }}</span>
-                </div>
-                @if ($pendaftaran->tanggal_ujian)
-                    <div class="flex justify-between gap-2 text-xs">
-                        <span class="text-[#d6e3d0]">Tgl Ujian</span>
-                        <span class="font-bold">{{ $pendaftaran->tanggal_ujian->isoFormat('D MMM Y') }}</span>
-                    </div>
-                @endif
-                @if ($pendaftaran->nilai_ujian)
-                    <div class="flex justify-between gap-2 text-xs">
-                        <span class="text-[#d6e3d0]">Nilai</span>
-                        <span class="font-bold text-[#f0cf6f]">{{ $pendaftaran->nilai_ujian }}</span>
-                    </div>
-                @endif
-
-                {{-- Kelulusan --}}
-                <div class="flex justify-between gap-2">
-                    <span class="text-[#d6e3d0]">Kelulusan</span>
-                    <span class="font-bold">{{ $pendaftaran->status_kelulusan }}</span>
-                </div>
-
-                {{-- Daftar Ulang --}}
-                <div class="flex justify-between gap-2">
-                    <span class="text-[#d6e3d0]">Daftar Ulang</span>
-                    <span class="font-bold">{{ $pendaftaran->status_daftar_ulang }}</span>
-                </div>
-                @if ($pendaftaran->tanggal_daftar_ulang)
-                    <div class="flex justify-between gap-2 text-xs">
-                        <span class="text-[#d6e3d0]">Tgl Daftar Ulang</span>
-                        <span class="font-bold">{{ $pendaftaran->tanggal_daftar_ulang->isoFormat('D MMM Y') }}</span>
-                    </div>
-                @endif
-                @if ($pendaftaran->link_daftar_ulang)
-                    <div class="pt-2 border-t border-white/10">
-                        <a href="{{ $pendaftaran->link_daftar_ulang }}" target="_blank" rel="noopener noreferrer"
-                           class="text-xs font-bold text-[#f0cf6f] hover:underline inline-flex items-center gap-1">
-                            <i data-lucide="external-link" class="h-3 w-3"></i>
-                            Link Daftar Ulang
-                        </a>
-                    </div>
-                @endif
+        {{-- Pembayaran --}}
+        <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-[#0d4a36]">Pembayaran</h3>
+                <span class="status-chip {{
+                    $statusPembayaran === 'Terverifikasi' ? 'status-success' :
+                    ($statusPembayaran === 'Gagal' ? 'status-danger' :
+                    ($statusPembayaran === 'Menunggu Verifikasi' ? 'status-pending' : 'status-neutral'))
+                }}">
+                    {{ $statusPembayaran }}
+                </span>
             </div>
+
+            @if ($pendaftaran->pembayaran)
+                <dl class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <dt class="text-[#617064]">Jumlah</dt>
+                        <dd class="font-bold text-[#0d4a36]">Rp{{ number_format($pendaftaran->pembayaran->jumlah, 0, ',', '.') }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-[#617064]">Metode</dt>
+                        <dd class="text-[#244535]">{{ $pendaftaran->pembayaran->metode_label }}</dd>
+                    </div>
+                </dl>
+
+                <a href="{{ route('admin.pembayaran.show', $pendaftaran->pembayaran) }}"
+                class="mt-3 inline-flex items-center gap-1 rounded-lg border border-[#0d4a36] px-3 py-1.5 text-xs font-bold text-[#0d4a36] hover:bg-[#f4f8ee]">
+                    Lihat Detail Pembayaran
+                    <i data-lucide="arrow-right" class="h-3 w-3"></i>
+                </a>
+            @else
+                <p class="text-sm text-[#617064]">Belum ada data pembayaran.</p>
+            @endif
         </div>
 
         {{-- Form Kelulusan --}}
-        <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm">
-            <h3 class="font-bold text-[#0d4a36] mb-3">Kelulusan</h3>
+        <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm
+            {{ $pendaftaran->status_ujian !== 'Sudah Ujian' ? 'opacity-60' : '' }}">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-[#0d4a36]">Kelulusan</h3>
+                @if ($pendaftaran->status_ujian !== 'Sudah Ujian')
+                    <span class="status-chip status-pending">
+                        <i data-lucide="lock" class="inline h-3 w-3 mr-1"></i>
+                        Terkunci
+                    </span>
+                @endif
+            </div>
+
+            @if ($pendaftaran->status_ujian !== 'Sudah Ujian')
+                <p class="mb-3 text-xs text-[#963d21] bg-[#fff0ea] rounded-lg p-2.5 border border-[#f2c1ae]">
+                    <i data-lucide="info" class="inline h-3 w-3"></i>
+                    Pendaftar harus menyelesaikan ujian terlebih dahulu (Status Ujian: {{ $pendaftaran->status_ujian }}).
+                </p>
+            @endif
+
             <form method="POST" action="{{ route('admin.pendaftaran.kelulusan', $pendaftaran) }}">
                 @csrf
                 @method('PATCH')
-                <select name="status_kelulusan" class="field-control">
+                <select name="status_kelulusan" class="field-control"
+                    {{ $pendaftaran->status_ujian !== 'Sudah Ujian' ? 'disabled' : '' }}>
                     @foreach (['Menunggu Hasil', 'Lulus', 'Tidak Lulus'] as $s)
                         <option value="{{ $s }}" @selected($pendaftaran->status_kelulusan === $s)>{{ $s }}</option>
                     @endforeach
                 </select>
-                <button type="submit" class="mt-3 w-full rounded-lg bg-[#0d4a36] px-4 py-2 text-sm font-bold text-white hover:bg-[#176346]">
+                <button type="submit"
+                    class="mt-3 w-full rounded-lg bg-[#0d4a36] px-4 py-2 text-sm font-bold text-white hover:bg-[#176346] disabled:opacity-50 disabled:cursor-not-allowed"
+                    {{ $pendaftaran->status_ujian !== 'Sudah Ujian' ? 'disabled' : '' }}>
                     Update Kelulusan
                 </button>
             </form>

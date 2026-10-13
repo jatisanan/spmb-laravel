@@ -44,6 +44,11 @@ class Pendaftaran extends Model
         return $this->hasMany(BerkasPendaftaran::class);
     }
 
+    public function pembayaran()
+    {
+        return $this->hasOne(Pembayaran::class);
+    }
+
     public static function generateNomor(string $kodeJenjang): string
     {
         $tahun = now()->year;

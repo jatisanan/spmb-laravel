@@ -9,8 +9,8 @@ class WelcomeController extends Controller
     public function index()
     {
         $jenjangs = Jenjang::with(['gelombang' => function ($q) {
-            $q->where('aktif', true)->orderBy('tanggal_mulai');
-        }])->where('aktif', true)->get();
+            $q->orderBy('tanggal_mulai');   // ← filter aktif DIHAPUS
+        }])->where('aktif', true)->get();    // ← filter aktif jenjang TETAP
 
         return view('welcome', compact('jenjangs'));
     }
