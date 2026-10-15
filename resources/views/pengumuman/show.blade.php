@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $pengumuman->judul }} - PPDB Jati Sanan</title>
+    <title>{{ $pengumuman->judul }} - SPMB Jati Sanan</title>
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
     <style>
@@ -69,7 +69,7 @@
 
     {{-- Footer — otomatis nempel bawah --}}
     <footer class="bg-[#073528] text-white text-center py-6 shrink-0">
-        <p class="text-xs text-[#d6e3d0]">{{ \App\Models\PengaturanSitus::get('footer_copyright', '© PPDB Jati Sanan') }}</p>
+        <p class="text-xs text-[#d6e3d0]">{{ \App\Models\PengaturanSitus::get('footer_copyright', '© SPMB Jati Sanan') }}</p>
     </footer>
 
     <script>lucide.createIcons();</script>

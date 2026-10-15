@@ -2,7 +2,7 @@
 
 @section('title', 'Dashboard')
 @section('page-title', 'Dashboard')
-@section('page-subtitle', 'Ringkasan aktivitas PPDB Jati Sanan')
+@section('page-subtitle', 'Ringkasan aktivitas SPMB Jati Sanan')
 
 @section('content')
 

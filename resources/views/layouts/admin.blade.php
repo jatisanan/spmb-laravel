@@ -4,7 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin Panel') — PPDB Jati Sanan</title>
+
+    {{-- Favicon: otomatis pakai header_logo --}}
+    @php
+        $faviconPath = \App\Models\PengaturanSitus::get('header_logo', 'images/logo.png');
+        $faviconUrl  = str_starts_with($faviconPath, 'http')
+            ? $faviconPath
+            : (file_exists(storage_path('app/public/' . $faviconPath))
+                ? asset('storage/' . $faviconPath)
+                : asset($faviconPath));
+    @endphp
+    <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
+    <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
+
+    <title>@yield('title', 'Admin Panel') — SPMB Jati Sanan</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -247,7 +260,7 @@
         </main>
 
         <footer class="px-4 sm:px-6 py-4 text-xs text-[#617064] border-t border-[#e1e9da]">
-            &copy; {{ date('Y') }} PPDB Pondok Pesantren Jati Sanan
+            &copy; {{ date('Y') }} SPMB Pondok Pesantren Jati Sanan
         </footer>
     </div>
 </div>

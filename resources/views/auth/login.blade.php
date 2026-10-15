@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — PPDB Jati Sanan</title>
+    <title>Login — SPMB Jati Sanan</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -63,7 +63,7 @@
         {{-- Card Login --}}
         <div class="rounded-2xl border border-[#dce6d3] bg-white p-6 shadow-lg md:p-8">
 
-            <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">Portal PPDB</p>
+            <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">Portal SPMB</p>
             <h2 class="display-font mt-2 text-2xl font-bold text-[#0d4a36]">Masuk ke Akun Anda</h2>
             <p class="mt-2 text-sm leading-6 text-[#506056]">
                 Gunakan email dan password yang telah terdaftar.

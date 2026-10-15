@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'mailboxlayer' => [
+        'key' => env('MAILBOX_LAYER_API_KEY'),
+    ],
+
 ];

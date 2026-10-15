@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>PPDB Pondok Pesantren Jati Sanan</title>
+    {{-- Favicon: otomatis pakai header_logo --}}
+    @php
+        $faviconPath = \App\Models\PengaturanSitus::get('header_logo', 'images/logo.png');
+        $faviconUrl  = str_starts_with($faviconPath, 'http')
+            ? $faviconPath
+            : (file_exists(storage_path('app/public/' . $faviconPath))
+                ? asset('storage/' . $faviconPath)
+                : asset($faviconPath));
+    @endphp
+    <link rel="icon" type="image/png" href="{{ $faviconUrl }}">
+    <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
+    <title>SPMB Pondok Pesantren Jati Sanan</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
@@ -430,7 +441,7 @@
             <div class="max-w-2xl">
                 <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">Informasi Terbaru</p>
                 <h2 class="display-font mt-3 text-2xl sm:text-3xl md:text-4xl font-bold text-[#0d4a36]">Pengumuman</h2>
-                <p class="mt-4 text-sm sm:text-base leading-7 text-[#506056]">Ikuti informasi terbaru seputar PPDB Jati Sanan.</p>
+                <p class="mt-4 text-sm sm:text-base leading-7 text-[#506056]">Ikuti informasi terbaru seputar SPMB Jati Sanan.</p>
             </div>
             <a href="{{ route('pengumuman.index') }}"
             class="inline-flex items-center gap-2 rounded-lg border border-[#0d4a36] px-4 py-2 text-sm font-bold text-[#0d4a36] hover:bg-[#f4f8ee] shrink-0">

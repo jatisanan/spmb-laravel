@@ -305,7 +305,7 @@
                         <div class="ttd-name">{{ $pendaftaran->nama_lengkap }}</div>
                     </td>
                     <td>
-                        Panitia PPDB,
+                        Panitia SPMB,
                         <div class="ttd-space"></div>
                         <div class="ttd-name">{{ $info['yayasan_kepala'] ?: '( .................... )' }}</div>
                         @if($info['yayasan_nip_kepala'])

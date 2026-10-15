@@ -440,7 +440,7 @@
         </div>
         <h2 class="display-font text-xl font-bold text-[#0d4a36]">Anda Belum Mendaftar</h2>
         <p class="mt-2 text-sm text-[#617064] max-w-md mx-auto">
-            Akun Anda belum terhubung dengan data pendaftaran. Silakan isi formulir PPDB terlebih dahulu.
+            Akun Anda belum terhubung dengan data pendaftaran. Silakan isi formulir SPMB terlebih dahulu.
         </p>
         <a href="{{ route('landing') }}#daftar"
            class="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#0d4a36] px-5 py-3 font-bold text-white hover:bg-[#176346]">
