@@ -183,6 +183,17 @@ class PendaftaranController extends Controller
             ], 404);
         }
 
+        $statusPembayaran     = $pendaftaran->pembayaran?->status ?? 'Belum Bayar';
+        $statusVerifikasi     = $pendaftaran->status_verifikasi;
+        $statusUjian          = $pendaftaran->status_ujian;
+        $statusKelulusan      = $pendaftaran->status_kelulusan;
+        $statusDaftarUlang    = $pendaftaran->status_daftar_ulang;
+        $linkDaftarUlang      = $pendaftaran->link_daftar_ulang;
+
+        $bolehDaftarUlang = $statusKelulusan === 'Lulus'
+            && $statusDaftarUlang === 'Belum Daftar Ulang'
+            && !empty($linkDaftarUlang);
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -192,20 +203,29 @@ class PendaftaranController extends Controller
                 'gelombang'         => $pendaftaran->gelombang?->nama ?? '—',
                 'email'             => $pendaftaran->email,
 
-                'status_pembayaran'   => $pendaftaran->pembayaran?->status ?? 'Belum Bayar',
-                'status_verifikasi'   => $pendaftaran->status_verifikasi,
-                'catatan_verifikasi'  => $pendaftaran->catatan_verifikasi,
+                // 1. Pembayaran
+                'status_pembayaran' => $statusPembayaran,
 
-                'status_ujian'         => $pendaftaran->status_ujian,
+                // 2. Verifikasi Pendaftaran (berkas)
+                'status_verifikasi'  => $statusVerifikasi,
+                'catatan_verifikasi' => $pendaftaran->catatan_verifikasi,
+
+                // 3. Ujian
+                'status_ujian'         => $statusUjian,
                 'tanggal_ujian'        => $pendaftaran->tanggal_ujian?->isoFormat('D MMMM Y'),
                 'tanggal_ujian_short'  => $pendaftaran->tanggal_ujian?->isoFormat('D MMM Y'),
                 'nilai_ujian'          => $pendaftaran->nilai_ujian,
 
-                'status_kelulusan' => $pendaftaran->status_kelulusan,
+                // 4. Kelulusan
+                'status_kelulusan' => $statusKelulusan,
 
-                'status_daftar_ulang'      => $pendaftaran->status_daftar_ulang,
-                'link_daftar_ulang'        => $pendaftaran->link_daftar_ulang,
-                'tanggal_daftar_ulang'     => $pendaftaran->tanggal_daftar_ulang?->isoFormat('D MMMM Y'),
+                // 5. Daftar Ulang
+                'status_daftar_ulang'  => $statusDaftarUlang,
+                'link_daftar_ulang'    => $linkDaftarUlang,
+                'tanggal_daftar_ulang' => $pendaftaran->tanggal_daftar_ulang?->isoFormat('D MMMM Y'),
+
+                // Flag untuk CTA
+                'boleh_daftar_ulang' => $bolehDaftarUlang,
             ],
         ]);
     }

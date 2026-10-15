@@ -759,7 +759,9 @@
             <div id="status-message" class="mt-4 hidden rounded-lg px-4 py-3 text-sm"></div>
 
             <div id="status-result" class="mt-5 hidden rounded-xl border border-[#dce6d3] bg-white p-4 sm:p-5">
-                <div class="flex flex-wrap items-center justify-between gap-3">
+
+                {{-- Header: Nomor + Jenjang + Nama --}}
+                <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#ebeee6]">
                     <div class="min-w-0">
                         <p class="text-xs font-bold uppercase tracking-[.12em] text-[#699944]">Nomor Pendaftaran</p>
                         <p id="result-number" class="mt-1 font-mono font-bold text-[#0d4a36] break-all"></p>
@@ -768,33 +770,65 @@
                 </div>
                 <p id="result-nama" class="mt-3 text-sm font-bold text-[#244535]"></p>
 
-                <div class="mt-5 grid gap-3 grid-cols-2 lg:grid-cols-4">
-                    <div class="rounded-lg bg-[#f6f8f3] p-3">
-                        <p class="text-xs text-[#617064]">Verifikasi</p>
-                        <p id="result-verification" class="mt-1 text-sm font-bold text-[#244535]"></p>
+                {{-- 5 Card Status --}}
+                <div class="mt-5 grid gap-3 grid-cols-2 lg:grid-cols-5">
+
+                    {{-- 1. Pembayaran --}}
+                    <div id="card-payment" class="rounded-xl p-3 border transition">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <p class="text-[10px] font-bold uppercase tracking-[.1em] text-[#617064]">Pembayaran</p>
+                            <i id="card-payment-icon" data-lucide="wallet" data-original-icon="wallet" class="h-4 w-4"></i>
+                        </div>
+                        <p id="result-payment" class="text-sm font-bold">—</p>
+                        <p id="result-payment-note" class="mt-1 text-[10px] leading-4"></p>
                     </div>
 
-                    <div class="rounded-lg bg-[#f6f8f3] p-3">
-                        <p class="text-xs text-[#617064]">Ujian</p>
-                        <p id="result-exam" class="mt-1 text-sm font-bold text-[#244535]"></p>
-                        <p id="result-exam-date" class="mt-0.5 text-xs text-[#617064]"></p>
-                        <p id="result-exam-score" class="mt-0.5 text-xs font-bold text-[#0d4a36]"></p>
+                    {{-- 2. Verifikasi Pendaftaran --}}
+                    <div id="card-verification" class="rounded-xl p-3 border transition">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <p class="text-[10px] font-bold uppercase tracking-[.1em] text-[#617064]">Verifikasi Pendaftaran</p>
+                            <i id="card-verification-icon" data-lucide="file-check" data-original-icon="file-check" class="h-4 w-4"></i>
+                        </div>
+                        <p id="result-verification" class="text-sm font-bold">—</p>
+                        <p id="result-verification-note" class="mt-1 text-[10px] leading-4"></p>
                     </div>
 
-                    <div class="rounded-lg bg-[#f6f8f3] p-3">
-                        <p class="text-xs text-[#617064]">Kelulusan</p>
-                        <p id="result-graduation" class="mt-1 text-sm font-bold text-[#244535]"></p>
+                    {{-- 3. Ujian --}}
+                    <div id="card-exam" class="rounded-xl p-3 border transition">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <p class="text-[10px] font-bold uppercase tracking-[.1em] text-[#617064]">Ujian</p>
+                            <i id="card-exam-icon" data-lucide="clipboard-list" data-original-icon="clipboard-list" class="h-4 w-4"></i>
+                        </div>
+                        <p id="result-exam" class="text-sm font-bold">—</p>
+                        <p id="result-exam-date" class="mt-1 text-[10px] leading-4"></p>
+                        <p id="result-exam-score" class="mt-0.5 text-[10px] font-bold leading-4"></p>
                     </div>
 
-                    <div class="rounded-lg bg-[#f6f8f3] p-3">
-                        <p class="text-xs text-[#617064]">Daftar Ulang</p>
-                        <p id="result-reregistration" class="mt-1 text-sm font-bold text-[#244535]"></p>
-                        <p id="result-reregistration-date" class="mt-0.5 text-xs text-[#617064]"></p>
+                    {{-- 4. Kelulusan --}}
+                    <div id="card-graduation" class="rounded-xl p-3 border transition">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <p class="text-[10px] font-bold uppercase tracking-[.1em] text-[#617064]">Kelulusan</p>
+                            <i id="card-graduation-icon" data-lucide="award" data-original-icon="award" class="h-4 w-4"></i>
+                        </div>
+                        <p id="result-graduation" class="text-sm font-bold">—</p>
+                        <p id="result-graduation-note" class="mt-1 text-[10px] leading-4"></p>
+                    </div>
+
+                    {{-- 5. Daftar Ulang --}}
+                    <div id="card-reregistration" class="rounded-xl p-3 border transition">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <p class="text-[10px] font-bold uppercase tracking-[.1em] text-[#617064]">Daftar Ulang</p>
+                            <i id="card-reregistration-icon" data-lucide="user-check" data-original-icon="user-check" class="h-4 w-4"></i>
+                        </div>
+                        <p id="result-reregistration" class="text-sm font-bold">—</p>
+                        <p id="result-reregistration-date" class="mt-1 text-[10px] leading-4"></p>
                     </div>
                 </div>
 
+                {{-- Nilai ujian (highlight) --}}
                 <p id="result-score" class="mt-4 hidden rounded-lg bg-[#fff8dd] px-3 py-2 text-sm text-[#76530d]"></p>
 
+                {{-- CTA Daftar Ulang --}}
                 <div id="reregistration-cta" class="mt-5 hidden">
                     <div class="rounded-xl border-2 border-dashed border-[#b9dca8] bg-[#e8f4df] p-4 sm:p-5">
                         <div class="flex items-start gap-3">
@@ -1089,42 +1123,26 @@
     const $ = (id) => document.getElementById(id);
 
     // ============================================
-    // AUTO UPPERCASE — SEMUA INPUT FORM
+    // AUTO UPPERCASE / LOWERCASE
     // ============================================
-    const uppercaseFields = [
-        'nama_lengkap',
-        'tempat_lahir',
-        'asal_sekolah',
-        'nama_ayah',
-        'nama_ibu',
-        'nama_wali',
-        'alamat',
-    ];
+    const uppercaseFields = ['nama_lengkap', 'tempat_lahir', 'asal_sekolah', 'nama_ayah', 'nama_ibu', 'nama_wali', 'alamat'];
+    const lowercaseFields = ['email'];
 
     uppercaseFields.forEach((name) => {
         const el = document.querySelector(`[name="${name}"]`);
         if (!el) return;
-
         el.addEventListener('input', function () {
-            const start = this.selectionStart;
-            const end = this.selectionEnd;
+            const start = this.selectionStart, end = this.selectionEnd;
             this.value = this.value.toUpperCase();
             this.setSelectionRange(start, end);
         });
     });
 
-    // ============================================
-    // AUTO LOWERCASE — KHUSUS EMAIL
-    // ============================================
-    const lowercaseFields = ['email'];
-
     lowercaseFields.forEach((name) => {
         const el = document.querySelector(`[name="${name}"]`);
         if (!el) return;
-
         el.addEventListener('input', function () {
-            const start = this.selectionStart;
-            const end = this.selectionEnd;
+            const start = this.selectionStart, end = this.selectionEnd;
             this.value = this.value.toLowerCase();
             this.setSelectionRange(start, end);
         });
@@ -1222,18 +1240,14 @@
         if (!isoDate) return '—';
         try {
             const d = new Date(isoDate + 'T00:00:00');
-            return d.toLocaleDateString('id-ID', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-            });
+            return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
         } catch (e) {
             return isoDate;
         }
     }
 
     // ============================================
-    // JENJANG PICKER — Tampilkan Form Setelah Pilih
+    // JENJANG PICKER
     // ============================================
     const jenjangPicker = $('jenjang-picker');
     const formWrapper   = $('form-wrapper');
@@ -1242,25 +1256,18 @@
     const formSubtitle  = $('form-jenjang-subtitle');
 
     function showFormForJenjang(id, nama, kode, deskripsi) {
-        // Set value di hidden input (yang dikirim ke server)
         jenjangSelect.value = id;
-
-        // Set tampilan di input readonly
         const display = $('jenjang-display');
         if (display) display.value = nama;
 
-        // Update judul + subjudul
         formTitle.textContent = 'Formulir Pendaftaran ' + nama;
         formSubtitle.textContent = deskripsi || '';
 
-        // Sembunyikan picker, tampilkan form
         jenjangPicker.classList.add('hidden');
         formWrapper.classList.remove('hidden');
 
-        // Load gelombang secara manual (karena hidden input tidak trigger 'change')
         loadGelombang(id);
 
-        // Scroll + focus
         setTimeout(() => {
             formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
             if (window.lucide) lucide.createIcons();
@@ -1272,40 +1279,29 @@
         card.addEventListener('click', function () {
             document.querySelectorAll('.jenjang-card').forEach(c => c.classList.remove('active'));
             this.classList.add('active');
-
-            showFormForJenjang(
-                this.dataset.jenjangId,
-                this.dataset.jenjangNama,
-                this.dataset.jenjangKode,
-                this.dataset.jenjangDeskripsi
-            );
+            showFormForJenjang(this.dataset.jenjangId, this.dataset.jenjangNama, this.dataset.jenjangKode, this.dataset.jenjangDeskripsi);
         });
     });
 
-    // Tombol "Ganti Jenjang"
     $('back-to-picker')?.addEventListener('click', function () {
         formWrapper.classList.add('hidden');
         jenjangPicker.classList.remove('hidden');
         document.querySelectorAll('.jenjang-card').forEach(c => c.classList.remove('active'));
 
-        // Reset hidden input & display
         jenjangSelect.value = '';
         const display = $('jenjang-display');
         if (display) display.value = '';
 
-        // Reset gelombang
         const gelombangSelect = $('gelombang-id');
         gelombangSelect.innerHTML = '<option value="">Pilih jenjang terlebih dahulu</option>';
         gelombangSelect.disabled = true;
         $('gelombang-info').textContent = '';
 
-        setTimeout(() => {
-            jenjangPicker.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 50);
+        setTimeout(() => jenjangPicker.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
     });
 
     // ============================================
-    // LOAD GELOMBANG (dipanggil dari picker & ganti jenjang)
+    // LOAD GELOMBANG
     // ============================================
     async function loadGelombang(jenjangId) {
         const gelombangSelect = $('gelombang-id');
@@ -1330,7 +1326,6 @@
             data.forEach((g) => {
                 const opt = document.createElement('option');
                 opt.value = g.id;
-
                 const isAktif = g.aktif === true || g.aktif === 1 || g.aktif === '1';
 
                 if (isAktif) {
@@ -1374,14 +1369,14 @@
     });
 
     // ============================================
-    // STATE: Form yang Menunggu Konfirmasi
+    // STATE
     // ============================================
     let pendingForm = null;
     let isSubmitting = false;
     let isValidated = false;
 
     // ============================================
-    // SUBMIT STEP 1 — Validasi HTML5 + Validasi Server
+    // SUBMIT STEP 1 — Validasi
     // ============================================
     $('registration-form').addEventListener('submit', async function (e) {
         e.preventDefault();
@@ -1420,14 +1415,11 @@
                 pendingForm = form;
                 showModal('confirm-modal');
                 if (window.lucide) lucide.createIcons();
-
             } else if (data.errors) {
-                const list = Object.values(data.errors).flat();
-                showErrorModal(list);
+                showErrorModal(Object.values(data.errors).flat());
             } else {
                 showErrorModal([data.message || 'Validasi gagal.']);
             }
-
         } catch (err) {
             console.error('[validasi] Error:', err);
             showErrorModal(['Gagal memeriksa data. Periksa koneksi Anda.']);
@@ -1438,7 +1430,7 @@
     });
 
     // ============================================
-    // SUBMIT STEP 2 — User Klik "Ya, Data Benar"
+    // SUBMIT STEP 2 — Konfirmasi
     // ============================================
     $('confirm-submit').addEventListener('click', async function () {
         if (isSubmitting || !pendingForm || !isValidated) return;
@@ -1469,7 +1461,6 @@
             });
 
             const data = await res.json();
-            console.log('[daftar] Response:', data);
 
             if (data.success) {
                 const d = data.data;
@@ -1480,12 +1471,11 @@
                 $('modal-gelombang').textContent = d.gelombang;
                 $('modal-email').value           = d.email;
                 $('modal-password').value        = d.password;
-                $('modal-biaya').textContent = Number(d.biaya || 0).toLocaleString('id-ID');
+                $('modal-biaya').textContent     = Number(d.biaya || 0).toLocaleString('id-ID');
 
                 showModal('success-modal');
                 if (window.lucide) lucide.createIcons();
 
-                // Reset form
                 pendingForm.reset();
                 $('gelombang-id').innerHTML = '<option value="">Pilih jenjang terlebih dahulu</option>';
                 $('gelombang-id').disabled = true;
@@ -1493,17 +1483,14 @@
                 pendingForm = null;
                 isValidated = false;
 
-                // Reset ke picker
                 jenjangSelect.value = '';
                 const jenjangDisplay = $('jenjang-display');
                 if (jenjangDisplay) jenjangDisplay.value = '';
                 formWrapper.classList.add('hidden');
                 jenjangPicker.classList.remove('hidden');
                 document.querySelectorAll('.jenjang-card').forEach(c => c.classList.remove('active'));
-                
             } else if (data.errors) {
-                const list = Object.values(data.errors).flat();
-                showErrorModal(list);
+                showErrorModal(Object.values(data.errors).flat());
             } else {
                 showErrorModal([data.message || 'Terjadi kesalahan.']);
             }
@@ -1520,13 +1507,106 @@
     });
 
     // ============================================
-    // SUBMIT — CEK STATUS
+    // CEK STATUS — CONFIG-DRIVEN APPROACH
+    // ============================================
+
+    /**
+     * Style mapping untuk card
+     */
+    const CARD_STYLES = {
+        success: { card: 'bg-green-50 border-green-300',       icon: 'text-green-600',  text: 'text-green-900',  note: 'text-green-700' },
+        running: { card: 'bg-amber-50 border-amber-300',       icon: 'text-amber-600',  text: 'text-amber-900',  note: 'text-amber-700' },
+        danger:  { card: 'bg-red-50 border-red-300',           icon: 'text-red-600',    text: 'text-red-900',    note: 'text-red-700' },
+        neutral: { card: 'bg-[#f6f8f3] border-[#dce6d3]',      icon: 'text-[#617064]',  text: 'text-[#244535]',  note: 'text-[#617064]' },
+        locked:  { card: 'bg-[#f8fafc] border-dashed border-[#cbd5e1] opacity-60', icon: 'text-[#94a3b8]', text: 'text-[#94a3b8]', note: 'text-[#94a3b8]' },
+    };
+
+    /**
+     * Terapkan style ke card
+     */
+    function applyCardStyle(cardId, iconId, state, noteId) {
+        const card = $(cardId);
+        const icon = $(iconId);
+        const note = noteId ? $(noteId) : null;
+        if (!card) return;
+
+        const s = CARD_STYLES[state] || CARD_STYLES.neutral;
+        card.className = `rounded-xl p-3 border transition ${s.card}`;
+
+        if (icon) {
+            const iconName = state === 'locked' ? 'lock' : (icon.dataset.originalIcon || 'circle');
+
+            // ✅ FIX: pakai setAttribute (bekerja untuk HTML & SVG)
+            icon.setAttribute('class', `h-4 w-4 ${s.icon}`);
+            icon.setAttribute('data-lucide', iconName);
+
+            // Hapus isi lama supaya lucide render ulang
+            icon.innerHTML = '';
+        }
+
+        const valueEl = card.querySelectorAll('p')[1];
+        if (valueEl) valueEl.className = `text-sm font-bold ${s.text}`;
+
+        if (note) note.className = `mt-1 text-[10px] leading-4 ${s.note}`;
+    }
+
+    /**
+     * Lock card dengan pesan tertentu
+     */
+    function lockCard(cardId, noteId, message) {
+        applyCardStyle(cardId, cardId + '-icon', 'locked', noteId);
+        const card = $(cardId);
+        const valueEl = card?.querySelectorAll('p')[1];
+        if (valueEl) {
+            valueEl.textContent = '—';
+            valueEl.className = 'text-sm font-bold text-[#94a3b8]';
+        }
+        if (noteId) {
+            const note = $(noteId);
+            if (note) note.textContent = message;
+        }
+    }
+
+    /**
+     * Map status string ke state
+     */
+    function getPaymentState(status) {
+        if (status === 'Terverifikasi') return 'success';
+        if (status === 'Menunggu Verifikasi') return 'running';
+        if (status === 'Gagal') return 'danger';
+        return 'neutral';
+    }
+    function getVerifState(status) {
+        if (status === 'Terverifikasi') return 'success';
+        if (status === 'Perlu Perbaikan') return 'danger';
+        return 'running';
+    }
+    function getExamState(status) {
+        if (status === 'Sudah Ujian') return 'success';
+        if (status === 'Terjadwal') return 'running';
+        return 'neutral';
+    }
+    function getGradState(status) {
+        if (status === 'Lulus') return 'success';
+        if (status === 'Tidak Lulus') return 'danger';
+        return 'running';
+    }
+    function getReregState(status) {
+        if (status === 'Sudah Daftar Ulang') return 'success';
+        if (status === 'Belum Daftar Ulang') return 'danger';
+        return 'neutral';
+    }
+
+    // ============================================
+    // HANDLER: Cek Status
     // ============================================
     $('status-form').addEventListener('submit', async function (e) {
         e.preventDefault();
-        const num = $('status-number').value.trim();
-        const msg = $('status-message');
+
+        const num    = $('status-number').value.trim();
+        const msg    = $('status-message');
         const result = $('status-result');
+
         result.classList.add('hidden');
 
         const formData = new FormData();
@@ -1538,59 +1618,110 @@
                 headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
                 body: formData,
             });
+
             const data = await res.json();
 
-            if (data.success) {
-                const d = data.data;
-
-                $('result-number').textContent = d.nomor_pendaftaran;
-                $('result-nama').textContent   = d.nama_lengkap;
-                $('result-jenjang').textContent = d.jenjang;
-
-                $('result-verification').textContent = d.status_verifikasi;
-
-                $('result-exam').textContent = d.status_ujian;
-                $('result-exam-date').textContent = d.tanggal_ujian ? '📅 ' + d.tanggal_ujian : '';
-                $('result-exam-score').textContent = d.nilai_ujian ? 'Nilai: ' + d.nilai_ujian : '';
-
-                $('result-graduation').textContent = d.status_kelulusan;
-
-                $('result-reregistration').textContent = d.status_daftar_ulang;
-                $('result-reregistration-date').textContent = d.tanggal_daftar_ulang ? '📅 ' + d.tanggal_daftar_ulang : '';
-
-                const score = $('result-score');
-                if (d.nilai_ujian) {
-                    score.textContent = 'Nilai ujian: ' + d.nilai_ujian;
-                    score.classList.remove('hidden');
-                } else {
-                    score.classList.add('hidden');
-                }
-
-                const cta = $('reregistration-cta');
-                const ctaLink = $('reregistration-link');
-
-                const bolehDaftarUlang =
-                    d.status_kelulusan === 'Lulus' &&
-                    d.status_daftar_ulang === 'Belum Daftar Ulang' &&
-                    d.link_daftar_ulang;
-
-                if (bolehDaftarUlang) {
-                    ctaLink.href = d.link_daftar_ulang;
-                    cta.classList.remove('hidden');
-                } else {
-                    cta.classList.add('hidden');
-                }
-
-                result.classList.remove('hidden');
-                hideMsg(msg);
-
-                if (window.lucide) lucide.createIcons();
-            } else {
+            if (!data.success) {
                 showMsg(msg, data.message || 'Data tidak ditemukan.');
                 msg.className = 'mt-4 rounded-lg px-4 py-3 text-sm border border-[#f2c1ae] bg-[#fff0ea] text-[#963d21]';
+                return;
             }
+
+            const d = data.data;
+
+            // ---------- Header ----------
+            $('result-number').textContent  = d.nomor_pendaftaran;
+            $('result-nama').textContent    = d.nama_lengkap;
+            $('result-jenjang').textContent = d.jenjang;
+
+            // ---------- CARD 1: PEMBAYARAN ----------
+            const bayar = d.status_pembayaran || 'Belum Bayar';
+            $('result-payment').textContent = bayar;
+            $('result-payment-note').textContent =
+                bayar === 'Terverifikasi'       ? '✓ Sudah diverifikasi admin' :
+                bayar === 'Menunggu Verifikasi' ? 'Sedang dicek admin' :
+                bayar === 'Gagal'               ? 'Ditolak — hubungi admin' :
+                                                  'Login untuk upload bukti';
+            applyCardStyle('card-payment', 'card-payment-icon', getPaymentState(bayar), 'result-payment-note');
+
+            // ---------- CARD 2: VERIFIKASI ----------
+            const verifAktif = bayar === 'Terverifikasi';
+            if (!verifAktif) {
+                lockCard('card-verification', 'result-verification-note', 'Menunggu pembayaran terverifikasi');
+            } else {
+                const verif = d.status_verifikasi;
+                $('result-verification').textContent = verif;
+                $('result-verification-note').textContent = d.catatan_verifikasi ? '📝 ' + d.catatan_verifikasi : '';
+                applyCardStyle('card-verification', 'card-verification-icon', getVerifState(verif), 'result-verification-note');
+            }
+
+            // ---------- CARD 3: UJIAN ----------
+            const ujianAktif = verifAktif && d.status_verifikasi === 'Terverifikasi';
+            if (!ujianAktif) {
+                lockCard('card-exam', 'result-exam-date', 'Menunggu verifikasi pendaftaran');
+                $('result-exam-score').textContent = '';
+            } else {
+                const ujian = d.status_ujian;
+                $('result-exam').textContent = ujian;
+                $('result-exam-date').textContent = d.tanggal_ujian ? '📅 ' + d.tanggal_ujian : '';
+                $('result-exam-score').textContent = d.nilai_ujian ? 'Nilai: ' + d.nilai_ujian : '';
+                applyCardStyle('card-exam', 'card-exam-icon', getExamState(ujian), 'result-exam-date');
+            }
+
+            // ---------- CARD 4: KELULUSAN ----------
+            const lulusAktif = ujianAktif && d.status_ujian === 'Sudah Ujian';
+            if (!lulusAktif) {
+                lockCard('card-graduation', 'result-graduation-note', 'Menunggu ujian selesai');
+            } else {
+                const lulus = d.status_kelulusan;
+                $('result-graduation').textContent = lulus;
+                $('result-graduation-note').textContent = '';
+                applyCardStyle('card-graduation', 'card-graduation-icon', getGradState(lulus), 'result-graduation-note');
+            }
+
+            // ---------- CARD 5: DAFTAR ULANG ----------
+            const daftarAktif = lulusAktif && d.status_kelulusan === 'Lulus';
+            if (!daftarAktif) {
+                lockCard('card-reregistration', 'result-reregistration-date', 'Menunggu hasil kelulusan');
+            } else {
+                const daftar = d.status_daftar_ulang;
+                $('result-reregistration').textContent = daftar;
+                $('result-reregistration-date').textContent = d.tanggal_daftar_ulang ? '📅 ' + d.tanggal_daftar_ulang : '';
+                applyCardStyle('card-reregistration', 'card-reregistration-icon', getReregState(daftar), 'result-reregistration-date');
+            }
+
+            // ---------- NILAI UJIAN ----------
+            const score = $('result-score');
+            if (d.nilai_ujian) {
+                score.textContent = 'Nilai ujian Anda: ' + d.nilai_ujian;
+                score.classList.remove('hidden');
+            } else {
+                score.classList.add('hidden');
+            }
+
+            // ---------- CTA DAFTAR ULANG ----------
+            const cta     = $('reregistration-cta');
+            const ctaLink = $('reregistration-link');
+
+            const bolehDaftarUlang = d.boleh_daftar_ulang !== undefined
+                ? d.boleh_daftar_ulang
+                : (d.status_kelulusan === 'Lulus' && d.status_daftar_ulang === 'Belum Daftar Ulang' && !!d.link_daftar_ulang);
+
+            if (bolehDaftarUlang && d.link_daftar_ulang) {
+                ctaLink.href = d.link_daftar_ulang;
+                cta.classList.remove('hidden');
+            } else {
+                cta.classList.add('hidden');
+            }
+
+            // ---------- Show ----------
+            result.classList.remove('hidden');
+            hideMsg(msg);
+            if (window.lucide) lucide.createIcons();
+
         } catch (err) {
-            showMsg(msg, 'Gagal memuat data.');
+            console.error('[cekStatus] Error:', err);
+            showMsg(msg, 'Gagal memuat data. Periksa koneksi Anda.');
             msg.className = 'mt-4 rounded-lg px-4 py-3 text-sm border border-[#f2c1ae] bg-[#fff0ea] text-[#963d21]';
         }
     });
@@ -1599,7 +1730,6 @@
     // DELEGATED CLICKS — SEMUA MODAL
     // ============================================
     document.addEventListener('click', function (e) {
-
         const copyBtn = e.target.closest('[data-copy]');
         if (copyBtn) {
             const el = $(copyBtn.dataset.copy);
@@ -1608,15 +1738,8 @@
             return;
         }
 
-        if (e.target.closest('[data-close-modal]')) {
-            hideModal('success-modal');
-            return;
-        }
-
-        if (e.target.closest('[data-close-error-modal]')) {
-            hideErrorModal();
-            return;
-        }
+        if (e.target.closest('[data-close-modal]')) { hideModal('success-modal'); return; }
+        if (e.target.closest('[data-close-error-modal]')) { hideErrorModal(); return; }
 
         if (e.target.closest('[data-close-confirm]')) {
             hideModal('confirm-modal');
@@ -1634,10 +1757,7 @@
 
         if (e.target.id === 'success-modal') hideModal('success-modal');
         if (e.target.id === 'error-modal')   hideErrorModal();
-        if (e.target.id === 'confirm-modal') {
-            hideModal('confirm-modal');
-            pendingForm = null;
-        }
+        if (e.target.id === 'confirm-modal') { hideModal('confirm-modal'); pendingForm = null; }
     });
 
     // ============================================

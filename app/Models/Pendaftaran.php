@@ -19,9 +19,10 @@ class Pendaftaran extends Model
     ];
 
     protected $casts = [
-        'tanggal_lahir' => 'date',
-        'tanggal_ujian' => 'date',
-        'tanggal_daftar_ulang' => 'date',
+        'tanggal_lahir'         => 'date',
+        'tanggal_ujian'         => 'date',
+        'tanggal_daftar_ulang'  => 'date',
+        'nilai_ujian'           => 'decimal:2',
     ];
 
     public function user()
