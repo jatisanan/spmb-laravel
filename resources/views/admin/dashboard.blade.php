@@ -6,6 +6,112 @@
 
 @section('content')
 
+{{-- ============================================ --}}
+{{-- STATISTIK PEMBAYARAN --}}
+{{-- ============================================ --}}
+<div class="rounded-2xl bg-white p-5 shadow-sm border border-[#e1e9da] mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0d4a36]/10">
+                <i data-lucide="wallet" class="h-4 w-4 text-[#0d4a36]"></i>
+            </div>
+            <h3 class="display-font text-lg font-bold text-[#0d4a36]">Statistik Pembayaran</h3>
+        </div>
+        <a href="{{ route('admin.pembayaran.index') }}"
+        class="text-sm font-semibold text-[#0d4a36] hover:underline">
+            Kelola →
+        </a>
+    </div>
+
+    @php
+        $totalBayar = max($total, 1);
+        $pct = fn($n) => round($n / $totalBayar * 100);
+    @endphp
+
+    {{-- Progress bar gabungan --}}
+    <div class="mb-4 h-2.5 w-full overflow-hidden rounded-full bg-[#edf1ec] flex">
+        @php
+            $pBelum    = $pct($statsPembayaran['belum']);
+            $pMenunggu = $pct($statsPembayaran['menunggu']);
+            $pTerverif = $pct($statsPembayaran['terverifikasi']);
+            $pGagal    = $pct($statsPembayaran['gagal']);
+        @endphp
+        <div class="bg-[#a3b1a0]" style="width: {{ $pBelum }}%" title="Belum Bayar: {{ $pBelum }}%"></div>
+        <div class="bg-[#d8ae45]" style="width: {{ $pMenunggu }}%" title="Menunggu: {{ $pMenunggu }}%"></div>
+        <div class="bg-[#5d9f3f]" style="width: {{ $pTerverif }}%" title="Terverifikasi: {{ $pTerverif }}%"></div>
+        <div class="bg-[#963d21]" style="width: {{ $pGagal }}%" title="Gagal: {{ $pGagal }}%"></div>
+    </div>
+
+    {{-- 4 mini card --}}
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        @php
+            $pembayaranCards = [
+                [
+                    'label' => 'Belum Bayar',
+                    'value' => $statsPembayaran['belum'],
+                    'pct'   => $pBelum,
+                    'color' => 'bg-[#edf1ec] text-[#42604c]',
+                    'bar'   => 'bg-[#a3b1a0]',
+                    'icon'  => 'circle-dashed',
+                    'status'=> 'Belum Bayar',
+                ],
+                [
+                    'label' => 'Menunggu Verifikasi',
+                    'value' => $statsPembayaran['menunggu'],
+                    'pct'   => $pMenunggu,
+                    'color' => 'bg-[#fff2ca] text-[#805500]',
+                    'bar'   => 'bg-[#d8ae45]',
+                    'icon'  => 'clock',
+                    'status'=> 'Menunggu Verifikasi',
+                ],
+                [
+                    'label' => 'Terverifikasi',
+                    'value' => $statsPembayaran['terverifikasi'],
+                    'pct'   => $pTerverif,
+                    'color' => 'bg-[#e8f4df] text-[#175b31]',
+                    'bar'   => 'bg-[#5d9f3f]',
+                    'icon'  => 'check-circle',
+                    'status'=> 'Terverifikasi',
+                ],
+                [
+                    'label' => 'Gagal',
+                    'value' => $statsPembayaran['gagal'],
+                    'pct'   => $pGagal,
+                    'color' => 'bg-[#fff0ea] text-[#963d21]',
+                    'bar'   => 'bg-[#963d21]',
+                    'icon'  => 'x-circle',
+                    'status'=> 'Gagal',
+                ],
+            ];
+        @endphp
+
+        @foreach ($pembayaranCards as $c)
+            <a href="{{ route('admin.pembayaran.index', ['status' => $c['status']]) }}"
+            class="group rounded-xl border border-[#e1e9da] bg-white p-3 hover:border-[#0d4a36]/30 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                <div class="flex items-center gap-2.5">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ $c['color'] }}">
+                        <i data-lucide="{{ $c['icon'] }}" class="h-3.5 w-3.5"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-[10px] font-bold uppercase tracking-wide text-[#617064] truncate">
+                            {{ $c['label'] }}
+                        </p>
+                        <div class="flex items-baseline gap-1.5">
+                            <p class="display-font text-xl font-bold text-[#0d4a36]">{{ $c['value'] }}</p>
+                            <span class="text-[10px] font-semibold text-[#617064]">{{ $c['pct'] }}%</span>
+                        </div>
+                    </div>
+                    <i data-lucide="chevron-right"
+                    class="h-4 w-4 text-[#d6dccf] group-hover:text-[#0d4a36] transition-colors"></i>
+                </div>
+                <div class="mt-2 h-1 w-full overflow-hidden rounded-full bg-[#edf1ec]">
+                    <div class="{{ $c['bar'] }} h-full transition-all" style="width: {{ $c['pct'] }}%"></div>
+                </div>
+            </a>
+        @endforeach
+    </div>
+</div>
+
 {{-- Stats Cards --}}
 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
     <div class="rounded-2xl bg-[#0d4a36] p-5 text-white">
