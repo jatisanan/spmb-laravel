@@ -97,24 +97,13 @@
 </form>
 
 {{-- ============================================ --}}
-{{-- TABLE (DIPISAH PER JENJANG) --}}
+{{-- TABLE (DIPISAH PER JENJANG, PAGINATE TERPISAH) --}}
 {{-- ============================================ --}}
-@php
-    $grouped = $pendaftarans->getCollection()->groupBy(function ($p) {
-        return $p->jenjang->nama ?? 'Tanpa Jenjang';
-    });
-
-    $grouped = $grouped->sortBy(function ($items, $nama) {
-        $lower = strtolower($nama);
-        if (str_contains($lower, 'smp')) return 1;
-        if (str_contains($lower, 'sma')) return 2;
-        return 3;
-    });
-@endphp
-
-@forelse ($grouped as $namaJenjang => $items)
+@forelse ($paginated as $jenjangId => $group)
     @php
-        $lower = strtolower($namaJenjang);
+        $j     = $group['jenjang'];
+        $items = $group['items'];
+        $lower = strtolower($j->nama);
 
         if (str_contains($lower, 'smp')) {
             $bgHeader   = 'bg-[#d9e9f5]';
@@ -135,9 +124,9 @@
         {{-- Header Jenjang --}}
         <div class="{{ $bgHeader }} px-5 py-3 border-b {{ $borderCard }} flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
-                <h3 class="display-font text-base font-bold text-[#0d4a36]">{{ $namaJenjang }}</h3>
+                <h3 class="display-font text-base font-bold text-[#0d4a36]">{{ $j->nama }}</h3>
                 <span class="inline-flex items-center rounded-full {{ $chipColor }} px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide">
-                    {{ $items->count() }} pendaftar
+                    {{ $items->total() }} pendaftar
                 </span>
             </div>
         </div>
@@ -151,7 +140,7 @@
                         <th class="whitespace-nowrap">Nama</th>
                         <th class="whitespace-nowrap">NISN</th>
                         <th class="whitespace-nowrap">Pembayaran</th>
-                        <th class="whitespace-nowrap">Verifikasi</th>
+                        <th class="whitespace-nowrap">Verifikasi SPMB</th>
                         <th class="whitespace-nowrap">Ujian</th>
                         <th class="whitespace-nowrap">Kelulusan</th>
                         <th class="whitespace-nowrap">Daftar Ulang</th>
@@ -159,7 +148,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($items as $p)
+                    @forelse ($items as $p)
                         @php
                             $statusPembayaran = $p->pembayaran?->status ?? 'Belum Bayar';
 
@@ -168,7 +157,6 @@
                             $bisaLulus = $p->status_ujian === 'Sudah Ujian';
                             $bisaDaftarUlang = $p->status_kelulusan === 'Lulus';
 
-                            // Data attribute umum untuk semua tombol quick-action
                             $commonData = [
                                 'id' => $p->id,
                                 'nomor' => $p->nomor_pendaftaran,
@@ -199,7 +187,7 @@
                             </td>
                             <td class="font-mono whitespace-nowrap align-middle">{{ $p->nisn }}</td>
 
-                            {{-- Pembayaran (link ke detail) --}}
+                            {{-- Pembayaran --}}
                             <td class="whitespace-nowrap align-middle" data-cell="pembayaran">
                                 <a href="{{ route('admin.pembayaran.show', $p) }}"
                                    class="inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-xs font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all
@@ -302,7 +290,7 @@
                                 @endif
                             </td>
 
-                            {{-- Aksi: Detail + Edit + Hapus --}}
+                            {{-- Aksi --}}
                             <td class="whitespace-nowrap align-middle">
                                 <div class="flex items-center justify-end gap-1.5">
                                     <a href="{{ route('admin.pendaftaran.show', $p) }}"
@@ -328,9 +316,28 @@
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="9" class="px-4 py-6 text-center text-sm text-[#617064]">
+                                Tidak ada pendaftar {{ $j->nama }} pada halaman ini.
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
+        </div>
+
+        {{-- Pagination PER jenjang --}}
+        @if ($items->hasPages())
+            <div class="px-5 py-3 border-t {{ $borderCard }} bg-[#fafcf8]">
+                {{ $items->links() }}
+            </div>
+        @endif
+
+        {{-- Footer count PER jenjang --}}
+        <div class="px-5 py-2 text-[10px] text-[#617064] border-t {{ $borderCard }}">
+            Menampilkan {{ $items->firstItem() ?? 0 }}–{{ $items->lastItem() ?? 0 }}
+            dari {{ $items->total() }} pendaftar {{ $j->nama }}
         </div>
     </div>
 @empty
@@ -344,18 +351,6 @@
 <p class="mt-3 text-[10px] text-[#617064]">
     <i data-lucide="info" class="inline h-3 w-3"></i>
     Klik tombol <strong>kuning</strong> di kolom status untuk mengubah data. Tombol <strong>abu-abu</strong> berarti masih terkunci (menunggu tahap sebelumnya).
-</p>
-
-{{-- Pagination --}}
-@if ($pendaftarans->hasPages())
-    <div class="mt-3">
-        {{ $pendaftarans->links() }}
-    </div>
-@endif
-
-<p class="mt-3 text-xs text-[#617064]">
-    Menampilkan {{ $pendaftarans->firstItem() ?? 0 }}–{{ $pendaftarans->lastItem() ?? 0 }}
-    dari {{ $pendaftarans->total() }} pendaftar
 </p>
 
 {{-- ============================================ --}}
@@ -584,28 +579,6 @@
         toastTimeout = setTimeout(() => toast.classList.add('hidden'), 3500);
     }
 
-    function clsPembayaran(s) {
-        return s === 'Terverifikasi' ? 'status-success'
-             : s === 'Gagal' ? 'status-danger'
-             : s === 'Menunggu Verifikasi' ? 'status-pending'
-             : 'status-neutral';
-    }
-    function clsVerif(s) {
-        return s === 'Terverifikasi' ? 'status-success'
-             : s === 'Perlu Perbaikan' ? 'status-danger'
-             : 'status-pending';
-    }
-    function clsLulus(s) {
-        return s === 'Lulus' ? 'status-success'
-             : s === 'Tidak Lulus' ? 'status-danger'
-             : 'status-pending';
-    }
-    function clsDaftarUlang(s) {
-        return s === 'Sudah Daftar Ulang' ? 'status-success'
-             : s === 'Belum Daftar Ulang' ? 'status-danger'
-             : 'status-neutral';
-    }
-
     function updateRow(id, data) {
         const row = document.querySelector(`tr[data-pendaftaran-id="${id}"]`);
         if (!row) return;
@@ -615,7 +588,6 @@
             if (cell) {
                 const a = cell.querySelector('a');
                 if (a) {
-                    a.className = a.className.replace(/bg-\[\#[a-f0-9]+\]|border-\[\#[a-f0-9]+\]|text-\[\#[a-f0-9]+\]/g, '');
                     const cls = data.status_pembayaran === 'Terverifikasi' ? 'bg-[#e8f4df] border-[#b9dca8] text-[#175b31]'
                               : data.status_pembayaran === 'Gagal' ? 'bg-[#fff0ea] border-[#f2c1ae] text-[#963d21]'
                               : data.status_pembayaran === 'Menunggu Verifikasi' ? 'bg-[#fff2ca] border-[#f0e0a8] text-[#805500]'
@@ -633,7 +605,6 @@
                 if (btn) {
                     btn.innerHTML = `<i data-lucide="file-check" class="h-3.5 w-3.5"></i> ${data.status_verifikasi}`;
                 }
-                if (window.lucide) lucide.createIcons();
             }
         }
 
@@ -645,7 +616,6 @@
                     const label = data.nilai_ujian ? `Nilai ${data.nilai_ujian}` : data.status_ujian;
                     btn.innerHTML = `<i data-lucide="clipboard-list" class="h-3.5 w-3.5"></i> ${label}`;
                 }
-                if (window.lucide) lucide.createIcons();
             }
         }
 
@@ -656,7 +626,6 @@
                 if (btn) {
                     btn.innerHTML = `<i data-lucide="award" class="h-3.5 w-3.5"></i> ${data.status_kelulusan}`;
                 }
-                if (window.lucide) lucide.createIcons();
             }
         }
 
@@ -667,9 +636,10 @@
                 if (btn) {
                     btn.innerHTML = `<i data-lucide="user-check" class="h-3.5 w-3.5"></i> ${data.status_daftar_ulang}`;
                 }
-                if (window.lucide) lucide.createIcons();
             }
         }
+
+        if (window.lucide) lucide.createIcons();
 
         // Update dataset tombol quick-action
         const anyBtn = row.querySelector('.btn-quick-action');
@@ -817,7 +787,6 @@
         quickModal.classList.add('flex');
         document.body.style.overflow = 'hidden';
 
-        // Prioritas: tab yang diklik dari tabel, kalau ada & enabled
         if (data.targetTab && !document.getElementById('tab-' + data.targetTab).disabled) {
             activateQuickTab(data.targetTab);
         } else if (data.bisaVerifikasi === '1') activateQuickTab('verifikasi');

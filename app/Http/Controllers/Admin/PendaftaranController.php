@@ -13,26 +13,44 @@ class PendaftaranController extends Controller
 {
     public function index(Request $request)
     {
-        // Eager load 'pembayaran' biar tidak N+1 query
-        $query = Pendaftaran::with(['jenjang', 'gelombang', 'pembayaran']);
+        $baseQuery = Pendaftaran::with(['jenjang', 'gelombang', 'pembayaran']);
 
         if ($request->filled('q')) {
-            $query->search($request->q);
-        }
-        if ($request->filled('jenjang_id')) {
-            $query->where('jenjang_id', $request->jenjang_id);
+            $baseQuery->search($request->q);
         }
         if ($request->filled('status_verifikasi')) {
-            $query->where('status_verifikasi', $request->status_verifikasi);
+            $baseQuery->where('status_verifikasi', $request->status_verifikasi);
         }
         if ($request->filled('status_kelulusan')) {
-            $query->where('status_kelulusan', $request->status_kelulusan);
+            $baseQuery->where('status_kelulusan', $request->status_kelulusan);
         }
 
-        $pendaftarans = $query->latest()->paginate(15)->withQueryString();
-        $jenjangs = Jenjang::all();
+        $jenjangs = Jenjang::orderByRaw("
+            CASE
+                WHEN LOWER(nama) LIKE '%smp%' THEN 1
+                WHEN LOWER(nama) LIKE '%sma%' THEN 2
+                ELSE 3
+            END
+        ")->get();
 
-        return view('admin.pendaftaran.index', compact('pendaftarans', 'jenjangs'));
+        // Kalau filter jenjang dipilih, hanya proses jenjang itu
+        $targetJenjangs = $request->filled('jenjang_id')
+            ? $jenjangs->where('id', $request->jenjang_id)
+            : $jenjangs;
+
+        $paginated = [];
+        foreach ($targetJenjangs as $j) {
+            $paginated[$j->id] = [
+                'jenjang' => $j,
+                'items' => (clone $baseQuery)
+                    ->where('jenjang_id', $j->id)
+                    ->latest()
+                    ->paginate(15, ['*'], 'page_' . $j->id) // nama page unik per jenjang
+                    ->withQueryString(),
+            ];
+        }
+
+        return view('admin.pendaftaran.index', compact('paginated', 'jenjangs'));
     }
 
     // ============================================
