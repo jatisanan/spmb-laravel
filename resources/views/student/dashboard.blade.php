@@ -442,8 +442,8 @@
         <p class="mt-2 text-sm text-[#617064] max-w-md mx-auto">
             Akun Anda belum terhubung dengan data pendaftaran. Silakan isi formulir SPMB terlebih dahulu.
         </p>
-        <a href="{{ route('landing') }}#daftar"
-           class="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#0d4a36] px-5 py-3 font-bold text-white hover:bg-[#176346]">
+        <a href="{{ route('student.pendaftaran.create') }}"
+        class="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#0d4a36] px-5 py-3 font-bold text-white hover:bg-[#176346]">
             <i data-lucide="edit-3" class="h-4 w-4"></i>
             Isi Formulir Pendaftaran
         </a>

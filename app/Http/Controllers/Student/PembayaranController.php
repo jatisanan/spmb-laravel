@@ -34,7 +34,7 @@ class PembayaranController extends Controller
         $pembayaran = $pendaftaran->pembayaran;
         $info = $pendaftaran->gelombang->infoPembayaran;
 
-        return view('student.pembayaran.index', compact('pendaftaran', 'pembayaran', 'info'));
+        return view('student.pembayaran', compact('pendaftaran', 'pembayaran', 'info'));
     }
 
     /**

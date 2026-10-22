@@ -111,6 +111,10 @@ Route::middleware(['auth', 'student'])
     ->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
 
+        // ── Form Pendaftaran (halaman sendiri) ──
+        Route::get('/pendaftaran', [\App\Http\Controllers\Student\PendaftaranStudentController::class, 'create'])->name('pendaftaran.create');
+        Route::post('/pendaftaran', [\App\Http\Controllers\Student\PendaftaranStudentController::class, 'store'])->name('pendaftaran.store');
+
         // Pembayaran
         Route::get('/pembayaran', [\App\Http\Controllers\Student\PembayaranController::class, 'index'])->name('pembayaran.index');
         Route::post('/pembayaran/upload', [\App\Http\Controllers\Student\PembayaranController::class, 'uploadBukti'])->name('pembayaran.upload');
