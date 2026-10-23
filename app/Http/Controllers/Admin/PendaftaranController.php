@@ -45,7 +45,7 @@ class PendaftaranController extends Controller
                 'items' => (clone $baseQuery)
                     ->where('jenjang_id', $j->id)
                     ->latest()
-                    ->paginate(15, ['*'], 'page_' . $j->id) // nama page unik per jenjang
+                    ->paginate(10, ['*'], 'page_' . $j->id) // nama page unik per jenjang
                     ->withQueryString(),
             ];
         }
