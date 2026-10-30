@@ -267,43 +267,36 @@ class PendaftaranController extends Controller
 
         return response()->streamDownload(function () use ($data) {
             $out = fopen('php://output', 'w');
-            fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM UTF-8
 
             fputcsv($out, [
-                'Tanggal Daftar',
-                'Nomor Pendaftaran', 'NISN', 'Nama Lengkap', 'Jenis Kelamin',
-                'Tempat Lahir', 'Tanggal Lahir', 'Asal Sekolah',
-                'Jenjang', 'Gelombang',
-                'Nama Ayah', 'Nama Ibu', 'Nama Wali',
+                'Tanggal Daftar', 'Nomor Pendaftaran', 'NISN', 'Nama Lengkap',
+                'Jenis Kelamin', 'Tempat Lahir', 'Tanggal Lahir', 'Asal Sekolah',
+                'Jenjang', 'Gelombang', 'Nama Ayah', 'Nama Ibu', 'Nama Wali',
                 'No WhatsApp', 'Email', 'Alamat',
-
-                // Pembayaran
-                'Status Pembayaran',
-                'Jumlah Tagihan',
-                'Metode Pembayaran',
-                'Bukti Bayar',
-                'Tanggal Upload Bukti',
-                'Diverifikasi Oleh',
-                'Tanggal Verifikasi',
-                'Catatan Admin Pembayaran',
-
-                // Pendaftaran
+                'Status Pembayaran', 'Jumlah Tagihan', 'Metode Pembayaran',
+                'Bukti Bayar', 'Tanggal Upload Bukti', 'Diverifikasi Oleh',
+                'Tanggal Verifikasi', 'Catatan Admin Pembayaran',
                 'Status Verifikasi', 'Status Ujian', 'Tanggal Ujian', 'Nilai Ujian',
                 'Status Kelulusan', 'Status Daftar Ulang', 'Tanggal Daftar Ulang',
-                'Tanggal Daftar',
             ]);
 
             foreach ($data as $p) {
                 $bayar  = $p->pembayaran;
                 $jumlah = $bayar?->jumlah ?? $p->gelombang?->biaya ?? 0;
 
-                // Bersihkan newline supaya 1 record = 1 baris fisik
-                $clean = fn ($v) => $v === null ? '' : str_replace(["\r\n", "\r", "\n"], ' ', (string) $v);
+                $clean = fn ($v) => $v === null
+                    ? ''
+                    : str_replace(["\r\n", "\r", "\n"], ' ', (string) $v);
 
-                // Paksa jadi teks di Excel: ="..." (nol depan aman, tidak jadi E+)
                 $asText = fn ($v) => '="' . str_replace('"', '""', (string) $v) . '"';
 
+                // Bersihkan em dash / en dash / minus sign jadi hyphen biasa
+                $metodeLabel = (string) ($bayar?->metode_label ?? '-');
+                $metodeLabel = str_replace(['—', '–', '−'], '-', $metodeLabel);
+                if (trim($metodeLabel) === '') $metodeLabel = '-';
+
                 fputcsv($out, [
+                    $p->created_at->format('Y-m-d H:i'),
                     $asText($p->nomor_pendaftaran),
                     $asText($p->nisn),
                     $p->nama_lengkap,
@@ -319,18 +312,14 @@ class PendaftaranController extends Controller
                     $asText($p->no_whatsapp),
                     $p->email,
                     $clean($p->alamat),
-
-                    // Pembayaran
                     $bayar?->status ?? 'Belum Bayar',
                     $jumlah,
-                    $bayar?->metode_label ?? '-',
+                    $metodeLabel,                                       // ← hasil pembersih
                     $bayar?->bukti_path ? asset('storage/' . $bayar->bukti_path) : '-',
                     $bayar?->uploaded_at?->format('Y-m-d H:i') ?? '-',
                     $bayar?->verifier?->name ?? '-',
                     $bayar?->verified_at?->format('Y-m-d H:i') ?? '-',
                     $clean($bayar?->catatan_admin),
-
-                    // Pendaftaran
                     $p->status_verifikasi,
                     $p->status_ujian,
                     $p->tanggal_ujian?->format('Y-m-d') ?? '-',
@@ -338,7 +327,6 @@ class PendaftaranController extends Controller
                     $p->status_kelulusan,
                     $p->status_daftar_ulang,
                     $p->tanggal_daftar_ulang?->format('Y-m-d') ?? '-',
-                    $p->created_at->format('Y-m-d H:i'),
                 ]);
             }
 
@@ -347,6 +335,7 @@ class PendaftaranController extends Controller
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
+
 
     public function edit(Pendaftaran $pendaftaran)
     {
