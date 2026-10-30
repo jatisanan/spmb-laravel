@@ -1,3 +1,4 @@
+{{-- resources/views/pengumuman/index.blade.php --}}
 <!DOCTYPE html>
 <html lang="id">
 <head>
