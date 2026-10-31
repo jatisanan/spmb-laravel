@@ -11,12 +11,43 @@
 {{-- ============================================ --}}
 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 mb-5">
     @php
+        $bd = $stats['breakdown'];
         $cards = [
-            ['label' => 'Total Pendaftar',    'value' => $stats['total'],         'color' => 'bg-[#edf1ec] text-[#42604c]', 'icon' => 'users'],
-            ['label' => 'Belum Bayar',        'value' => $stats['belum_bayar'],   'color' => 'bg-[#edf1ec] text-[#42604c]', 'icon' => 'circle-dashed'],
-            ['label' => 'Menunggu Verifikasi','value' => $stats['menunggu'],      'color' => 'bg-[#fff2ca] text-[#805500]', 'icon' => 'clock'],
-            ['label' => 'Terverifikasi',      'value' => $stats['terverifikasi'], 'color' => 'bg-[#e8f4df] text-[#175b31]', 'icon' => 'check-circle'],
-            ['label' => 'Gagal',              'value' => $stats['gagal'],         'color' => 'bg-[#fff0ea] text-[#963d21]', 'icon' => 'x-circle'],
+            [
+                'label' => 'Total Pendaftar',
+                'value' => $stats['total'],
+                'color' => 'bg-[#edf1ec] text-[#42604c]',
+                'icon'  => 'users',
+                'sub'   => "SMP: {$bd['total']['smp']} · SMA: {$bd['total']['sma']}",
+            ],
+            [
+                'label' => 'Belum Bayar',
+                'value' => $stats['belum_bayar'],
+                'color' => 'bg-[#edf1ec] text-[#42604c]',
+                'icon'  => 'circle-dashed',
+                'sub'   => "SMP: {$bd['belum_bayar']['smp']} · SMA: {$bd['belum_bayar']['sma']}",
+            ],
+            [
+                'label' => 'Menunggu',
+                'value' => $stats['menunggu'],
+                'color' => 'bg-[#fff2ca] text-[#805500]',
+                'icon'  => 'clock',
+                'sub'   => "SMP: {$bd['menunggu']['smp']} · SMA: {$bd['menunggu']['sma']}",
+            ],
+            [
+                'label' => 'Terverifikasi',
+                'value' => $stats['terverifikasi'],
+                'color' => 'bg-[#e8f4df] text-[#175b31]',
+                'icon'  => 'check-circle',
+                'sub'   => "SMP: {$bd['terverifikasi']['smp']} · SMA: {$bd['terverifikasi']['sma']}",
+            ],
+            [
+                'label' => 'Gagal',
+                'value' => $stats['gagal'],
+                'color' => 'bg-[#fff0ea] text-[#963d21]',
+                'icon'  => 'x-circle',
+                'sub'   => "SMP: {$bd['gagal']['smp']} · SMA: {$bd['gagal']['sma']}",
+            ],
         ];
     @endphp
 
@@ -26,9 +57,10 @@
                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ $c['color'] }}">
                     <i data-lucide="{{ $c['icon'] }}" class="h-4 w-4"></i>
                 </div>
-                <div>
+                <div class="min-w-0">
                     <p class="text-xs text-[#617064]">{{ $c['label'] }}</p>
                     <p class="text-lg font-bold text-[#0d4a36]">{{ $c['value'] }}</p>
+                    <p class="text-[10px] leading-tight text-[#617064] mt-0.5">{{ $c['sub'] }}</p>
                 </div>
             </div>
         </div>
@@ -40,15 +72,21 @@
 {{-- ============================================ --}}
 <form method="GET" action="{{ route('admin.pembayaran.index') }}"
       class="rounded-2xl border border-[#e1e9da] bg-white p-4 sm:p-5 shadow-sm mb-5">
-    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-            <label class="mb-1.5 block text-xs font-bold text-[#244535]">Cari</label>
+    
+    {{-- Grid Utama: 4 Kolom --}}
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 items-end">
+        
+        {{-- Kolom 1: Cari --}}
+        <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-bold text-[#244535]">Cari</label>
             <input type="search" name="q" value="{{ request('q') }}"
                    placeholder="Nama, nomor, atau NISN..."
                    class="field-control">
         </div>
-        <div>
-            <label class="mb-1.5 block text-xs font-bold text-[#244535]">Jenjang</label>
+
+        {{-- Kolom 2: Jenjang --}}
+        <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-bold text-[#244535]">Jenjang</label>
             <select name="jenjang_id" class="field-control">
                 <option value="">Semua</option>
                 @foreach ($jenjangs as $j)
@@ -56,8 +94,10 @@
                 @endforeach
             </select>
         </div>
-        <div>
-            <label class="mb-1.5 block text-xs font-bold text-[#244535]">Status</label>
+
+        {{-- Kolom 3: Status --}}
+        <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-bold text-[#244535]">Status</label>
             <select name="status" class="field-control">
                 <option value="">Semua</option>
                 @foreach (['Belum Bayar', 'Menunggu Verifikasi', 'Terverifikasi', 'Gagal'] as $s)
@@ -65,19 +105,26 @@
                 @endforeach
             </select>
         </div>
-        <div class="flex items-end gap-2">
-            <button type="submit"
-                    class="inline-flex items-center gap-2 rounded-lg bg-[#0d4a36] px-4 py-2 text-sm font-bold text-white hover:bg-[#176346]">
-                <i data-lucide="search" class="h-4 w-4"></i>
-                Filter
-            </button>
-            @if (request()->hasAny(['q', 'jenjang_id', 'status']))
-                <a href="{{ route('admin.pembayaran.index') }}"
-                   class="inline-flex items-center gap-2 rounded-lg border border-[#d6dccf] px-4 py-2 text-sm font-semibold text-[#244535] hover:bg-[#f4f8ee]">
-                    Reset
-                </a>
-            @endif
+
+        {{-- Kolom 4: Tombol Aksi --}}
+        {{-- Kita beri label kosong (invisible) agar tingginya sama persis dengan input --}}
+        <div class="flex flex-col gap-1.5">
+            <label class="text-xs font-bold text-[#244535] invisible" aria-hidden="true">Aksi</label>
+            <div class="flex gap-2">
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#0d4a36] px-4 h-[42px] text-sm font-bold text-white hover:bg-[#176346] transition-colors w-full sm:w-auto">
+                    <i data-lucide="search" class="h-4 w-4"></i>
+                    Filter
+                </button>
+                @if (request()->hasAny(['q', 'jenjang_id', 'status']))
+                    <a href="{{ route('admin.pembayaran.index') }}"
+                       class="inline-flex items-center justify-center gap-2 rounded-lg border border-[#d6dccf] px-4 h-[42px] text-sm font-semibold text-[#244535] hover:bg-[#f4f8ee] transition-colors w-full sm:w-auto">
+                        Reset
+                    </a>
+                @endif
+            </div>
         </div>
+
     </div>
 </form>
 

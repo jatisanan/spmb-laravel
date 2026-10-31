@@ -75,12 +75,53 @@ class PembayaranController extends Controller
         $terverifikasi = Pembayaran::where('status', 'Terverifikasi')->count();
         $gagal         = Pembayaran::where('status', 'Gagal')->count();
 
+        // === BREAKDOWN PER JENJANG ===
+        // Kelompokkan jenjang: SMP, SMA, Lainnya
+        $smpIds = $jenjangs->filter(fn($j) => str_contains(strtolower($j->nama), 'smp'))->pluck('id');
+        $smaIds = $jenjangs->filter(fn($j) => str_contains(strtolower($j->nama), 'sma'))->pluck('id');
+
+        $breakdown = [
+            'total' => [
+                'smp' => Pendaftaran::whereIn('jenjang_id', $smpIds)->count(),
+                'sma' => Pendaftaran::whereIn('jenjang_id', $smaIds)->count(),
+            ],
+            'belum_bayar' => [
+                'smp' => Pendaftaran::whereIn('jenjang_id', $smpIds)->where(function ($q) {
+                    $q->whereDoesntHave('pembayaran')
+                    ->orWhereHas('pembayaran', fn($qq) => $qq->where('status', 'Belum Bayar'));
+                })->count(),
+                'sma' => Pendaftaran::whereIn('jenjang_id', $smaIds)->where(function ($q) {
+                    $q->whereDoesntHave('pembayaran')
+                    ->orWhereHas('pembayaran', fn($qq) => $qq->where('status', 'Belum Bayar'));
+                })->count(),
+            ],
+            'menunggu' => [
+                'smp' => Pembayaran::where('status', 'Menunggu Verifikasi')
+                    ->whereHas('pendaftaran', fn($q) => $q->whereIn('jenjang_id', $smpIds))->count(),
+                'sma' => Pembayaran::where('status', 'Menunggu Verifikasi')
+                    ->whereHas('pendaftaran', fn($q) => $q->whereIn('jenjang_id', $smaIds))->count(),
+            ],
+            'terverifikasi' => [
+                'smp' => Pembayaran::where('status', 'Terverifikasi')
+                    ->whereHas('pendaftaran', fn($q) => $q->whereIn('jenjang_id', $smpIds))->count(),
+                'sma' => Pembayaran::where('status', 'Terverifikasi')
+                    ->whereHas('pendaftaran', fn($q) => $q->whereIn('jenjang_id', $smaIds))->count(),
+            ],
+            'gagal' => [
+                'smp' => Pembayaran::where('status', 'Gagal')
+                    ->whereHas('pendaftaran', fn($q) => $q->whereIn('jenjang_id', $smpIds))->count(),
+                'sma' => Pembayaran::where('status', 'Gagal')
+                    ->whereHas('pendaftaran', fn($q) => $q->whereIn('jenjang_id', $smaIds))->count(),
+            ],
+        ];
+
         $stats = [
             'total'         => $totalPendaftar,
             'belum_bayar'   => $belumBayar,
             'menunggu'      => $menunggu,
             'terverifikasi' => $terverifikasi,
             'gagal'         => $gagal,
+            'breakdown'     => $breakdown,
         ];
 
         return view('admin.pembayaran.index', compact('paginated', 'jenjangs', 'stats'));
