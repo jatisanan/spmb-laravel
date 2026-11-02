@@ -402,7 +402,7 @@
                     </div>
                 </dl>
 
-                <a href="{{ route('admin.pembayaran.show', $pendaftaran->pembayaran) }}"
+                <a href="{{ route('admin.pembayaran.show', $pendaftaran) }}"
                 class="mt-3 inline-flex items-center gap-1 rounded-lg border border-[#0d4a36] px-3 py-1.5 text-xs font-bold text-[#0d4a36] hover:bg-[#f4f8ee]">
                     Lihat Detail Pembayaran
                     <i data-lucide="arrow-right" class="h-3 w-3"></i>
