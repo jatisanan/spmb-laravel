@@ -34,6 +34,95 @@
 
 @section('content')
 
+{{-- ============================================ --}}
+{{-- STATS CARDS + BREAKDOWN DEMOGRAFI --}}
+{{-- ============================================ --}}
+@php
+    $bd = $stats['breakdown'];
+
+    $cards = [
+        [
+            'label' => 'Total Pendaftar',
+            'value' => $stats['total'],
+            'color' => 'bg-[#edf1ec] text-[#42604c]',
+            'icon'  => 'users',
+            'smp'   => $bd['total']['smp'],
+            'sma'   => $bd['total']['sma'],
+        ],
+        [
+            'label' => 'Menunggu Verifikasi',
+            'value' => $stats['menunggu_verifikasi'],
+            'color' => 'bg-[#fff2ca] text-[#805500]',
+            'icon'  => 'clock',
+            'smp'   => $bd['verifikasi_menunggu']['smp'],
+            'sma'   => $bd['verifikasi_menunggu']['sma'],
+        ],
+        [
+            'label' => 'Terverifikasi',
+            'value' => $stats['terverifikasi'],
+            'color' => 'bg-[#e8f4df] text-[#175b31]',
+            'icon'  => 'check-circle',
+            'smp'   => $bd['verifikasi_terverifikasi']['smp'],
+            'sma'   => $bd['verifikasi_terverifikasi']['sma'],
+        ],
+        [
+            'label' => 'Lulus',
+            'value' => $stats['lulus'],
+            'color' => 'bg-[#e8f4df] text-[#175b31]',
+            'icon'  => 'award',
+            'smp'   => $bd['lulus']['smp'],
+            'sma'   => $bd['lulus']['sma'],
+        ],
+    ];
+@endphp
+
+<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 mb-5">
+    @foreach ($cards as $c)
+        <div class="rounded-xl border border-[#e1e9da] bg-white p-4 shadow-sm">
+            <div class="flex items-start gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ $c['color'] }}">
+                    <i data-lucide="{{ $c['icon'] }}" class="h-4 w-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs text-[#617064]">{{ $c['label'] }}</p>
+                    <p class="text-lg font-bold text-[#0d4a36]">{{ $c['value'] }}</p>
+
+                    {{-- Breakdown per jenjang dibungkus kotak --}}
+                    <div class="mt-2 space-y-2">
+
+                        {{-- KOTAK SMP --}}
+                        <div class="rounded-lg border border-[#c5d9e8] bg-[#f4f8fc] px-2.5 py-1.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[11px] font-bold text-[#1e4d75]">SMP</span>
+                                <span class="text-[11px] font-bold text-[#0d4a36]">{{ $c['smp']['total'] }} orang</span>
+                            </div>
+                            <div class="mt-0.5 flex flex-wrap items-center gap-x-2 text-[10px] text-[#617064]">
+                                <span>Laki-laki: <strong class="text-[#1e4d75]">{{ $c['smp']['laki'] }}</strong></span>
+                                <span class="text-[#a5b0a8]">·</span>
+                                <span>Perempuan: <strong class="text-[#963d21]">{{ $c['smp']['perempuan'] }}</strong></span>
+                            </div>
+                        </div>
+
+                        {{-- KOTAK SMA --}}
+                        <div class="rounded-lg border border-[#d6dccf] bg-[#f7f9f4] px-2.5 py-1.5">
+                            <div class="flex items-center justify-between gap-2">
+                                <span class="text-[11px] font-bold text-[#4b5347]">SMA</span>
+                                <span class="text-[11px] font-bold text-[#0d4a36]">{{ $c['sma']['total'] }} orang</span>
+                            </div>
+                            <div class="mt-0.5 flex flex-wrap items-center gap-x-2 text-[10px] text-[#617064]">
+                                <span>Laki-laki: <strong class="text-[#4b5347]">{{ $c['sma']['laki'] }}</strong></span>
+                                <span class="text-[#a5b0a8]">·</span>
+                                <span>Perempuan: <strong class="text-[#963d21]">{{ $c['sma']['perempuan'] }}</strong></span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+</div>
+
 {{-- Filter --}}
 <form method="GET" action="{{ route('admin.pendaftaran.index') }}"
       class="rounded-2xl border border-[#e1e9da] bg-white p-4 sm:p-5 shadow-sm mb-5">

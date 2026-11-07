@@ -50,7 +50,60 @@ class PendaftaranController extends Controller
             ];
         }
 
-        return view('admin.pendaftaran.index', compact('paginated', 'jenjangs'));
+        // ============================================
+        // STATS + BREAKDOWN DEMOGRAFI PER JENJANG
+        // ============================================
+        $smpIds = $jenjangs->filter(fn($j) => str_contains(strtolower($j->nama), 'smp'))->pluck('id');
+        $smaIds = $jenjangs->filter(fn($j) => str_contains(strtolower($j->nama), 'sma'))->pluck('id');
+
+        // Helper: hitung total + L + P untuk sekumpulan jenjang_id
+        $demo = function ($ids) {
+            $base = Pendaftaran::whereIn('jenjang_id', $ids);
+            return [
+                'total'     => (clone $base)->count(),
+                'laki'      => (clone $base)->where('jenis_kelamin', 'Laki-laki')->count(),
+                'perempuan' => (clone $base)->where('jenis_kelamin', 'Perempuan')->count(),
+            ];
+        };
+
+        // Helper: hitung berdasarkan status tertentu (opsional filter status)
+        $demoByStatus = function ($ids, $column, $value) {
+            $base = Pendaftaran::whereIn('jenjang_id', $ids)->where($column, $value);
+            return [
+                'total'     => (clone $base)->count(),
+                'laki'      => (clone $base)->where('jenis_kelamin', 'Laki-laki')->count(),
+                'perempuan' => (clone $base)->where('jenis_kelamin', 'Perempuan')->count(),
+            ];
+        };
+
+        $breakdown = [
+            'total' => [
+                'smp' => $demo($smpIds),
+                'sma' => $demo($smaIds),
+            ],
+            'verifikasi_terverifikasi' => [
+                'smp' => $demoByStatus($smpIds, 'status_verifikasi', 'Terverifikasi'),
+                'sma' => $demoByStatus($smaIds, 'status_verifikasi', 'Terverifikasi'),
+            ],
+            'verifikasi_menunggu' => [
+                'smp' => $demoByStatus($smpIds, 'status_verifikasi', 'Menunggu Verifikasi'),
+                'sma' => $demoByStatus($smaIds, 'status_verifikasi', 'Menunggu Verifikasi'),
+            ],
+            'lulus' => [
+                'smp' => $demoByStatus($smpIds, 'status_kelulusan', 'Lulus'),
+                'sma' => $demoByStatus($smaIds, 'status_kelulusan', 'Lulus'),
+            ],
+        ];
+
+        $stats = [
+            'total'               => Pendaftaran::count(),
+            'menunggu_verifikasi' => Pendaftaran::where('status_verifikasi', 'Menunggu Verifikasi')->count(),
+            'terverifikasi'       => Pendaftaran::where('status_verifikasi', 'Terverifikasi')->count(),
+            'lulus'               => Pendaftaran::where('status_kelulusan', 'Lulus')->count(),
+            'breakdown'           => $breakdown,
+        ];
+
+        return view('admin.pendaftaran.index', compact('paginated', 'jenjangs', 'stats'));
     }
 
     // ============================================
@@ -58,10 +111,8 @@ class PendaftaranController extends Controller
     // ============================================
     public function show(Pendaftaran $pendaftaran)
     {
-        // Load relasi
         $pendaftaran->load(['jenjang', 'gelombang', 'pembayaran.verifier', 'berkas']);
 
-        // Auto-create record pembayaran kalau belum ada
         if (!$pendaftaran->pembayaran) {
             $jumlah = $pendaftaran->gelombang?->biaya ?? 0;
             Pembayaran::create([
@@ -82,7 +133,6 @@ class PendaftaranController extends Controller
     // ============================================
     public function updateVerifikasi(Request $request, Pendaftaran $pendaftaran)
     {
-        // Baca status pembayaran dari RELASI (single source of truth)
         $statusPembayaran = $pendaftaran->pembayaran?->status ?? 'Belum Bayar';
 
         if ($statusPembayaran !== 'Terverifikasi') {
@@ -222,7 +272,6 @@ class PendaftaranController extends Controller
 
     /**
      * Data ringkas untuk update baris tabel via AJAX.
-     * Ambil status pembayaran dari RELASI.
      */
     private function rowData(Pendaftaran $p): array
     {
@@ -239,7 +288,6 @@ class PendaftaranController extends Controller
 
     public function destroy(Pendaftaran $pendaftaran)
     {
-        // Hanya super_admin yang boleh hapus pendaftaran
         if (!auth()->user()->isSuperAdmin()) {
             abort(403, 'Hapus pendaftaran hanya bisa dilakukan oleh Super Admin.');
         }
@@ -290,7 +338,6 @@ class PendaftaranController extends Controller
 
                 $asText = fn ($v) => '="' . str_replace('"', '""', (string) $v) . '"';
 
-                // Bersihkan em dash / en dash / minus sign jadi hyphen biasa
                 $metodeLabel = (string) ($bayar?->metode_label ?? '-');
                 $metodeLabel = str_replace(['—', '–', '−'], '-', $metodeLabel);
                 if (trim($metodeLabel) === '') $metodeLabel = '-';
@@ -314,7 +361,7 @@ class PendaftaranController extends Controller
                     $clean($p->alamat),
                     $bayar?->status ?? 'Belum Bayar',
                     $jumlah,
-                    $metodeLabel,                                       // ← hasil pembersih
+                    $metodeLabel,
                     $bayar?->bukti_path ? asset('storage/' . $bayar->bukti_path) : '-',
                     $bayar?->uploaded_at?->format('Y-m-d H:i') ?? '-',
                     $bayar?->verifier?->name ?? '-',
@@ -335,7 +382,6 @@ class PendaftaranController extends Controller
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }
-
 
     public function edit(Pendaftaran $pendaftaran)
     {
@@ -389,7 +435,6 @@ class PendaftaranController extends Controller
 
         $pendaftaran->update($validated);
 
-        // Sinkronkan email ke akun user (hanya jika Super Admin & user ada)
         if ($isSuperAdmin && $request->filled('email') && $pendaftaran->user) {
             $pendaftaran->user->update(['email' => $request->email]);
         }
