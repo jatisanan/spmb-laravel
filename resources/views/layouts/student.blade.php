@@ -74,7 +74,8 @@
 {{-- ============================================ --}}
 <header class="sticky top-0 z-40 w-full border-b-4 border-[#d8ae45] bg-[#0d4a36] text-white"
         x-data="{ open: false }">
-    <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 sm:px-5 py-3">
+    {{-- Menggunakan w-full dan padding responsif --}}
+    <div class="flex w-full items-center justify-between gap-3 px-4 sm:px-6 py-3">
 
         {{-- Brand --}}
         <a href="{{ route('student.dashboard') }}" class="flex items-center gap-3 min-w-0">
@@ -160,7 +161,8 @@
 {{-- ============================================ --}}
 {{-- CONTENT --}}
 {{-- ============================================ --}}
-<main class="mx-auto max-w-5xl px-4 sm:px-5 py-6 sm:py-8">
+{{-- Menghapus max-w-5xl mx-auto agar konten full width --}}
+<main class="w-full px-4 sm:px-6 py-6 sm:py-8">
 
     @if (session('success'))
         <div class="mb-5 rounded-xl border border-[#b9dca8] bg-[#e8f4df] px-4 py-3 text-sm text-[#175b31] flex items-start gap-2">
@@ -178,7 +180,8 @@
     @yield('content')
 </main>
 
-<footer class="mx-auto max-w-5xl px-4 sm:px-5 py-6 text-center text-xs text-[#617064]">
+{{-- Footer disesuaikan jadi full width --}}
+<footer class="w-full px-4 sm:px-6 py-6 text-center text-xs text-[#617064]">
     &copy; {{ date('Y') }} {{ \App\Models\PengaturanSitus::get('footer_title', 'SPMB Jati Sanan') }}
 </footer>
 

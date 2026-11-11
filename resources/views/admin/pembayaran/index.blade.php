@@ -7,61 +7,97 @@
 @section('content')
 
 {{-- ============================================ --}}
-{{-- STATS CARDS --}}
+{{-- STATS CARDS + BREAKDOWN DEMOGRAFI --}}
 {{-- ============================================ --}}
-<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 mb-5">
-    @php
-        $bd = $stats['breakdown'];
-        $cards = [
-            [
-                'label' => 'Total Pendaftar',
-                'value' => $stats['total'],
-                'color' => 'bg-[#edf1ec] text-[#42604c]',
-                'icon'  => 'users',
-                'sub'   => "SMP: {$bd['total']['smp']} · SMA: {$bd['total']['sma']}",
-            ],
-            [
-                'label' => 'Belum Bayar',
-                'value' => $stats['belum_bayar'],
-                'color' => 'bg-[#edf1ec] text-[#42604c]',
-                'icon'  => 'circle-dashed',
-                'sub'   => "SMP: {$bd['belum_bayar']['smp']} · SMA: {$bd['belum_bayar']['sma']}",
-            ],
-            [
-                'label' => 'Menunggu',
-                'value' => $stats['menunggu'],
-                'color' => 'bg-[#fff2ca] text-[#805500]',
-                'icon'  => 'clock',
-                'sub'   => "SMP: {$bd['menunggu']['smp']} · SMA: {$bd['menunggu']['sma']}",
-            ],
-            [
-                'label' => 'Terverifikasi',
-                'value' => $stats['terverifikasi'],
-                'color' => 'bg-[#e8f4df] text-[#175b31]',
-                'icon'  => 'check-circle',
-                'sub'   => "SMP: {$bd['terverifikasi']['smp']} · SMA: {$bd['terverifikasi']['sma']}",
-            ],
-            [
-                'label' => 'Gagal',
-                'value' => $stats['gagal'],
-                'color' => 'bg-[#fff0ea] text-[#963d21]',
-                'icon'  => 'x-circle',
-                'sub'   => "SMP: {$bd['gagal']['smp']} · SMA: {$bd['gagal']['sma']}",
-            ],
-        ];
-    @endphp
+@php
+    $bd = $stats['breakdown'];
+    $cards = [
+        [
+            'label' => 'Total Pendaftar',
+            'value' => $stats['total'],
+            'color' => 'bg-[#edf1ec] text-[#42604c]',
+            'icon'  => 'users',
+            'smp'   => $bd['total']['smp'],
+            'sma'   => $bd['total']['sma'],
+        ],
+        [
+            'label' => 'Belum Bayar',
+            'value' => $stats['belum_bayar'],
+            'color' => 'bg-[#edf1ec] text-[#42604c]',
+            'icon'  => 'circle-dashed',
+            'smp'   => $bd['belum_bayar']['smp'],
+            'sma'   => $bd['belum_bayar']['sma'],
+        ],
+        [
+            'label' => 'Menunggu',
+            'value' => $stats['menunggu'],
+            'color' => 'bg-[#fff2ca] text-[#805500]',
+            'icon'  => 'clock',
+            'smp'   => $bd['menunggu']['smp'],
+            'sma'   => $bd['menunggu']['sma'],
+        ],
+        [
+            'label' => 'Terverifikasi',
+            'value' => $stats['terverifikasi'],
+            'color' => 'bg-[#e8f4df] text-[#175b31]',
+            'icon'  => 'check-circle',
+            'smp'   => $bd['terverifikasi']['smp'],
+            'sma'   => $bd['terverifikasi']['sma'],
+        ],
+        [
+            'label' => 'Gagal',
+            'value' => $stats['gagal'],
+            'color' => 'bg-[#fff0ea] text-[#963d21]',
+            'icon'  => 'x-circle',
+            'smp'   => $bd['gagal']['smp'],
+            'sma'   => $bd['gagal']['sma'],
+        ],
+    ];
+@endphp
 
+<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 mb-5">
     @foreach ($cards as $c)
-        <div class="rounded-xl border border-[#e1e9da] bg-white p-4 shadow-sm">
-            <div class="flex items-center gap-3">
+        <div class="rounded-xl border border-[#e1e9da] bg-white p-4 shadow-sm flex flex-col">
+            {{-- Header: Ikon & Total Utama --}}
+            <div class="flex items-start gap-3">
                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ $c['color'] }}">
                     <i data-lucide="{{ $c['icon'] }}" class="h-4 w-4"></i>
                 </div>
-                <div class="min-w-0">
-                    <p class="text-xs text-[#617064]">{{ $c['label'] }}</p>
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs text-[#617064] truncate">{{ $c['label'] }}</p>
                     <p class="text-lg font-bold text-[#0d4a36]">{{ $c['value'] }}</p>
-                    <p class="text-[10px] leading-tight text-[#617064] mt-0.5">{{ $c['sub'] }}</p>
                 </div>
+            </div>
+
+            {{-- Breakdown per Jenjang (dibuat sejajar L & P) --}}
+            <div class="mt-3 space-y-2 flex-1 flex flex-col justify-end">
+                
+                {{-- KOTAK SMP --}}
+                <div class="rounded-lg border border-[#c5d9e8] bg-[#f4f8fc] px-2.5 py-1.5">
+                    <div class="flex items-center justify-between gap-1 mb-1">
+                        <span class="text-[11px] font-bold text-[#1e4d75]">SMP</span>
+                        <span class="text-[11px] font-bold text-[#0d4a36]">{{ $c['smp']['total'] }} org</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px] text-[#617064]">
+                        <span class="whitespace-nowrap">L: <strong class="text-[#1e4d75]">{{ $c['smp']['laki'] }}</strong></span>
+                        <span class="text-[#a5b0a8]">·</span>
+                        <span class="whitespace-nowrap">P: <strong class="text-[#963d21]">{{ $c['smp']['perempuan'] }}</strong></span>
+                    </div>
+                </div>
+
+                {{-- KOTAK SMA --}}
+                <div class="rounded-lg border border-[#d6dccf] bg-[#f7f9f4] px-2.5 py-1.5">
+                    <div class="flex items-center justify-between gap-1 mb-1">
+                        <span class="text-[11px] font-bold text-[#4b5347]">SMA</span>
+                        <span class="text-[11px] font-bold text-[#0d4a36]">{{ $c['sma']['total'] }} org</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px] text-[#617064]">
+                        <span class="whitespace-nowrap">L: <strong class="text-[#4b5347]">{{ $c['sma']['laki'] }}</strong></span>
+                        <span class="text-[#a5b0a8]">·</span>
+                        <span class="whitespace-nowrap">P: <strong class="text-[#963d21]">{{ $c['sma']['perempuan'] }}</strong></span>
+                    </div>
+                </div>
+
             </div>
         </div>
     @endforeach
@@ -360,6 +396,39 @@
                 </div>
             </div>
 
+            {{-- Breakdown Demografi Jenjang --}}
+            <div class="rounded-xl bg-[#f4f8fc] border border-[#c5d9e8] p-4">
+                <p class="text-[10px] font-bold uppercase tracking-wide text-[#1e4d75] mb-2">
+                    Rincian Pendaftar per Jenjang
+                </p>
+                <div class="grid gap-2 sm:grid-cols-2 text-xs">
+                    <div class="rounded-lg border border-[#c5d9e8] bg-white px-3 py-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-[#1e4d75]">SMP</span>
+                            <span class="font-bold text-[#0d4a36]" id="modal-bd-smp-total">
+                                {{ $stats['breakdown']['total']['smp']['total'] }} org
+                            </span>
+                        </div>
+                        <div class="mt-0.5 text-[#617064]" id="modal-bd-smp">
+                            L: <strong class="text-[#1e4d75]">{{ $stats['breakdown']['total']['smp']['laki'] }}</strong>
+                            · P: <strong class="text-[#963d21]">{{ $stats['breakdown']['total']['smp']['perempuan'] }}</strong>
+                        </div>
+                    </div>
+                    <div class="rounded-lg border border-[#d6dccf] bg-white px-3 py-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-[#4b5347]">SMA</span>
+                            <span class="font-bold text-[#0d4a36]" id="modal-bd-sma-total">
+                                {{ $stats['breakdown']['total']['sma']['total'] }} org
+                            </span>
+                        </div>
+                        <div class="mt-0.5 text-[#617064]" id="modal-bd-sma">
+                            L: <strong class="text-[#4b5347]">{{ $stats['breakdown']['total']['sma']['laki'] }}</strong>
+                            · P: <strong class="text-[#963d21]">{{ $stats['breakdown']['total']['sma']['perempuan'] }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- Bukti Bayar --}}
             <div class="rounded-xl border border-[#e1e9da] p-4">
                 <div class="flex items-center justify-between mb-3">
@@ -600,6 +669,19 @@
                         }
 
                         if (window.lucide) lucide.createIcons();
+                    }
+                }
+
+                // Update breakdown jenjang di modal (jika ada perubahan status)
+                if (data.data?.breakdown_jenjang) {
+                    const b = data.data.breakdown_jenjang;
+                    const smpEl = document.getElementById('modal-bd-smp');
+                    const smaEl = document.getElementById('modal-bd-sma');
+                    if (smpEl) {
+                        smpEl.innerHTML = `L: <strong class="text-[#1e4d75]">${b.terverifikasi.smp.laki}</strong> · P: <strong class="text-[#963d21]">${b.terverifikasi.smp.perempuan}</strong>`;
+                    }
+                    if (smaEl) {
+                        smaEl.innerHTML = `L: <strong class="text-[#4b5347]">${b.terverifikasi.sma.laki}</strong> · P: <strong class="text-[#963d21]">${b.terverifikasi.sma.perempuan}</strong>`;
                     }
                 }
 

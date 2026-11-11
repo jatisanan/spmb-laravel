@@ -77,42 +77,46 @@ class PembayaranController extends Controller
 
         // === BREAKDOWN PER JENJANG ===
         // Kelompokkan jenjang: SMP, SMA, Lainnya
+        // === BREAKDOWN PER JENJANG (dengan rincian L/P) ===
         $smpIds = $jenjangs->filter(fn($j) => str_contains(strtolower($j->nama), 'smp'))->pluck('id');
         $smaIds = $jenjangs->filter(fn($j) => str_contains(strtolower($j->nama), 'sma'))->pluck('id');
 
+        // Helper: hitung total + L + P untuk sekumpulan jenjang_id
+        $demo = function ($ids) {
+            $base = Pendaftaran::whereIn('jenjang_id', $ids);
+            return [
+                'total'     => (clone $base)->count(),
+                'laki'      => (clone $base)->where('jenis_kelamin', 'Laki-laki')->count(),
+                'perempuan' => (clone $base)->where('jenis_kelamin', 'Perempuan')->count(),
+            ];
+        };
+
+        // Helper: hitung berdasarkan status pembayaran
+        $demoByPembayaran = function ($ids, string $status) {
+            $base = Pendaftaran::whereIn('jenjang_id', $ids);
+
+            if ($status === 'Belum Bayar') {
+                $base->where(function ($qq) {
+                    $qq->whereDoesntHave('pembayaran')
+                       ->orWhereHas('pembayaran', fn($x) => $x->where('status', 'Belum Bayar'));
+                });
+            } else {
+                $base->whereHas('pembayaran', fn($x) => $x->where('status', $status));
+            }
+
+            return [
+                'total'     => (clone $base)->count(),
+                'laki'      => (clone $base)->where('jenis_kelamin', 'Laki-laki')->count(),
+                'perempuan' => (clone $base)->where('jenis_kelamin', 'Perempuan')->count(),
+            ];
+        };
+
         $breakdown = [
-            'total' => [
-                'smp' => Pendaftaran::whereIn('jenjang_id', $smpIds)->count(),
-                'sma' => Pendaftaran::whereIn('jenjang_id', $smaIds)->count(),
-            ],
-            'belum_bayar' => [
-                'smp' => Pendaftaran::whereIn('jenjang_id', $smpIds)->where(function ($q) {
-                    $q->whereDoesntHave('pembayaran')
-                    ->orWhereHas('pembayaran', fn($qq) => $qq->where('status', 'Belum Bayar'));
-                })->count(),
-                'sma' => Pendaftaran::whereIn('jenjang_id', $smaIds)->where(function ($q) {
-                    $q->whereDoesntHave('pembayaran')
-                    ->orWhereHas('pembayaran', fn($qq) => $qq->where('status', 'Belum Bayar'));
-                })->count(),
-            ],
-            'menunggu' => [
-                'smp' => Pembayaran::where('status', 'Menunggu Verifikasi')
-                    ->whereHas('pendaftaran', fn($q) => $q->whereIn('jenjang_id', $smpIds))->count(),
-                'sma' => Pembayaran::where('status', 'Menunggu Verifikasi')
-                    ->whereHas('pendaftaran', fn($q) => $q->whereIn('jenjang_id', $smaIds))->count(),
-            ],
-            'terverifikasi' => [
-                'smp' => Pembayaran::where('status', 'Terverifikasi')
-                    ->whereHas('pendaftaran', fn($q) => $q->whereIn('jenjang_id', $smpIds))->count(),
-                'sma' => Pembayaran::where('status', 'Terverifikasi')
-                    ->whereHas('pendaftaran', fn($q) => $q->whereIn('jenjang_id', $smaIds))->count(),
-            ],
-            'gagal' => [
-                'smp' => Pembayaran::where('status', 'Gagal')
-                    ->whereHas('pendaftaran', fn($q) => $q->whereIn('jenjang_id', $smpIds))->count(),
-                'sma' => Pembayaran::where('status', 'Gagal')
-                    ->whereHas('pendaftaran', fn($q) => $q->whereIn('jenjang_id', $smaIds))->count(),
-            ],
+            'total'          => ['smp' => $demo($smpIds), 'sma' => $demo($smaIds)],
+            'belum_bayar'    => ['smp' => $demoByPembayaran($smpIds, 'Belum Bayar'),         'sma' => $demoByPembayaran($smaIds, 'Belum Bayar')],
+            'menunggu'       => ['smp' => $demoByPembayaran($smpIds, 'Menunggu Verifikasi'), 'sma' => $demoByPembayaran($smaIds, 'Menunggu Verifikasi')],
+            'terverifikasi'  => ['smp' => $demoByPembayaran($smpIds, 'Terverifikasi'),       'sma' => $demoByPembayaran($smaIds, 'Terverifikasi')],
+            'gagal'          => ['smp' => $demoByPembayaran($smpIds, 'Gagal'),               'sma' => $demoByPembayaran($smaIds, 'Gagal')],
         ];
 
         $stats = [
@@ -181,6 +185,20 @@ class PembayaranController extends Controller
         ]);
 
         if ($request->expectsJson()) {
+            // Hitung ulang breakdown untuk jenjang SMP & SMA agar modal bisa update real-time
+            $smpIds = Jenjang::whereRaw("LOWER(nama) LIKE '%smp%'")->pluck('id');
+            $smaIds = Jenjang::whereRaw("LOWER(nama) LIKE '%sma%'")->pluck('id');
+
+            $demoBy = function ($ids, string $status) {
+                $base = Pendaftaran::whereIn('jenjang_id', $ids)
+                    ->whereHas('pembayaran', fn($x) => $x->where('status', $status));
+                return [
+                    'total'     => (clone $base)->count(),
+                    'laki'      => (clone $base)->where('jenis_kelamin', 'Laki-laki')->count(),
+                    'perempuan' => (clone $base)->where('jenis_kelamin', 'Perempuan')->count(),
+                ];
+            };
+
             return response()->json([
                 'success' => true,
                 'message' => 'Status pembayaran berhasil diupdate.',
@@ -189,6 +207,11 @@ class PembayaranController extends Controller
                     'status'            => $pembayaran->status,
                     'status_pembayaran' => $pembayaran->status,
                     'pendaftaran_id'    => $pembayaran->pendaftaran_id,
+                    'breakdown_jenjang' => [
+                        'terverifikasi' => ['smp' => $demoBy($smpIds, 'Terverifikasi'), 'sma' => $demoBy($smaIds, 'Terverifikasi')],
+                        'menunggu'      => ['smp' => $demoBy($smpIds, 'Menunggu Verifikasi'), 'sma' => $demoBy($smaIds, 'Menunggu Verifikasi')],
+                        'gagal'         => ['smp' => $demoBy($smpIds, 'Gagal'), 'sma' => $demoBy($smaIds, 'Gagal')],
+                    ],
                 ],
             ]);
         }

@@ -120,7 +120,8 @@
 {{-- ============================================ --}}
 <header x-data="{ open: false }"
         class="w-full border-b-4 border-[#d8ae45] bg-[#0d4a36] text-white sticky top-0 z-50">
-    <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 sm:gap-4 px-4 sm:px-5 py-3">
+    {{-- FULL WIDTH: mx-auto max-w-6xl diganti jadi w-full --}}
+    <div class="flex w-full items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6 py-3">
 
         {{-- Logo --}}
         <a href="{{ route('landing') }}" class="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -230,7 +231,8 @@
          alt="Gerbang" class="absolute inset-0 h-full w-full object-cover">
     <div class="hero-wash absolute inset-0"></div>
 
-    <div class="relative mx-auto flex min-h-[520px] sm:min-h-[560px] md:min-h-[620px] max-w-6xl items-center px-4 sm:px-5 py-14 sm:py-16 md:py-20">
+    {{-- FULL WIDTH: mx-auto max-w-6xl diganti jadi w-full --}}
+    <div class="relative flex min-h-[520px] sm:min-h-[560px] md:min-h-[620px] w-full items-center px-4 sm:px-6 py-14 sm:py-16 md:py-20">
         <div class="reveal max-w-2xl text-white">
             <div class="inline-flex items-center gap-2 rounded-full bg-[#d8ae45] px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[.12em] text-[#073528]">
                 <i data-lucide="sparkles" class="h-3.5 w-3.5 sm:h-4 sm:w-4"></i>
@@ -260,7 +262,8 @@
 {{-- TENTANG --}}
 {{-- ============================================ --}}
 <section id="tentang" class="w-full bg-[#fffdf7] py-12 sm:py-16">
-    <div class="mx-auto grid max-w-6xl items-center gap-8 lg:gap-12 px-4 sm:px-5 lg:grid-cols-2">
+    {{-- FULL WIDTH: mx-auto max-w-6xl diganti jadi w-full --}}
+    <div class="grid w-full items-center gap-8 lg:gap-12 px-4 sm:px-6 lg:grid-cols-2">
         <div class="relative mx-auto w-full max-w-md lg:max-w-none">
             <div class="arch-frame">
                 <img src="{{ \App\Models\PengaturanSitus::getImage('about_image', 'images/building.jpg') }}"
@@ -310,7 +313,8 @@
 {{-- JENJANG --}}
 {{-- ============================================ --}}
 <section id="jenjang" class="w-full bg-[#e9f0e3] py-12 sm:py-16">
-    <div class="mx-auto max-w-6xl px-4 sm:px-5">
+    {{-- FULL WIDTH: mx-auto max-w-6xl diganti jadi w-full --}}
+    <div class="w-full px-4 sm:px-6">
         <div class="max-w-2xl">
             <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">
                 {{ \App\Models\PengaturanSitus::get('program_eyebrow') }}
@@ -359,7 +363,8 @@
 {{-- BIAYA --}}
 {{-- ============================================ --}}
 <section id="biaya" class="w-full bg-[#f1f5eb] py-12 sm:py-16">
-    <div class="mx-auto max-w-6xl px-4 sm:px-5">
+    {{-- FULL WIDTH: mx-auto max-w-6xl diganti jadi w-full --}}
+    <div class="w-full px-4 sm:px-6">
         <div class="mb-8 sm:mb-9 max-w-2xl">
             <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">Informasi Pendaftaran</p>
             <h2 class="display-font mt-3 text-2xl sm:text-3xl md:text-4xl font-bold text-[#0d4a36]">Biaya &amp; Timeline Pendaftaran</h2>
@@ -436,7 +441,8 @@
 
 @if ($pengumumanPublik->isNotEmpty())
 <section id="pengumuman" class="w-full bg-[#fffdf7] py-12 sm:py-16">
-    <div class="mx-auto max-w-6xl px-4 sm:px-5">
+    {{-- FULL WIDTH: mx-auto max-w-6xl diganti jadi w-full --}}
+    <div class="w-full px-4 sm:px-6">
         <div class="mb-8 sm:mb-9 flex flex-wrap items-end justify-between gap-4">
             <div class="max-w-2xl">
                 <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">Informasi Terbaru</p>
@@ -475,7 +481,9 @@
 {{-- FORM PENDAFTARAN --}}
 {{-- ============================================ --}}
 <section id="daftar" class="w-full bg-[#fffdf7] py-12 sm:py-16">
-    <div class="mx-auto max-w-5xl px-4 sm:px-5">
+    {{-- FULL WIDTH: mx-auto max-w-5xl diganti jadi w-full --}}
+    <div class="w-full px-4 sm:px-6">
+        {{-- Teks form tetap dibuat center dengan max-w-2xl agar rapi --}}
         <div class="mx-auto max-w-2xl text-center">
             <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">
                 {{ \App\Models\PengaturanSitus::get('form_eyebrow') }}
@@ -491,6 +499,7 @@
         {{-- ============================================ --}}
         {{-- STEP 1: PILIH JENJANG --}}
         {{-- ============================================ --}}
+        {{-- Pilihan jenjang tetap dibatasi (max-w-3xl) di tengah agar tidak terlalu lebar --}}
         <div id="jenjang-picker" class="mx-auto mt-8 sm:mt-10 max-w-3xl">
             <p class="mb-4 text-center text-sm font-bold uppercase tracking-[.14em] text-[#699944]">
                 Langkah 1 — Pilih Jenjang
@@ -545,8 +554,7 @@
         {{-- ============================================ --}}
         {{-- STEP 2: FORM (Tersembunyi sampai jenjang dipilih) --}}
         {{-- ============================================ --}}
-        <div id="form-wrapper" class="hidden">
-
+        <div id="form-wrapper" class="hidden mx-auto max-w-4xl">
             {{-- Judul dinamis --}}
             <div class="mb-5 sm:mb-6 rounded-xl bg-[#f4f8ee] border border-[#dce6d3] px-4 sm:px-5 py-4">
                 <p class="text-xs font-bold uppercase tracking-[.14em] text-[#699944]">Langkah 2 — Isi Formulir</p>
@@ -746,7 +754,8 @@
         {{-- ============================================ --}}
         {{-- CEK STATUS --}}
         {{-- ============================================ --}}
-        <section class="mt-10 rounded-2xl border border-[#dce6d3] bg-[#f4f8ee] p-5 sm:p-6 md:p-8">
+        {{-- Cek Status dibatasi max-w-4xl agar tidak terlalu melebar form inputnya --}}
+        <section class="mt-10 mx-auto max-w-4xl rounded-2xl border border-[#dce6d3] bg-[#f4f8ee] p-5 sm:p-6 md:p-8">
             <div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
                 <div>
                     <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">Cek Status</p>
@@ -1546,12 +1555,8 @@
 
         if (icon) {
             const iconName = state === 'locked' ? 'lock' : (icon.dataset.originalIcon || 'circle');
-
-            // ✅ FIX: pakai setAttribute (bekerja untuk HTML & SVG)
             icon.setAttribute('class', `h-4 w-4 ${s.icon}`);
             icon.setAttribute('data-lucide', iconName);
-
-            // Hapus isi lama supaya lucide render ulang
             icon.innerHTML = '';
         }
 
