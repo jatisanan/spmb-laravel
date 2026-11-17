@@ -18,19 +18,54 @@
 </div>
 
 {{-- ============================================ --}}
-{{-- FLASH MESSAGE --}}
+{{-- FLASH MESSAGE — TOAST MENONJOL --}}
 {{-- ============================================ --}}
 @if (session('success'))
-    <div class="mb-5 rounded-lg border border-green-300 bg-green-100 px-4 py-3 text-sm text-green-800 flex items-start gap-2">
-        <i data-lucide="check-circle" class="inline h-4 w-4 mt-0.5 shrink-0"></i>
-        <span>{{ session('success') }}</span>
+    <div x-data="{ show: true }" x-show="show" x-cloak
+         x-init="setTimeout(() => show = false, 7000)"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-4"
+         class="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md">
+        <div class="rounded-xl border-2 border-green-400 bg-white shadow-xl px-5 py-4 flex items-start gap-3">
+            <i data-lucide="check-circle-2" class="h-6 w-6 text-green-600 shrink-0 mt-0.5"></i>
+            <div class="flex-1">
+                <p class="font-bold text-green-900 text-sm">Upload Berhasil!</p>
+                <p class="text-xs text-green-800 mt-0.5">{{ session('success') }}</p>
+                <p class="text-[11px] text-green-700 mt-1">
+                    Status berubah → <strong>Menunggu Verifikasi</strong>.
+                </p>
+            </div>
+            <button type="button" @click="show = false" class="text-green-700 hover:text-green-900 shrink-0">
+                <i data-lucide="x" class="h-4 w-4"></i>
+            </button>
+        </div>
     </div>
 @endif
 
 @if (session('error'))
-    <div class="mb-5 rounded-lg border border-red-300 bg-red-100 px-4 py-3 text-sm text-red-800 flex items-start gap-2">
-        <i data-lucide="alert-circle" class="inline h-4 w-4 mt-0.5 shrink-0"></i>
-        <span>{{ session('error') }}</span>
+    <div x-data="{ show: true }" x-show="show" x-cloak
+         x-init="setTimeout(() => show = false, 9000)"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-4"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-4"
+         class="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-md">
+        <div class="rounded-xl border-2 border-red-400 bg-white shadow-xl px-5 py-4 flex items-start gap-3">
+            <i data-lucide="alert-circle" class="h-6 w-6 text-red-600 shrink-0 mt-0.5"></i>
+            <div class="flex-1">
+                <p class="font-bold text-red-900 text-sm">Terjadi Kesalahan</p>
+                <p class="text-xs text-red-800 mt-0.5">{{ session('error') }}</p>
+            </div>
+            <button type="button" @click="show = false" class="text-red-700 hover:text-red-900 shrink-0">
+                <i data-lucide="x" class="h-4 w-4"></i>
+            </button>
+        </div>
     </div>
 @endif
 
@@ -41,35 +76,15 @@
     $statusConfig = match($pembayaran->status) {
         'Terverifikasi' => [
             'chip'        => 'bg-green-100 text-green-800 border border-green-300',
-            'card_bg'     => 'bg-green-100',
-            'card_border' => 'border-green-400',
-            'eyebrow'     => 'text-green-700',
-            'title'       => 'text-green-900',
-            'text'        => 'text-green-800',
         ],
         'Menunggu Verifikasi' => [
             'chip'        => 'bg-amber-100 text-amber-800 border border-amber-300',
-            'card_bg'     => 'bg-amber-100',
-            'card_border' => 'border-amber-400',
-            'eyebrow'     => 'text-amber-700',
-            'title'       => 'text-amber-900',
-            'text'        => 'text-amber-800',
         ],
         'Gagal' => [
             'chip'        => 'bg-red-100 text-red-800 border border-red-300',
-            'card_bg'     => 'bg-red-100',
-            'card_border' => 'border-red-400',
-            'eyebrow'     => 'text-red-700',
-            'title'       => 'text-red-900',
-            'text'        => 'text-red-800',
         ],
-        default => [  // Belum Bayar
+        default => [
             'chip'        => 'bg-slate-100 text-slate-700 border border-slate-300',
-            'card_bg'     => 'bg-slate-100',
-            'card_border' => 'border-slate-300',
-            'eyebrow'     => 'text-slate-600',
-            'title'       => 'text-slate-900',
-            'text'        => 'text-slate-700',
         ],
     };
 
@@ -82,8 +97,6 @@
 
     // ============================================
     // TENTUKAN DEFAULT METODE
-    // Prioritas: metode yang sudah dipilih user (kalau masih tersedia),
-    // kalau tidak → pilih yang tersedia pertama
     // ============================================
     $defaultMetode = null;
 
@@ -150,10 +163,10 @@
     </div>
 
     {{-- ============================================ --}}
-    {{-- STATUS: SUDAH TERVERIFIKASI --}}
+    {{-- STATUS: TERVERIFIKASI --}}
     {{-- ============================================ --}}
     @if ($pembayaran->status === 'Terverifikasi')
-        <div class="rounded-2xl border-2 border-green-400 bg-green-100 p-6 text-center">
+        <div id="status-pembayaran" class="rounded-2xl border-2 border-green-400 bg-green-100 p-6 text-center">
             <i data-lucide="check-circle-2" class="mx-auto h-12 w-12 text-green-700 mb-3"></i>
             <p class="font-bold text-green-900 text-lg">Pembayaran Terverifikasi</p>
             <p class="text-sm text-green-800 mt-1">Terima kasih. Lanjutkan proses berikutnya.</p>
@@ -168,7 +181,7 @@
     {{-- STATUS: MENUNGGU VERIFIKASI --}}
     {{-- ============================================ --}}
     @elseif ($pembayaran->status === 'Menunggu Verifikasi')
-        <div class="rounded-2xl border-2 border-amber-400 bg-amber-100 p-6 text-center">
+        <div id="status-pembayaran" class="rounded-2xl border-2 border-amber-400 bg-amber-100 p-6 text-center">
             <i data-lucide="clock" class="mx-auto h-12 w-12 text-amber-700 mb-3"></i>
             <p class="font-bold text-amber-900 text-lg">Menunggu Verifikasi Admin</p>
             <p class="text-sm text-amber-800 mt-1">Bukti bayar Anda sedang diperiksa. Tunggu maks 1×24 jam.</p>
@@ -192,7 +205,6 @@
     {{-- ============================================ --}}
     @else
 
-        {{-- Info penolakan kalau Gagal --}}
         @if ($pembayaran->status === 'Gagal' && $pembayaran->catatan_admin)
             <div class="rounded-2xl border-2 border-red-300 bg-red-50 p-5">
                 <div class="flex items-start gap-3">
@@ -206,9 +218,6 @@
             </div>
         @endif
 
-        {{-- ============================================ --}}
-        {{-- 2. PILIH METODE + INFO + UPLOAD (SATU CARD) --}}
-        {{-- ============================================ --}}
         <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm"
              x-data="{ metode: '{{ $defaultMetode }}' }">
 
@@ -227,10 +236,9 @@
                 </div>
             @else
 
-                {{-- Pilihan metode (semua tampil, yang kosong di-disable) --}}
                 <div class="grid gap-2 sm:grid-cols-3 mb-5">
 
-                    {{-- === OFFLINE === --}}
+                    {{-- OFFLINE --}}
                     <button type="button"
                             @if($offlineAvailable) @click="metode = 'offline'" @endif
                             @disabled(!$offlineAvailable)
@@ -245,15 +253,12 @@
                         <p class="text-xs {{ $offlineAvailable ? 'text-[#617064]' : 'text-[#94a3b8]' }} mt-0.5">
                             {{ $offlineAvailable ? 'Datang ke kantor' : 'Belum tersedia' }}
                         </p>
-
                         @if(!$offlineAvailable)
-                            <span class="absolute top-2 right-2 text-[9px] font-bold uppercase tracking-wide bg-[#e1e9da] text-[#94a3b8] rounded-full px-2 py-0.5">
-                                Kosong
-                            </span>
+                            <span class="absolute top-2 right-2 text-[9px] font-bold uppercase tracking-wide bg-[#e1e9da] text-[#94a3b8] rounded-full px-2 py-0.5">Kosong</span>
                         @endif
                     </button>
 
-                    {{-- === TRANSFER === --}}
+                    {{-- TRANSFER --}}
                     <button type="button"
                             @if($transferAvailable) @click="metode = 'transfer'" @endif
                             @disabled(!$transferAvailable)
@@ -268,15 +273,12 @@
                         <p class="text-xs {{ $transferAvailable ? 'text-[#617064]' : 'text-[#94a3b8]' }} mt-0.5">
                             {{ $transferAvailable ? 'Via bank' : 'Belum tersedia' }}
                         </p>
-
                         @if(!$transferAvailable)
-                            <span class="absolute top-2 right-2 text-[9px] font-bold uppercase tracking-wide bg-[#e1e9da] text-[#94a3b8] rounded-full px-2 py-0.5">
-                                Kosong
-                            </span>
+                            <span class="absolute top-2 right-2 text-[9px] font-bold uppercase tracking-wide bg-[#e1e9da] text-[#94a3b8] rounded-full px-2 py-0.5">Kosong</span>
                         @endif
                     </button>
 
-                    {{-- === QRIS === --}}
+                    {{-- QRIS --}}
                     <button type="button"
                             @if($qrisAvailable) @click="metode = 'qris'" @endif
                             @disabled(!$qrisAvailable)
@@ -291,16 +293,13 @@
                         <p class="text-xs {{ $qrisAvailable ? 'text-[#617064]' : 'text-[#94a3b8]' }} mt-0.5">
                             {{ $qrisAvailable ? 'Scan QR' : 'Belum tersedia' }}
                         </p>
-
                         @if(!$qrisAvailable)
-                            <span class="absolute top-2 right-2 text-[9px] font-bold uppercase tracking-wide bg-[#e1e9da] text-[#94a3b8] rounded-full px-2 py-0.5">
-                                Kosong
-                            </span>
+                            <span class="absolute top-2 right-2 text-[9px] font-bold uppercase tracking-wide bg-[#e1e9da] text-[#94a3b8] rounded-full px-2 py-0.5">Kosong</span>
                         @endif
                     </button>
                 </div>
 
-                {{-- INFO sesuai metode yang dipilih --}}
+                {{-- INFO sesuai metode --}}
                 <div class="rounded-xl bg-[#f4f8ee] border border-[#dce6d3] p-4 sm:p-5">
 
                     {{-- Offline --}}
@@ -407,29 +406,104 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('student.pembayaran.upload') }}"
-                          enctype="multipart/form-data" class="space-y-3">
-                        @csrf
+                    {{-- ============================================ --}}
+                    {{-- FORM UPLOAD — LOADING OVERLAY + KONFIRMASI --}}
+                    {{-- ============================================ --}}
+                    <div x-data="{ confirmOpen: false, submitting: false }">
 
-                        {{-- Metode otomatis dari pilihan di atas (hidden) --}}
-                        <input type="hidden" name="metode" :value="metode">
+                        <form method="POST" action="{{ route('student.pembayaran.upload') }}"
+                              enctype="multipart/form-data" class="space-y-3"
+                              x-ref="uploadForm"
+                              @submit.prevent="
+                                  if (!$refs.fileInput.files.length) {
+                                      alert('Pilih file bukti bayar terlebih dahulu.');
+                                      return;
+                                  }
+                                  confirmOpen = true;
+                              ">
+                            @csrf
+                            <input type="hidden" name="metode" :value="metode">
 
-                        <div>
-                            <label class="mb-1.5 block text-xs font-bold text-[#244535]">Bukti Bayar</label>
-                            <input type="file" name="bukti" required accept=".jpg,.jpeg,.png,.pdf"
-                                   class="field-control text-xs">
-                            <p class="mt-1 text-xs text-[#617064]">JPG, PNG, atau PDF. Maks 2MB.</p>
+                            <div>
+                                <label class="mb-1.5 block text-xs font-bold text-[#244535]">Bukti Bayar</label>
+                                <input type="file" name="bukti" required accept=".jpg,.jpeg,.png,.pdf"
+                                       x-ref="fileInput"
+                                       class="field-control text-xs">
+                                <p class="mt-1 text-xs text-[#617064]">JPG, PNG, atau PDF. Maks 2MB.</p>
+                            </div>
+
+                            @error('bukti')  <p class="text-xs text-red-700">{{ $message }}</p> @enderror
+                            @error('metode') <p class="text-xs text-red-700">{{ $message }}</p> @enderror
+
+                            <button type="submit"
+                                    class="w-full rounded-lg bg-[#0d4a36] px-4 py-3 text-sm font-bold text-white hover:bg-[#176346]
+                                           inline-flex items-center justify-center gap-2">
+                                <i data-lucide="upload" class="inline h-4 w-4"></i>
+                                Kirim Bukti Bayar
+                            </button>
+                        </form>
+
+                        {{-- ============================================ --}}
+                        {{-- MODAL KONFIRMASI --}}
+                        {{-- ============================================ --}}
+                        <div x-show="confirmOpen" x-cloak
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0"
+                             class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                            <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <i data-lucide="upload-cloud" class="h-5 w-5 text-[#0d4a36]"></i>
+                                    <p class="font-bold text-[#0d4a36] text-lg">Konfirmasi Upload</p>
+                                </div>
+                                <p class="text-sm text-[#617064] mb-4">
+                                    Pastikan bukti bayar sudah benar. Setelah dikirim, Anda
+                                    <strong class="text-[#244535]">tidak bisa mengubah</strong>
+                                    sampai admin selesai verifikasi.
+                                </p>
+                                <div class="flex gap-2">
+                                    <button type="button" @click="confirmOpen = false"
+                                            class="flex-1 rounded-lg border border-[#e1e9da] px-4 py-2.5 text-sm font-semibold text-[#244535] hover:bg-[#f8faf5]">
+                                        Batal
+                                    </button>
+                                    <button type="button"
+                                            @click="confirmOpen = false; submitting = true; $refs.uploadForm.submit()"
+                                            class="flex-1 rounded-lg bg-[#0d4a36] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#176346]">
+                                        Ya, Kirim
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        @error('bukti')  <p class="text-xs text-red-700">{{ $message }}</p> @enderror
-                        @error('metode') <p class="text-xs text-red-700">{{ $message }}</p> @enderror
+                        {{-- ============================================ --}}
+                        {{-- LOADING OVERLAY FULLSCREEN --}}
+                        {{-- ============================================ --}}
+                        <div x-show="submitting" x-cloak
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100"
+                             class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                            <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center">
+                                {{-- Spinner besar --}}
+                                <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f8ee]">
+                                    <svg class="animate-spin h-9 w-9 text-[#0d4a36]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                    </svg>
+                                </div>
+                                <p class="font-bold text-[#0d4a36] text-lg">Mengunggah Bukti Bayar...</p>
+                                <p class="text-sm text-[#617064] mt-1">Mohon tunggu, jangan tutup halaman ini.</p>
 
-                        <button type="submit"
-                                class="w-full rounded-lg bg-[#0d4a36] px-4 py-3 text-sm font-bold text-white hover:bg-[#176346]">
-                            <i data-lucide="upload" class="inline h-4 w-4 mr-1"></i>
-                            Kirim Bukti Bayar
-                        </button>
-                    </form>
+                                {{-- Progress bar animasi --}}
+                                <div class="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-[#e1e9da]">
+                                    <div class="h-full w-1/2 animate-pulse rounded-full bg-[#0d4a36]"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             @endif
         </div>

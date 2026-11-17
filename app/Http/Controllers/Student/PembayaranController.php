@@ -29,7 +29,6 @@ class PembayaranController extends Controller
 
         $pembayaran = $this->ensurePembayaran($pendaftaran);
 
-        // Refresh relasi
         $pendaftaran->load(['gelombang.infoPembayaran', 'pembayaran']);
         $pembayaran = $pendaftaran->pembayaran;
         $info = $pendaftaran->gelombang->infoPembayaran;
@@ -52,17 +51,25 @@ class PembayaranController extends Controller
 
         $pendaftaran = auth()->user()->pendaftaran()->first();
         if (!$pendaftaran) {
-            return back()->with('error', 'Data pendaftaran tidak ditemukan.');
+            return redirect()
+                ->route('student.pembayaran.index')
+                ->with('error', 'Data pendaftaran tidak ditemukan.');
         }
 
         $pembayaran = $this->ensurePembayaran($pendaftaran);
 
         if ($pembayaran->status === 'Terverifikasi') {
-            return back()->with('error', 'Pembayaran sudah terverifikasi, tidak bisa upload ulang.');
+            return redirect()
+                ->route('student.pembayaran.index')
+                ->withFragment('status-pembayaran')
+                ->with('error', 'Pembayaran sudah terverifikasi, tidak bisa upload ulang.');
         }
 
         if ($pembayaran->status === 'Menunggu Verifikasi') {
-            return back()->with('error', 'Bukti bayar Anda sedang diverifikasi admin. Tunggu hasilnya.');
+            return redirect()
+                ->route('student.pembayaran.index')
+                ->withFragment('status-pembayaran')
+                ->with('error', 'Bukti bayar Anda sedang diverifikasi admin. Tunggu hasilnya.');
         }
 
         // Hapus file lama
@@ -85,21 +92,21 @@ class PembayaranController extends Controller
             'verified_at'     => null,
         ]);
 
-        // NOTE: Tidak ada sync manual ke pendaftaran.status_pembayaran.
-        // Semua pembacaan status pembayaran dilakukan via relasi $pendaftaran->pembayaran.
-
-        return back()->with('success', 'Bukti pembayaran berhasil diupload. Menunggu verifikasi admin.');
+        // Redirect ke halaman pembayaran + fragment #status-pembayaran
+        // supaya browser auto-scroll ke kartu "Menunggu Verifikasi".
+        return redirect()
+            ->route('student.pembayaran.index')
+            ->withFragment('status-pembayaran')
+            ->with('success', 'Bukti pembayaran berhasil diupload. Status: Menunggu Verifikasi.');
     }
 
     /**
      * Pastikan record Pembayaran ada & sinkron dengan gelombang saat ini.
-     * Kalau user pindah gelombang, nominal di-update (hanya kalau belum upload / belum diverifikasi).
      */
     private function ensurePembayaran($pendaftaran): Pembayaran
     {
         $pembayaran = $pendaftaran->pembayaran;
 
-        // Belum ada → buat baru dengan snapshot biaya gelombang
         if (!$pembayaran) {
             $pembayaran = Pembayaran::create([
                 'pendaftaran_id' => $pendaftaran->id,
@@ -110,11 +117,9 @@ class PembayaranController extends Controller
             return $pembayaran;
         }
 
-        // Sudah ada → cek apakah biaya gelombang berubah?
         $biayaSekarang = $pendaftaran->gelombang->biaya;
 
         if ($pembayaran->jumlah != $biayaSekarang) {
-            // Update nominal HANYA kalau belum pernah upload / belum diverifikasi
             if (in_array($pembayaran->status, ['Belum Bayar', 'Gagal'])) {
                 $pembayaran->update(['jumlah' => $biayaSekarang]);
             }
