@@ -1,0 +1,73 @@
+services:
+  php:
+    container_name: spmb-jatisanan-php
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        UID: 1000
+        GID: 1000
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    restart: unless-stopped
+    networks:
+      - spmb-network
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=sqlite
+      - TZ=Asia/Jakarta
+
+  nginx:
+    container_name: spmb-jatisanan-nginx
+    image: nginx:alpine
+    depends_on:
+      - php
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8082:80"
+    restart: unless-stopped
+    networks:
+      - spmb-network
+    environment:
+      - TZ=Asia/Jakarta
+
+  queue:
+    container_name: spmb-jatisanan-queue
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        UID: 1000
+        GID: 1000
+    volumes:
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    restart: unless-stopped
+    networks:
+      - spmb-network
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=sqlite
+      - TZ=Asia/Jakarta
+    command: php artisan queue:work --tries=3 --timeout=3600
+
+networks:
+  spmb-network:
+    driver: bridge
+
+x-casaos:
+  author: self
+  category: Education
+  icon: https://laravel.com/img/favicon/favicon-32x32.png
+  index: /
+  port_map: "8082"
+  scheme: http
+  title:
+    custom: SPMB-Jatisanan
+  description:
+    custom: Sistem Penerimaan Murid Baru Jatisanan
