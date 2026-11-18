@@ -1,8 +1,9 @@
+# ============================================
+# OS & IDE
+# ============================================
 *.log
 .DS_Store
-.env
-.env.backup
-.env.production
+Thumbs.db
 .phpactor.json
 .phpunit.result.cache
 /.codex
@@ -12,18 +13,49 @@
 /.phpunit.cache
 /.vscode
 /.zed
+_ide_helper.php
+
+# ============================================
+# ENV & SECRETS
+# ============================================
+.env
+.env.backup
+.env.production
 /auth.json
+
+# ============================================
+# DEPENDENCIES
+# ============================================
 /node_modules
+/vendor
+
+# ============================================
+# BUILD & PUBLIC ASSETS
+# ============================================
 /public/build
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
+
+# ============================================
+# STORAGE (RUNTIME — JANGAN MASUK GIT)
+# ============================================
 /storage/*.key
 /storage/pail
-/vendor
-_ide_helper.php
-Homestead.json
-Homestead.yaml
-Thumbs.db
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+
+# ============================================
+# DATABASE
+# ============================================
 /database/*.sqlite
 /database/*.sqlite-journal
+
+# ============================================
+# HOMESTEAD / VM
+# ============================================
+Homestead.json
+Homestead.yaml
