@@ -314,7 +314,14 @@
                             <td data-cell="verifikasi" class="whitespace-nowrap align-middle">
                                 @if ($bisaVerifikasi)
                                     <button type="button"
-                                            class="btn-quick-action inline-flex items-center gap-1.5 rounded-lg bg-[#d8ae45] border-2 border-[#b8902f] px-3 py-1.5 text-xs font-bold text-[#3a2a00] shadow-md hover:bg-[#efd175] hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                                            class="btn-quick-action inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-xs font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all
+                                                   {{
+                                                       $p->status_verifikasi === 'Terverifikasi'
+                                                           ? 'bg-[#e8f4df] border-[#b9dca8] text-[#175b31]'
+                                                           : ($p->status_verifikasi === 'Perlu Perbaikan'
+                                                               ? 'bg-[#fff0ea] border-[#f2c1ae] text-[#963d21]'
+                                                               : 'bg-[#fff2ca] border-[#f0e0a8] text-[#805500]')
+                                                   }}"
                                             title="Klik untuk verifikasi"
                                             data-quick-tab-target="verifikasi"
                                             @foreach ($commonData as $key => $val) data-{{ $key }}="{{ $val }}" @endforeach>
@@ -334,7 +341,14 @@
                             <td data-cell="ujian" class="whitespace-nowrap align-middle">
                                 @if ($bisaUjian)
                                     <button type="button"
-                                            class="btn-quick-action inline-flex items-center gap-1.5 rounded-lg bg-[#d8ae45] border-2 border-[#b8902f] px-3 py-1.5 text-xs font-bold text-[#3a2a00] shadow-md hover:bg-[#efd175] hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                                            class="btn-quick-action inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-xs font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all
+                                                   {{
+                                                       $p->status_ujian === 'Sudah Ujian'
+                                                           ? 'bg-[#e8f4df] border-[#b9dca8] text-[#175b31]'
+                                                           : ($p->status_ujian === 'Terjadwal'
+                                                               ? 'bg-[#e0f2fe] border-[#bae6fd] text-[#0369a1]'
+                                                               : 'bg-[#fff2ca] border-[#f0e0a8] text-[#805500]')
+                                                   }}"
                                             title="Klik untuk atur ujian"
                                             data-quick-tab-target="ujian"
                                             @foreach ($commonData as $key => $val) data-{{ $key }}="{{ $val }}" @endforeach>
@@ -358,7 +372,14 @@
                             <td data-cell="kelulusan" class="whitespace-nowrap align-middle">
                                 @if ($bisaLulus)
                                     <button type="button"
-                                            class="btn-quick-action inline-flex items-center gap-1.5 rounded-lg bg-[#d8ae45] border-2 border-[#b8902f] px-3 py-1.5 text-xs font-bold text-[#3a2a00] shadow-md hover:bg-[#efd175] hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                                            class="btn-quick-action inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-xs font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all
+                                                   {{
+                                                       $p->status_kelulusan === 'Lulus'
+                                                           ? 'bg-[#e8f4df] border-[#b9dca8] text-[#175b31]'
+                                                           : ($p->status_kelulusan === 'Tidak Lulus'
+                                                               ? 'bg-[#fff0ea] border-[#f2c1ae] text-[#963d21]'
+                                                               : 'bg-[#fff2ca] border-[#f0e0a8] text-[#805500]')
+                                                   }}"
                                             title="Klik untuk atur kelulusan"
                                             data-quick-tab-target="kelulusan"
                                             @foreach ($commonData as $key => $val) data-{{ $key }}="{{ $val }}" @endforeach>
@@ -378,7 +399,14 @@
                             <td data-cell="daftar-ulang" class="whitespace-nowrap align-middle">
                                 @if ($bisaDaftarUlang)
                                     <button type="button"
-                                            class="btn-quick-action inline-flex items-center gap-1.5 rounded-lg bg-[#d8ae45] border-2 border-[#b8902f] px-3 py-1.5 text-xs font-bold text-[#3a2a00] shadow-md hover:bg-[#efd175] hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                                            class="btn-quick-action inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-xs font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all
+                                                   {{
+                                                       $p->status_daftar_ulang === 'Sudah Daftar Ulang'
+                                                           ? 'bg-[#e8f4df] border-[#b9dca8] text-[#175b31]'
+                                                           : ($p->status_daftar_ulang === 'Belum Daftar Ulang'
+                                                               ? 'bg-[#fff0ea] border-[#f2c1ae] text-[#963d21]'
+                                                               : 'bg-[#edf1ec] border-[#d6dccf] text-[#617064]')
+                                                   }}"
                                             title="Klik untuk atur daftar ulang"
                                             data-quick-tab-target="daftar-ulang"
                                             @foreach ($commonData as $key => $val) data-{{ $key }}="{{ $val }}" @endforeach>
@@ -456,7 +484,7 @@
 {{-- Keterangan --}}
 <p class="mt-3 text-[10px] text-[#617064]">
     <i data-lucide="info" class="inline h-3 w-3"></i>
-    Klik tombol <strong>kuning</strong> di kolom status untuk mengubah data. Tombol <strong>abu-abu</strong> berarti masih terkunci (menunggu tahap sebelumnya).
+    Klik tombol berwarna di kolom status untuk mengubah data. Tombol <strong>abu-abu</strong> berarti masih terkunci (menunggu tahap sebelumnya).
 </p>
 
 {{-- ============================================ --}}
@@ -709,6 +737,10 @@
             if (cell) {
                 const btn = cell.querySelector('.btn-quick-action');
                 if (btn) {
+                    const cls = data.status_verifikasi === 'Terverifikasi' ? 'bg-[#e8f4df] border-[#b9dca8] text-[#175b31]'
+                              : data.status_verifikasi === 'Perlu Perbaikan' ? 'bg-[#fff0ea] border-[#f2c1ae] text-[#963d21]'
+                              : 'bg-[#fff2ca] border-[#f0e0a8] text-[#805500]';
+                    btn.className = 'btn-quick-action inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-xs font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all ' + cls;
                     btn.innerHTML = `<i data-lucide="file-check" class="h-3.5 w-3.5"></i> ${data.status_verifikasi}`;
                 }
             }
@@ -720,6 +752,10 @@
                 const btn = cell.querySelector('.btn-quick-action');
                 if (btn) {
                     const label = data.nilai_ujian ? `Nilai ${data.nilai_ujian}` : data.status_ujian;
+                    const cls = data.status_ujian === 'Sudah Ujian' ? 'bg-[#e8f4df] border-[#b9dca8] text-[#175b31]'
+                              : data.status_ujian === 'Terjadwal' ? 'bg-[#e0f2fe] border-[#bae6fd] text-[#0369a1]'
+                              : 'bg-[#fff2ca] border-[#f0e0a8] text-[#805500]';
+                    btn.className = 'btn-quick-action inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-xs font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all ' + cls;
                     btn.innerHTML = `<i data-lucide="clipboard-list" class="h-3.5 w-3.5"></i> ${label}`;
                 }
             }
@@ -730,6 +766,10 @@
             if (cell) {
                 const btn = cell.querySelector('.btn-quick-action');
                 if (btn) {
+                    const cls = data.status_kelulusan === 'Lulus' ? 'bg-[#e8f4df] border-[#b9dca8] text-[#175b31]'
+                              : data.status_kelulusan === 'Tidak Lulus' ? 'bg-[#fff0ea] border-[#f2c1ae] text-[#963d21]'
+                              : 'bg-[#fff2ca] border-[#f0e0a8] text-[#805500]';
+                    btn.className = 'btn-quick-action inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-xs font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all ' + cls;
                     btn.innerHTML = `<i data-lucide="award" class="h-3.5 w-3.5"></i> ${data.status_kelulusan}`;
                 }
             }
@@ -740,6 +780,10 @@
             if (cell) {
                 const btn = cell.querySelector('.btn-quick-action');
                 if (btn) {
+                    const cls = data.status_daftar_ulang === 'Sudah Daftar Ulang' ? 'bg-[#e8f4df] border-[#b9dca8] text-[#175b31]'
+                              : data.status_daftar_ulang === 'Belum Daftar Ulang' ? 'bg-[#fff0ea] border-[#f2c1ae] text-[#963d21]'
+                              : 'bg-[#edf1ec] border-[#d6dccf] text-[#617064]';
+                    btn.className = 'btn-quick-action inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 text-xs font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all ' + cls;
                     btn.innerHTML = `<i data-lucide="user-check" class="h-3.5 w-3.5"></i> ${data.status_daftar_ulang}`;
                 }
             }
