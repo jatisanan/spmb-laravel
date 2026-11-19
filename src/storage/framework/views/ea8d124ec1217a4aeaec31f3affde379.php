@@ -172,11 +172,35 @@
             <i data-lucide="check-circle-2" class="mx-auto h-12 w-12 text-green-700 mb-3"></i>
             <p class="font-bold text-green-900 text-lg">Pembayaran Terverifikasi</p>
             <p class="text-sm text-green-800 mt-1">Terima kasih. Lanjutkan proses berikutnya.</p>
-            <?php if($pembayaran->verified_at): ?>
-                <p class="text-xs text-green-700 mt-2">
-                    Diverifikasi: <?php echo e($pembayaran->verified_at->isoFormat('D MMMM Y, HH:mm')); ?>
+            <?php if($pembayaran->bukti_path): ?>
+                <?php
+                    $ext = strtolower(pathinfo($pembayaran->bukti_path, PATHINFO_EXTENSION));
+                    $isImage = in_array($ext, ['jpg', 'jpeg', 'png']);
+                ?>
 
-                </p>
+                <div class="mt-4 pt-4 border-t border-green-300">
+                    <p class="text-xs font-bold text-green-900 mb-2">Bukti Pembayaran:</p>
+
+                    <?php if($isImage): ?>
+                        <a href="<?php echo e(asset('storage/' . $pembayaran->bukti_path)); ?>" target="_blank">
+                            <img src="<?php echo e(asset('storage/' . $pembayaran->bukti_path)); ?>"
+                                alt="Bukti Pembayaran"
+                                class="mx-auto max-h-64 rounded-lg border-2 border-green-300 bg-white p-1 hover:opacity-90 transition">
+                        </a>
+                        <p class="text-[11px] text-green-700 mt-2">Klik gambar untuk memperbesar</p>
+                    <?php else: ?>
+                        <a href="<?php echo e(asset('storage/' . $pembayaran->bukti_path)); ?>"
+                        target="_blank"
+                        class="inline-flex items-center gap-1.5 rounded-lg bg-white border border-green-300 px-4 py-2 text-xs text-green-900 font-semibold hover:bg-green-50">
+                            <i data-lucide="file-text" class="h-3.5 w-3.5"></i>
+                            Lihat Bukti Bayar (PDF)
+                        </a>
+                    <?php endif; ?>
+
+                    <?php if($pembayaran->bukti_nama_asli): ?>
+                        <p class="text-[11px] text-green-700 mt-1.5"><?php echo e($pembayaran->bukti_nama_asli); ?></p>
+                    <?php endif; ?>
+                </div>
             <?php endif; ?>
         </div>
 
@@ -423,7 +447,36 @@
                     
                     
                     
-                    <div x-data="{ confirmOpen: false, submitting: false }">
+                    <div x-data="{
+                        confirmOpen: false,
+                        submitting: false,
+                        previewUrl: null,
+                        fileName: '',
+
+                        handleFile(e) {
+                            const file = e.target.files[0];
+                            if (!file) {
+                                this.previewUrl = null;
+                                this.fileName = '';
+                                return;
+                            }
+                            this.fileName = file.name;
+
+                            if (file.type.startsWith('image/')) {
+                                const reader = new FileReader();
+                                reader.onload = (ev) => { this.previewUrl = ev.target.result; };
+                                reader.readAsDataURL(file);
+                            } else {
+                                this.previewUrl = null;
+                            }
+                        },
+
+                        resetFile() {
+                            this.previewUrl = null;
+                            this.fileName = '';
+                            this.$refs.fileInput.value = '';
+                        }
+                    }">
 
                         <form method="POST" action="<?php echo e(route('student.pembayaran.upload')); ?>"
                               enctype="multipart/form-data" class="space-y-3"
@@ -442,8 +495,39 @@
                                 <label class="mb-1.5 block text-xs font-bold text-[#244535]">Bukti Bayar</label>
                                 <input type="file" name="bukti" required accept=".jpg,.jpeg,.png,.pdf"
                                        x-ref="fileInput"
+                                       @change="handleFile($event)"
                                        class="field-control text-xs">
                                 <p class="mt-1 text-xs text-[#617064]">JPG, PNG, atau PDF. Maks 2MB.</p>
+                            </div>
+
+                            
+                            
+                            
+                            <div x-show="previewUrl" x-cloak x-transition class="mt-3">
+                                <p class="text-xs font-bold text-[#244535] mb-1.5">Preview:</p>
+                                <div class="relative inline-block rounded-xl border-2 border-[#dce6d3] bg-[#f8faf5] p-2">
+                                    <img :src="previewUrl" alt="Preview bukti bayar"
+                                         class="max-h-64 w-auto rounded-lg object-contain">
+                                    <button type="button"
+                                            @click="resetFile()"
+                                            class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white shadow-md hover:bg-red-700">
+                                        <i data-lucide="x" class="h-3.5 w-3.5"></i>
+                                    </button>
+                                </div>
+                                <p class="mt-1 text-xs text-[#617064]" x-text="fileName"></p>
+                            </div>
+
+                            
+                            <div x-show="fileName && !previewUrl" x-cloak class="mt-3">
+                                <div class="inline-flex items-center gap-2 rounded-lg border border-[#e1e9da] bg-[#f8faf5] px-3 py-2">
+                                    <i data-lucide="file-text" class="h-4 w-4 text-[#0d4a36]"></i>
+                                    <span class="text-xs font-semibold text-[#244535]" x-text="fileName"></span>
+                                    <button type="button"
+                                            @click="resetFile()"
+                                            class="text-red-600 hover:text-red-800">
+                                        <i data-lucide="x" class="h-3.5 w-3.5"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <?php $__errorArgs = ['bukti'];
@@ -540,5 +624,4 @@ unset($__errorArgs, $__bag); ?>
 </div>
 
 <?php $__env->stopSection(); ?>
-
 <?php echo $__env->make('layouts.student', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/html/resources/views/student/pembayaran.blade.php ENDPATH**/ ?>
