@@ -112,6 +112,8 @@ Route::middleware(['auth', 'student'])
     ->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
 
+        Route::post('/dashboard/upload-foto', [\App\Http\Controllers\Student\DashboardController::class, 'uploadFoto'])->name('dashboard.upload-foto');
+        
         // ── Form Pendaftaran (halaman sendiri) ──
         Route::get('/pendaftaran', [\App\Http\Controllers\Student\PendaftaranStudentController::class, 'create'])->name('pendaftaran.create');
         Route::post('/pendaftaran', [\App\Http\Controllers\Student\PendaftaranStudentController::class, 'store'])->name('pendaftaran.store');

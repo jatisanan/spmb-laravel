@@ -50,6 +50,14 @@ class Pendaftaran extends Model
         return $this->hasOne(Pembayaran::class);
     }
 
+    // ============================================
+    // ACCESSOR: foto siswa (dari berkas_pendaftarans)
+    // ============================================
+    public function getFotoAttribute()
+    {
+        return $this->berkas->firstWhere('jenis', 'foto');
+    }
+
     public static function generateNomor(string $kodeJenjang): string
     {
         $tahun = now()->year;

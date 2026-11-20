@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BerkasPendaftaran;
 use App\Models\GelombangPendaftaran;
 use App\Models\Jenjang;
 use App\Models\Pendaftaran;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class PendaftaranController extends Controller
@@ -22,7 +24,7 @@ class PendaftaranController extends Controller
     {
         $this->normalizeInput($request);
 
-        $validator = Validator::make($request->all(), $this->rules(), $this->messages());
+        $validator = Validator::make($request->all(), $this->rules(false), $this->messages());
 
         if ($validator->fails()) {
             return response()->json([
@@ -57,7 +59,7 @@ class PendaftaranController extends Controller
     {
         $this->normalizeInput($request);
 
-        $validator = Validator::make($request->all(), $this->rules(), $this->messages());
+        $validator = Validator::make($request->all(), $this->rules(true), $this->messages());
 
         if ($validator->fails()) {
             return response()->json([
@@ -82,6 +84,8 @@ class PendaftaranController extends Controller
             ], 422);
         }
 
+        $fotoPath = null;
+
         try {
             DB::beginTransaction();
 
@@ -90,6 +94,12 @@ class PendaftaranController extends Controller
             $nomor     = Pendaftaran::generateNomor($jenjang->kode);
 
             $passwordPlain = User::generatePasswordFromBirthdate($request->tanggal_lahir);
+
+            // ============================================
+            // SIMPAN FOTO SISWA
+            // ============================================
+            $file = $request->file('foto');
+            $fotoPath = $file->store('foto-siswa', 'public');
 
             $user = User::create([
                 'name'        => $request->nama_lengkap,
@@ -124,6 +134,17 @@ class PendaftaranController extends Controller
                 'status_daftar_ulang' => 'Belum Dibuka',
             ]);
 
+            // ============================================
+            // SIMPAN FOTO KE berkas_pendaftarans
+            // ============================================
+            BerkasPendaftaran::create([
+                'pendaftaran_id' => $pendaftaran->id,
+                'jenis'          => 'foto',
+                'file_path'      => $fotoPath,
+                'nama_asli'      => $file->getClientOriginalName(),
+                'verified'       => false,
+            ]);
+
             // Buat record pembayaran awal
             Pembayaran::create([
                 'pendaftaran_id' => $pendaftaran->id,
@@ -151,6 +172,11 @@ class PendaftaranController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            // Hapus file yang terlanjur ter-store
+            if (!empty($fotoPath) && Storage::disk('public')->exists($fotoPath)) {
+                Storage::disk('public')->delete($fotoPath);
+            }
 
             Log::error('Pendaftaran store error: ' . $e->getMessage(), [
                 'email' => $request->email,
@@ -203,28 +229,22 @@ class PendaftaranController extends Controller
                 'gelombang'         => $pendaftaran->gelombang?->nama ?? '—',
                 'email'             => $pendaftaran->email,
 
-                // 1. Pembayaran
                 'status_pembayaran' => $statusPembayaran,
 
-                // 2. Verifikasi Pendaftaran (berkas)
                 'status_verifikasi'  => $statusVerifikasi,
                 'catatan_verifikasi' => $pendaftaran->catatan_verifikasi,
 
-                // 3. Ujian
                 'status_ujian'         => $statusUjian,
                 'tanggal_ujian'        => $pendaftaran->tanggal_ujian?->isoFormat('D MMMM Y'),
                 'tanggal_ujian_short'  => $pendaftaran->tanggal_ujian?->isoFormat('D MMM Y'),
                 'nilai_ujian'          => $pendaftaran->nilai_ujian,
 
-                // 4. Kelulusan
                 'status_kelulusan' => $statusKelulusan,
 
-                // 5. Daftar Ulang
                 'status_daftar_ulang'  => $statusDaftarUlang,
                 'link_daftar_ulang'    => $linkDaftarUlang,
                 'tanggal_daftar_ulang' => $pendaftaran->tanggal_daftar_ulang?->isoFormat('D MMMM Y'),
 
-                // Flag untuk CTA
                 'boleh_daftar_ulang' => $bolehDaftarUlang,
             ],
         ]);
@@ -261,9 +281,15 @@ class PendaftaranController extends Controller
         ]);
     }
 
-    private function rules(): array
+    /**
+     * Rules validasi.
+     *
+     * @param bool $withFoto true kalau dipakai saat submit final (store),
+     *                       false kalau dipakai saat validasi awal (validasi).
+     */
+    private function rules(bool $withFoto = false): array
     {
-        return [
+        $rules = [
             'nama_lengkap'  => 'required|string|max:100',
             'jenis_kelamin' => 'required|in:Laki-laki,Perempuan',
             'nisn'          => 'required|digits:10|unique:pendaftarans,nisn|unique:users,nisn',
@@ -279,6 +305,12 @@ class PendaftaranController extends Controller
             'email'         => 'required|email|max:150|unique:users,email',
             'alamat'        => 'required|string',
         ];
+
+        if ($withFoto) {
+            $rules['foto'] = 'required|image|mimes:jpg,jpeg,png|max:2048';
+        }
+
+        return $rules;
     }
 
     private function messages(): array
@@ -290,6 +322,10 @@ class PendaftaranController extends Controller
             'tanggal_lahir.before' => 'Tanggal lahir tidak valid.',
             'no_whatsapp.required' => 'Nomor WhatsApp wajib diisi.',
             'no_whatsapp.regex'    => 'Nomor WhatsApp harus 11–12 digit angka.',
+            'foto.required'        => 'Foto siswa wajib diupload.',
+            'foto.image'           => 'File foto harus berupa gambar.',
+            'foto.mimes'           => 'Foto harus berformat JPG, JPEG, atau PNG.',
+            'foto.max'             => 'Ukuran foto maksimal 2MB.',
         ];
     }
 

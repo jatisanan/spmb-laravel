@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    {{-- Favicon: otomatis pakai header_logo --}}
     @php
         $faviconPath = \App\Models\PengaturanSitus::get('header_logo', 'images/logo.png');
         $faviconUrl  = str_starts_with($faviconPath, 'http')
@@ -82,10 +81,7 @@
         .status-neutral { background: #edf1ec; color: #42604c; }
         .status-danger { background: #fff0ea; color: #963d21; }
 
-        /* ===== JENJANG PICKER & FORM WRAPPER ===== */
-        #form-wrapper {
-            animation: slideDown .45s cubic-bezier(.22,.9,.32,1) both;
-        }
+        #form-wrapper { animation: slideDown .45s cubic-bezier(.22,.9,.32,1) both; }
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-14px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -120,10 +116,7 @@
 {{-- ============================================ --}}
 <header x-data="{ open: false }"
         class="w-full border-b-4 border-[#d8ae45] bg-[#0d4a36] text-white sticky top-0 z-50">
-    {{-- FULL WIDTH: mx-auto max-w-6xl diganti jadi w-full --}}
     <div class="flex w-full items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6 py-3">
-
-        {{-- Logo --}}
         <a href="{{ route('landing') }}" class="flex items-center gap-2 sm:gap-3 min-w-0">
             <img src="{{ \App\Models\PengaturanSitus::getImage('header_logo', 'images/logo.png') }}"
                  alt="Logo" class="h-10 w-10 sm:h-12 sm:w-12 object-contain shrink-0">
@@ -137,7 +130,6 @@
             </div>
         </a>
 
-        {{-- Navigasi + Login (desktop ≥ md) --}}
         <nav class="hidden items-center gap-4 text-sm md:flex">
             <a href="#tentang" class="hover:text-[#f1cf72]">Tentang</a>
             <a href="#jenjang" class="hover:text-[#f1cf72]">Jenjang</a>
@@ -166,7 +158,6 @@
             @endauth
         </nav>
 
-        {{-- Mobile: tombol Login/Dashboard + hamburger --}}
         <div class="flex items-center gap-2 md:hidden shrink-0">
             @auth
                 <a href="{{ auth()->user()->canAccessAdmin() ? route('admin.dashboard') : route('student.dashboard') }}"
@@ -179,9 +170,7 @@
                 </a>
             @endauth
 
-            <button type="button" @click="open = !open"
-                    class="p-2 rounded-lg hover:bg-white/10"
-                    aria-label="Menu">
+            <button type="button" @click="open = !open" class="p-2 rounded-lg hover:bg-white/10" aria-label="Menu">
                 <svg x-show="!open" class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -192,7 +181,6 @@
         </div>
     </div>
 
-    {{-- Menu mobile dropdown --}}
     <div x-show="open" x-cloak
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0 -translate-y-2"
@@ -203,12 +191,9 @@
             <a href="#jenjang" @click="open = false" class="py-2.5 border-b border-white/10 hover:text-[#f1cf72]">Jenjang</a>
             <a href="#pengumuman" @click="open = false" class="py-2.5 border-b border-white/10 hover:text-[#f1cf72]">Pengumuman</a>
             <a href="#biaya" @click="open = false" class="py-2.5 border-b border-white/10 hover:text-[#f1cf72]">Biaya</a>
-
-            <a href="#daftar" @click="open = false"
-               class="mt-3 rounded bg-[#d8ae45] px-4 py-2.5 text-center font-bold text-[#073528] hover:bg-[#efd175]">
+            <a href="#daftar" @click="open = false" class="mt-3 rounded bg-[#d8ae45] px-4 py-2.5 text-center font-bold text-[#073528] hover:bg-[#efd175]">
                 Daftar Sekarang
             </a>
-
             @auth
                 <form method="POST" action="{{ route('logout') }}" class="mt-2">
                     @csrf
@@ -231,7 +216,6 @@
          alt="Gerbang" class="absolute inset-0 h-full w-full object-cover">
     <div class="hero-wash absolute inset-0"></div>
 
-    {{-- FULL WIDTH: mx-auto max-w-6xl diganti jadi w-full --}}
     <div class="relative flex min-h-[520px] sm:min-h-[560px] md:min-h-[620px] w-full items-center px-4 sm:px-6 py-14 sm:py-16 md:py-20">
         <div class="reveal max-w-2xl text-white">
             <div class="inline-flex items-center gap-2 rounded-full bg-[#d8ae45] px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold uppercase tracking-[.12em] text-[#073528]">
@@ -262,7 +246,6 @@
 {{-- TENTANG --}}
 {{-- ============================================ --}}
 <section id="tentang" class="w-full bg-[#fffdf7] py-12 sm:py-16">
-    {{-- FULL WIDTH: mx-auto max-w-6xl diganti jadi w-full --}}
     <div class="grid w-full items-center gap-8 lg:gap-12 px-4 sm:px-6 lg:grid-cols-2">
         <div class="relative mx-auto w-full max-w-md lg:max-w-none">
             <div class="arch-frame">
@@ -313,7 +296,6 @@
 {{-- JENJANG --}}
 {{-- ============================================ --}}
 <section id="jenjang" class="w-full bg-[#e9f0e3] py-12 sm:py-16">
-    {{-- FULL WIDTH: mx-auto max-w-6xl diganti jadi w-full --}}
     <div class="w-full px-4 sm:px-6">
         <div class="max-w-2xl">
             <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">
@@ -363,7 +345,6 @@
 {{-- BIAYA --}}
 {{-- ============================================ --}}
 <section id="biaya" class="w-full bg-[#f1f5eb] py-12 sm:py-16">
-    {{-- FULL WIDTH: mx-auto max-w-6xl diganti jadi w-full --}}
     <div class="w-full px-4 sm:px-6">
         <div class="mb-8 sm:mb-9 max-w-2xl">
             <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">Informasi Pendaftaran</p>
@@ -441,7 +422,6 @@
 
 @if ($pengumumanPublik->isNotEmpty())
 <section id="pengumuman" class="w-full bg-[#fffdf7] py-12 sm:py-16">
-    {{-- FULL WIDTH: mx-auto max-w-6xl diganti jadi w-full --}}
     <div class="w-full px-4 sm:px-6">
         <div class="mb-8 sm:mb-9 flex flex-wrap items-end justify-between gap-4">
             <div class="max-w-2xl">
@@ -481,9 +461,7 @@
 {{-- FORM PENDAFTARAN --}}
 {{-- ============================================ --}}
 <section id="daftar" class="w-full bg-[#fffdf7] py-12 sm:py-16">
-    {{-- FULL WIDTH: mx-auto max-w-5xl diganti jadi w-full --}}
     <div class="w-full px-4 sm:px-6">
-        {{-- Teks form tetap dibuat center dengan max-w-2xl agar rapi --}}
         <div class="mx-auto max-w-2xl text-center">
             <p class="text-xs font-bold uppercase tracking-[.18em] text-[#699944]">
                 {{ \App\Models\PengaturanSitus::get('form_eyebrow') }}
@@ -496,10 +474,7 @@
             </p>
         </div>
 
-        {{-- ============================================ --}}
         {{-- STEP 1: PILIH JENJANG --}}
-        {{-- ============================================ --}}
-        {{-- Pilihan jenjang tetap dibatasi (max-w-3xl) di tengah agar tidak terlalu lebar --}}
         <div id="jenjang-picker" class="mx-auto mt-8 sm:mt-10 max-w-3xl">
             <p class="mb-4 text-center text-sm font-bold uppercase tracking-[.14em] text-[#699944]">
                 Langkah 1 — Pilih Jenjang
@@ -551,11 +526,8 @@
             </div>
         </div>
 
-        {{-- ============================================ --}}
-        {{-- STEP 2: FORM (Tersembunyi sampai jenjang dipilih) --}}
-        {{-- ============================================ --}}
+        {{-- STEP 2: FORM --}}
         <div id="form-wrapper" class="hidden mx-auto max-w-4xl">
-            {{-- Judul dinamis --}}
             <div class="mb-5 sm:mb-6 rounded-xl bg-[#f4f8ee] border border-[#dce6d3] px-4 sm:px-5 py-4">
                 <p class="text-xs font-bold uppercase tracking-[.14em] text-[#699944]">Langkah 2 — Isi Formulir</p>
                 <h3 id="form-jenjang-title" class="display-font mt-1 text-xl sm:text-2xl font-bold text-[#0d4a36]">
@@ -582,7 +554,6 @@
                             <p class="text-xs text-[#617064] mt-0.5">Asli dan FC sebanyak 3 lembar</p>
                         </div>
                     </li>
-
                     <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">2</span>
                         <div class="min-w-0">
@@ -590,7 +561,6 @@
                             <p class="text-xs text-[#617064] mt-0.5">Asli dan FC sebanyak 3 lembar</p>
                         </div>
                     </li>
-
                     <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">3</span>
                         <div class="min-w-0">
@@ -598,7 +568,6 @@
                             <p class="text-xs text-[#617064] mt-0.5">Asli dan FC sebanyak 3 lembar</p>
                         </div>
                     </li>
-
                     <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">4</span>
                         <div class="min-w-0">
@@ -606,7 +575,6 @@
                             <p class="text-xs text-[#617064] mt-0.5">2 lembar</p>
                         </div>
                     </li>
-
                     <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">5</span>
                         <div class="min-w-0">
@@ -617,7 +585,6 @@
                             <p class="text-xs text-[#617064] mt-0.5">Atau FC Ijazah</p>
                         </div>
                     </li>
-
                     <li class="flex items-start gap-3 rounded-xl border border-[#e1e9da] bg-white px-4 py-3">
                         <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-sm font-bold text-white">6</span>
                         <div class="min-w-0">
@@ -630,7 +597,6 @@
                 </ol>
             </aside>
 
-            {{-- Tombol kembali --}}
             <div class="mt-8 sm:mt-10 mb-4">
                 <button type="button" id="back-to-picker"
                         class="inline-flex items-center gap-2 rounded-lg border border-[#d6dccf] bg-white px-4 py-2 text-sm font-semibold text-[#0d4a36] hover:bg-[#f4f8ee] transition">
@@ -639,101 +605,161 @@
                 </button>
             </div>
 
-            <form id="registration-form" class="form-shell rounded-2xl border border-[#e2e4d8] bg-white p-5 sm:p-6 md:p-9" novalidate>
+            <form id="registration-form" class="form-shell rounded-2xl border border-[#e2e4d8] bg-white p-5 sm:p-6 md:p-9" novalidate enctype="multipart/form-data">
                 @csrf
-                <div class="grid gap-5 md:grid-cols-2">
-                    <div>
-                        <label for="nama-lengkap" class="mb-2 block text-sm font-bold text-[#244535]">Nama Lengkap</label>
-                        <input id="nama-lengkap" name="nama_lengkap" type="text" required class="field-control">
-                    </div>
-                    <div>
-                        <label for="jenis-kelamin" class="mb-2 block text-sm font-bold text-[#244535]">Jenis Kelamin</label>
-                        <select id="jenis-kelamin" name="jenis_kelamin" required class="field-control">
-                            <option value="" selected disabled>Pilih jenis kelamin</option>
-                            <option value="Laki-laki">Laki-laki</option>
-                            <option value="Perempuan">Perempuan</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="nisn" class="mb-2 block text-sm font-bold text-[#244535]">NISN (10 digit)</label>
-                        <input id="nisn" name="nisn" type="text" inputmode="numeric" pattern="[0-9]{10}" minlength="10" maxlength="10" required class="field-control">
-                    </div>
-                    <div>
-                        <label for="tempat-lahir" class="mb-2 block text-sm font-bold text-[#244535]">Tempat Lahir</label>
-                        <input id="tempat-lahir" name="tempat_lahir" type="text" required class="field-control">
-                    </div>
-                    <div>
-                        <label for="tanggal-lahir" class="mb-2 block text-sm font-bold text-[#244535]">Tanggal Lahir</label>
-                        <input id="tanggal-lahir" name="tanggal_lahir" type="date" required class="field-control">
-                    </div>
-                    <div>
-                        <label for="asal-sekolah" class="mb-2 block text-sm font-bold text-[#244535]">Asal Sekolah</label>
-                        <input id="asal-sekolah" name="asal_sekolah" type="text" required class="field-control">
+
+                {{-- ============================================ --}}
+                {{-- CARD 1: FOTO SISWA --}}
+                {{-- ============================================ --}}
+                <div class="rounded-xl border-2 border-[#dce6d3] bg-[#f8faf5] p-4 sm:p-5 mb-5"
+                     x-data="{
+                        previewUrl: null,
+                        fileName: '',
+                        handleFile(e) {
+                            const file = e.target.files[0];
+                            if (!file) { this.previewUrl = null; this.fileName = ''; return; }
+                            this.fileName = file.name;
+                            const reader = new FileReader();
+                            reader.onload = (ev) => { this.previewUrl = ev.target.result; };
+                            reader.readAsDataURL(file);
+                        },
+                        resetFile() {
+                            this.previewUrl = null;
+                            this.fileName = '';
+                            this.$refs.fotoInput.value = '';
+                        }
+                     }">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36]">
+                            <i data-lucide="camera" class="h-4 w-4 text-white"></i>
+                        </div>
+                        <h4 class="display-font text-base sm:text-lg font-bold text-[#0d4a36]">Foto Siswa</h4>
+                        <span class="text-xs text-[#963d21] font-bold">*Wajib</span>
                     </div>
 
-                    {{-- Jenjang (auto dari picker, readonly) --}}
-                    <div>
-                        <label for="jenjang-display" class="mb-2 block text-sm font-bold text-[#244535]">Jenjang Pendaftaran</label>
+                    <input id="foto" name="foto" type="file" required
+                           accept=".jpg,.jpeg,.png"
+                           x-ref="fotoInput"
+                           @change="handleFile($event)"
+                           class="field-control text-sm">
 
-                        {{-- Yang dikirim ke server --}}
-                        <input type="hidden" id="jenjang-id" name="jenjang_id" value="">
+                    <p class="mt-1 text-xs text-[#69786e]">
+                        Format JPG / JPEG / PNG. Maks 2MB. Gunakan foto formal terbaru.
+                    </p>
 
-                        {{-- Yang ditampilkan ke user (readonly, tidak bisa diklik) --}}
-                        <input type="text"
-                            id="jenjang-display"
-                            readonly
-                            tabindex="-1"
-                            class="field-control bg-[#f0f4ec] cursor-not-allowed text-[#0d4a36] font-bold pointer-events-none"
-                            placeholder="Pilih jenjang di atas"
-                            value="">
+                    <div x-show="previewUrl" x-cloak x-transition class="mt-3">
+                        <p class="text-xs font-bold text-[#244535] mb-1.5">Preview:</p>
+                        <div class="relative inline-block rounded-xl border-2 border-[#dce6d3] bg-white p-2">
+                            <img :src="previewUrl" alt="Preview foto siswa"
+                                 class="max-h-64 w-auto rounded-lg object-contain">
+                            <button type="button" @click="resetFile()"
+                                    class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white shadow-md hover:bg-red-700">
+                                <i data-lucide="x" class="h-3.5 w-3.5"></i>
+                            </button>
+                        </div>
+                        <p class="mt-1 text-xs text-[#617064]" x-text="fileName"></p>
+                    </div>
+                </div>
 
-                        <p class="mt-1 text-xs text-[#69786e]">Jenjang dipilih dari tombol di atas. Klik "Ganti Jenjang" untuk mengubah.</p>
+                {{-- ============================================ --}}
+                {{-- CARD 2: DATA IDENTITAS --}}
+                {{-- ============================================ --}}
+                <div class="rounded-xl border-2 border-[#dce6d3] bg-white p-4 sm:p-5 mb-5">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36]">
+                            <i data-lucide="user" class="h-4 w-4 text-white"></i>
+                        </div>
+                        <h4 class="display-font text-base sm:text-lg font-bold text-[#0d4a36]">Data Identitas</h4>
                     </div>
 
-                    <div>
-                        <label for="gelombang-id" class="mb-2 block text-sm font-bold text-[#244535]">Gelombang</label>
-                        <select id="gelombang-id" name="gelombang_id" required class="field-control" disabled>
-                            <option value="">Pilih jenjang terlebih dahulu</option>
-                        </select>
-                        <p id="gelombang-info" class="mt-1 text-xs text-[#699944]"></p>
-                    </div>
-                    <div>
-                        <label for="nama-ayah" class="mb-2 block text-sm font-bold text-[#244535]">Nama Ayah</label>
-                        <input id="nama-ayah" name="nama_ayah" type="text" required class="field-control">
-                    </div>
-                    <div>
-                        <label for="nama-ibu" class="mb-2 block text-sm font-bold text-[#244535]">Nama Ibu</label>
-                        <input id="nama-ibu" name="nama_ibu" type="text" required class="field-control">
-                    </div>
-                    <div>
-                        <label for="nama-wali" class="mb-2 block text-sm font-bold text-[#244535]">Nama Wali (opsional)</label>
-                        <input id="nama-wali" name="nama_wali" type="text" class="field-control">
-                    </div>
-                    <div>
-                        <label for="no-whatsapp" class="mb-2 block text-sm font-bold text-[#244535]">No. WhatsApp</label>
-                        <input id="no-whatsapp" name="no_whatsapp" type="tel"
-                            inputmode="numeric"
-                            pattern="[0-9]{11,12}"
-                            minlength="11"
-                            maxlength="12"
-                            required
-                            title="Nomor WhatsApp harus 11–12 digit angka. Contoh: 081234567890"
-                            class="field-control"
-                            placeholder="08xxxxxxxxxx">
-                        <p class="mt-1 text-xs text-[#69786e]">11–12 digit angka, contoh: 081234567890</p>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label for="email" class="mb-2 block text-sm font-bold text-[#244535]">Email Aktif</label>
-                        <input id="email" name="email" type="email" required autocomplete="email"
-                               title="Masukkan alamat email yang valid. Contoh: nama@email.com"
-                               class="field-control" placeholder="nama@email.com">
-                        <p class="mt-1 text-xs leading-5 text-[#69786e]">
-                            Email ini akan digunakan untuk membuat akun login. Password awal adalah tanggal lahir Anda (ddmmyyyy).
-                        </p>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label for="alamat" class="mb-2 block text-sm font-bold text-[#244535]">Alamat Lengkap</label>
-                        <textarea id="alamat" name="alamat" rows="4" required class="field-control resize-y"></textarea>
+                    <div class="grid gap-5 md:grid-cols-2">
+                        <div>
+                            <label for="nama-lengkap" class="mb-2 block text-sm font-bold text-[#244535]">Nama Lengkap</label>
+                            <input id="nama-lengkap" name="nama_lengkap" type="text" required class="field-control">
+                        </div>
+                        <div>
+                            <label for="jenis-kelamin" class="mb-2 block text-sm font-bold text-[#244535]">Jenis Kelamin</label>
+                            <select id="jenis-kelamin" name="jenis_kelamin" required class="field-control">
+                                <option value="" selected disabled>Pilih jenis kelamin</option>
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="nisn" class="mb-2 block text-sm font-bold text-[#244535]">NISN (10 digit)</label>
+                            <input id="nisn" name="nisn" type="text" inputmode="numeric" pattern="[0-9]{10}" minlength="10" maxlength="10" required class="field-control">
+                        </div>
+                        <div>
+                            <label for="tempat-lahir" class="mb-2 block text-sm font-bold text-[#244535]">Tempat Lahir</label>
+                            <input id="tempat-lahir" name="tempat_lahir" type="text" required class="field-control">
+                        </div>
+                        <div>
+                            <label for="tanggal-lahir" class="mb-2 block text-sm font-bold text-[#244535]">Tanggal Lahir</label>
+                            <input id="tanggal-lahir" name="tanggal_lahir" type="date" required class="field-control">
+                        </div>
+                        <div>
+                            <label for="asal-sekolah" class="mb-2 block text-sm font-bold text-[#244535]">Asal Sekolah</label>
+                            <input id="asal-sekolah" name="asal_sekolah" type="text" required class="field-control">
+                        </div>
+
+                        <div>
+                            <label for="jenjang-display" class="mb-2 block text-sm font-bold text-[#244535]">Jenjang Pendaftaran</label>
+                            <input type="hidden" id="jenjang-id" name="jenjang_id" value="">
+                            <input type="text"
+                                id="jenjang-display"
+                                readonly
+                                tabindex="-1"
+                                class="field-control bg-[#f0f4ec] cursor-not-allowed text-[#0d4a36] font-bold pointer-events-none"
+                                placeholder="Pilih jenjang di atas"
+                                value="">
+                            <p class="mt-1 text-xs text-[#69786e]">Jenjang dipilih dari tombol di atas. Klik "Ganti Jenjang" untuk mengubah.</p>
+                        </div>
+
+                        <div>
+                            <label for="gelombang-id" class="mb-2 block text-sm font-bold text-[#244535]">Gelombang</label>
+                            <select id="gelombang-id" name="gelombang_id" required class="field-control" disabled>
+                                <option value="">Pilih jenjang terlebih dahulu</option>
+                            </select>
+                            <p id="gelombang-info" class="mt-1 text-xs text-[#699944]"></p>
+                        </div>
+                        <div>
+                            <label for="nama-ayah" class="mb-2 block text-sm font-bold text-[#244535]">Nama Ayah</label>
+                            <input id="nama-ayah" name="nama_ayah" type="text" required class="field-control">
+                        </div>
+                        <div>
+                            <label for="nama-ibu" class="mb-2 block text-sm font-bold text-[#244535]">Nama Ibu</label>
+                            <input id="nama-ibu" name="nama_ibu" type="text" required class="field-control">
+                        </div>
+                        <div>
+                            <label for="nama-wali" class="mb-2 block text-sm font-bold text-[#244535]">Nama Wali (opsional)</label>
+                            <input id="nama-wali" name="nama_wali" type="text" class="field-control">
+                        </div>
+                        <div>
+                            <label for="no-whatsapp" class="mb-2 block text-sm font-bold text-[#244535]">No. WhatsApp</label>
+                            <input id="no-whatsapp" name="no_whatsapp" type="tel"
+                                inputmode="numeric"
+                                pattern="[0-9]{11,12}"
+                                minlength="11"
+                                maxlength="12"
+                                required
+                                title="Nomor WhatsApp harus 11–12 digit angka. Contoh: 081234567890"
+                                class="field-control"
+                                placeholder="08xxxxxxxxxx">
+                            <p class="mt-1 text-xs text-[#69786e]">11–12 digit angka, contoh: 081234567890</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="email" class="mb-2 block text-sm font-bold text-[#244535]">Email Aktif</label>
+                            <input id="email" name="email" type="email" required autocomplete="email"
+                                   title="Masukkan alamat email yang valid. Contoh: nama@email.com"
+                                   class="field-control" placeholder="nama@email.com">
+                            <p class="mt-1 text-xs leading-5 text-[#69786e]">
+                                Email ini akan digunakan untuk membuat akun login. Password awal adalah tanggal lahir Anda (ddmmyyyy).
+                            </p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="alamat" class="mb-2 block text-sm font-bold text-[#244535]">Alamat Lengkap</label>
+                            <textarea id="alamat" name="alamat" rows="4" required class="field-control resize-y"></textarea>
+                        </div>
                     </div>
                 </div>
 
@@ -754,7 +780,6 @@
         {{-- ============================================ --}}
         {{-- CEK STATUS --}}
         {{-- ============================================ --}}
-        {{-- Cek Status dibatasi max-w-4xl agar tidak terlalu melebar form inputnya --}}
         <section class="mt-10 mx-auto max-w-4xl rounded-2xl border border-[#dce6d3] bg-[#f4f8ee] p-5 sm:p-6 md:p-8">
             <div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
                 <div>
@@ -779,8 +804,6 @@
             <div id="status-message" class="mt-4 hidden rounded-lg px-4 py-3 text-sm"></div>
 
             <div id="status-result" class="mt-5 hidden rounded-xl border border-[#dce6d3] bg-white p-4 sm:p-5">
-
-                {{-- Header: Nomor + Jenjang + Nama --}}
                 <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#ebeee6]">
                     <div class="min-w-0">
                         <p class="text-xs font-bold uppercase tracking-[.12em] text-[#699944]">Nomor Pendaftaran</p>
@@ -790,10 +813,7 @@
                 </div>
                 <p id="result-nama" class="mt-3 text-sm font-bold text-[#244535]"></p>
 
-                {{-- 5 Card Status --}}
                 <div class="mt-5 grid gap-3 grid-cols-2 lg:grid-cols-5">
-
-                    {{-- 1. Pembayaran --}}
                     <div id="card-payment" class="rounded-xl p-3 border transition">
                         <div class="flex items-center justify-between mb-1.5">
                             <p class="text-[10px] font-bold uppercase tracking-[.1em] text-[#617064]">Pembayaran</p>
@@ -802,8 +822,6 @@
                         <p id="result-payment" class="text-sm font-bold">—</p>
                         <p id="result-payment-note" class="mt-1 text-[10px] leading-4"></p>
                     </div>
-
-                    {{-- 2. Verifikasi Pendaftaran --}}
                     <div id="card-verification" class="rounded-xl p-3 border transition">
                         <div class="flex items-center justify-between mb-1.5">
                             <p class="text-[10px] font-bold uppercase tracking-[.1em] text-[#617064]">Verifikasi Pendaftaran</p>
@@ -812,8 +830,6 @@
                         <p id="result-verification" class="text-sm font-bold">—</p>
                         <p id="result-verification-note" class="mt-1 text-[10px] leading-4"></p>
                     </div>
-
-                    {{-- 3. Ujian --}}
                     <div id="card-exam" class="rounded-xl p-3 border transition">
                         <div class="flex items-center justify-between mb-1.5">
                             <p class="text-[10px] font-bold uppercase tracking-[.1em] text-[#617064]">Ujian</p>
@@ -823,8 +839,6 @@
                         <p id="result-exam-date" class="mt-1 text-[10px] leading-4"></p>
                         <p id="result-exam-score" class="mt-0.5 text-[10px] font-bold leading-4"></p>
                     </div>
-
-                    {{-- 4. Kelulusan --}}
                     <div id="card-graduation" class="rounded-xl p-3 border transition">
                         <div class="flex items-center justify-between mb-1.5">
                             <p class="text-[10px] font-bold uppercase tracking-[.1em] text-[#617064]">Kelulusan</p>
@@ -833,8 +847,6 @@
                         <p id="result-graduation" class="text-sm font-bold">—</p>
                         <p id="result-graduation-note" class="mt-1 text-[10px] leading-4"></p>
                     </div>
-
-                    {{-- 5. Daftar Ulang --}}
                     <div id="card-reregistration" class="rounded-xl p-3 border transition">
                         <div class="flex items-center justify-between mb-1.5">
                             <p class="text-[10px] font-bold uppercase tracking-[.1em] text-[#617064]">Daftar Ulang</p>
@@ -845,10 +857,8 @@
                     </div>
                 </div>
 
-                {{-- Nilai ujian (highlight) --}}
                 <p id="result-score" class="mt-4 hidden rounded-lg bg-[#fff8dd] px-3 py-2 text-sm text-[#76530d]"></p>
 
-                {{-- CTA Daftar Ulang --}}
                 <div id="reregistration-cta" class="mt-5 hidden">
                     <div class="rounded-xl border-2 border-dashed border-[#b9dca8] bg-[#e8f4df] p-4 sm:p-5">
                         <div class="flex items-start gap-3">
@@ -884,7 +894,6 @@
 {{-- ============================================ --}}
 <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-3 sm:p-4">
     <div class="w-full max-w-lg rounded-2xl bg-white shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
-
         <div class="bg-[#d8ae45] px-5 sm:px-6 py-4 sm:py-5 text-center text-[#073528] shrink-0">
             <div class="mx-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-white mb-3">
                 <i data-lucide="clipboard-check" class="h-7 w-7 sm:h-8 sm:w-8 text-[#0d4a36]"></i>
@@ -894,7 +903,6 @@
         </div>
 
         <div class="px-5 sm:px-6 py-4 sm:py-5 overflow-y-auto space-y-3">
-
             <p class="text-xs leading-5 text-[#617064]">
                 Pastikan data di bawah ini sudah benar. Setelah dikirim, data <strong>tidak dapat diubah sendiri</strong> —
                 harus menghubungi admin untuk perbaikan.
@@ -905,25 +913,28 @@
                     <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">Nama Lengkap</p>
                     <p id="confirm-nama" class="mt-0.5 font-bold text-[#0d4a36] break-words">—</p>
                 </div>
-
                 <div>
                     <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">Tempat, Tanggal Lahir</p>
                     <p id="confirm-ttl" class="mt-0.5 font-bold text-[#0d4a36] break-words">—</p>
                 </div>
-
                 <div>
                     <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">NISN</p>
                     <p id="confirm-nisn" class="mt-0.5 font-mono font-bold text-[#0d4a36] break-all">—</p>
                 </div>
-
                 <div>
                     <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">No. WhatsApp</p>
                     <p id="confirm-wa" class="mt-0.5 font-mono font-bold text-[#0d4a36] break-all">—</p>
                 </div>
-
                 <div>
                     <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">Email</p>
                     <p id="confirm-email" class="mt-0.5 font-mono font-bold text-[#0d4a36] break-all">—</p>
+                </div>
+                <div id="confirm-foto-wrapper" class="hidden">
+                    <p class="text-xs font-semibold text-[#617064] uppercase tracking-wide">Foto Siswa</p>
+                    <div class="mt-1.5 rounded-lg border-2 border-[#dce6d3] bg-white p-1.5 inline-block">
+                        <img id="confirm-foto" src="" alt="Foto siswa"
+                             class="max-h-40 w-auto rounded object-contain">
+                    </div>
                 </div>
             </div>
 
@@ -954,7 +965,6 @@
 {{-- ============================================ --}}
 <div id="success-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-3 sm:p-4">
     <div class="w-full max-w-lg rounded-2xl bg-white shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
-
         <div class="bg-[#0d4a36] px-5 sm:px-6 py-4 sm:py-5 text-center text-white shrink-0">
             <div class="mx-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-[#d8ae45] mb-3">
                 <i data-lucide="check" class="h-7 w-7 sm:h-8 sm:w-8 text-[#073528]"></i>
@@ -990,7 +1000,6 @@
 
             <div class="border-t border-[#e1e9da] pt-4">
                 <p class="text-xs font-bold uppercase tracking-[.14em] text-[#699944] mb-3">Akun Login Anda</p>
-
                 <div class="mb-3">
                     <label class="text-xs text-[#617064]">Email</label>
                     <div class="flex items-center gap-2 mt-1">
@@ -1002,7 +1011,6 @@
                         </button>
                     </div>
                 </div>
-
                 <div>
                     <label class="text-xs text-[#617064]">Password (tanggal lahir)</label>
                     <div class="flex items-center gap-2 mt-1">
@@ -1014,15 +1022,12 @@
                         </button>
                     </div>
                 </div>
-
                 <p class="mt-3 text-xs leading-5 text-[#963d21] bg-[#fff0ea] rounded-lg p-3 border border-[#f2c1ae]">
                     <i data-lucide="alert-triangle" class="inline h-3 w-3"></i>
                     <strong>Penting:</strong> Segera ganti password setelah login pertama.
                 </p>
-
                 <div class="border-t border-[#e1e9da] pt-4 mt-4">
                     <p class="text-xs font-bold uppercase tracking-[.14em] text-[#699944] mb-3">Langkah Selanjutnya</p>
-
                     <div class="rounded-xl bg-[#fff8dd] border border-[#f0e0a8] p-4 mb-3 text-center">
                         <p class="text-xs text-[#805500] font-semibold">Biaya Pendaftaran</p>
                         <p class="display-font mt-1 text-2xl font-bold text-[#0d4a36]">
@@ -1030,7 +1035,6 @@
                         </p>
                         <p class="text-xs text-[#805500] mt-1">Login untuk melihat cara pembayaran & upload bukti.</p>
                     </div>
-
                     <ol class="space-y-2 text-sm text-[#244535]">
                         <li class="flex items-start gap-2">
                             <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#0d4a36] text-[10px] font-bold text-white">1</span>
@@ -1068,11 +1072,10 @@
 </div>
 
 {{-- ============================================ --}}
-{{-- MODAL ERROR / VALIDASI --}}
+{{-- MODAL ERROR --}}
 {{-- ============================================ --}}
 <div id="error-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-3 sm:p-4">
     <div class="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-
         <div class="bg-[#963d21] px-5 sm:px-6 py-4 sm:py-5 text-center text-white shrink-0">
             <div class="mx-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-[#fff0ea] mb-3">
                 <i data-lucide="alert-triangle" class="h-7 w-7 sm:h-8 sm:w-8 text-[#963d21]"></i>
@@ -1080,11 +1083,9 @@
             <h3 class="display-font text-xl sm:text-2xl font-bold">Periksa Kembali</h3>
             <p class="text-sm text-[#f5d5c9] mt-1">Ada isian yang perlu diperbaiki</p>
         </div>
-
         <div class="px-5 sm:px-6 py-4 sm:py-5 overflow-y-auto">
             <ul id="error-modal-list" class="space-y-2 text-sm text-[#963d21]"></ul>
         </div>
-
         <div class="px-5 sm:px-6 py-4 bg-[#fff8f5] border-t border-[#f2c1ae] flex justify-end shrink-0">
             <button type="button" data-close-error-modal
                     class="rounded-lg bg-[#963d21] px-5 py-2 text-sm font-bold text-white hover:bg-[#7a2f19]">
@@ -1129,22 +1130,14 @@
 (function () {
     'use strict';
 
-    // ============================================
-    // CONFIG & HELPERS
-    // ============================================
     const CSRF = document.querySelector('meta[name="csrf-token"]').content;
-
     const ROUTES = {
         validasi:  '{{ route("daftar.validasi") }}',
         daftar:    '{{ route("daftar.store") }}',
         cekStatus: '{{ route("cek-status") }}',
     };
-
     const $ = (id) => document.getElementById(id);
 
-    // ============================================
-    // AUTO UPPERCASE / LOWERCASE
-    // ============================================
     const uppercaseFields = ['nama_lengkap', 'tempat_lahir', 'asal_sekolah', 'nama_ayah', 'nama_ibu', 'nama_wali', 'alamat'];
     const lowercaseFields = ['email'];
 
@@ -1168,9 +1161,6 @@
         });
     });
 
-    // ============================================
-    // HELPER: Show / Hide Message
-    // ============================================
     function showMsg(el, text, type = 'error') {
         el.className = 'mt-5 rounded-lg px-4 py-3 text-sm border ' + (
             type === 'error'
@@ -1180,15 +1170,10 @@
         el.innerHTML = text;
         el.classList.remove('hidden');
     }
-
     function hideMsg(el) {
         el.className = 'mt-5 hidden rounded-lg px-4 py-3 text-sm';
         el.innerHTML = '';
     }
-
-    // ============================================
-    // HELPER: Show / Hide Modal
-    // ============================================
     function showModal(id) {
         const m = $(id);
         if (m) {
@@ -1197,7 +1182,6 @@
             document.body.style.overflow = 'hidden';
         }
     }
-
     function hideModal(id) {
         const m = $(id);
         if (m) {
@@ -1206,15 +1190,10 @@
             document.body.style.overflow = '';
         }
     }
-
-    // ============================================
-    // HELPER: Error Modal
-    // ============================================
     function showErrorModal(messages) {
         const modal = $('error-modal');
         const list  = $('error-modal-list');
         if (!modal || !list) return;
-
         list.innerHTML = '';
         messages.forEach((msg) => {
             const li = document.createElement('li');
@@ -1222,13 +1201,11 @@
             li.innerHTML = '<i data-lucide="x-circle" class="h-4 w-4 mt-0.5 shrink-0"></i><span>' + msg + '</span>';
             list.appendChild(li);
         });
-
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
         if (window.lucide) lucide.createIcons();
     }
-
     function hideErrorModal() {
         const modal = $('error-modal');
         if (modal) {
@@ -1237,10 +1214,6 @@
             document.body.style.overflow = '';
         }
     }
-
-    // ============================================
-    // HELPER: Copy Text
-    // ============================================
     function copyText(text, btn) {
         navigator.clipboard.writeText(text).then(() => {
             const original = btn.innerHTML;
@@ -1252,10 +1225,6 @@
             }, 1500);
         });
     }
-
-    // ============================================
-    // HELPER: Format Tanggal Indonesia
-    // ============================================
     function formatTanggalIndonesia(isoDate) {
         if (!isoDate) return '—';
         try {
@@ -1266,9 +1235,6 @@
         }
     }
 
-    // ============================================
-    // JENJANG PICKER
-    // ============================================
     const jenjangPicker = $('jenjang-picker');
     const formWrapper   = $('form-wrapper');
     const jenjangSelect = $('jenjang-id');
@@ -1279,15 +1245,11 @@
         jenjangSelect.value = id;
         const display = $('jenjang-display');
         if (display) display.value = nama;
-
         formTitle.textContent = 'Formulir Pendaftaran ' + nama;
         formSubtitle.textContent = deskripsi || '';
-
         jenjangPicker.classList.add('hidden');
         formWrapper.classList.remove('hidden');
-
         loadGelombang(id);
-
         setTimeout(() => {
             formWrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
             if (window.lucide) lucide.createIcons();
@@ -1307,47 +1269,35 @@
         formWrapper.classList.add('hidden');
         jenjangPicker.classList.remove('hidden');
         document.querySelectorAll('.jenjang-card').forEach(c => c.classList.remove('active'));
-
         jenjangSelect.value = '';
         const display = $('jenjang-display');
         if (display) display.value = '';
-
         const gelombangSelect = $('gelombang-id');
         gelombangSelect.innerHTML = '<option value="">Pilih jenjang terlebih dahulu</option>';
         gelombangSelect.disabled = true;
         $('gelombang-info').textContent = '';
-
         setTimeout(() => jenjangPicker.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
     });
 
-    // ============================================
-    // LOAD GELOMBANG
-    // ============================================
     async function loadGelombang(jenjangId) {
         const gelombangSelect = $('gelombang-id');
         const info = $('gelombang-info');
-
         if (!jenjangId) {
             gelombangSelect.innerHTML = '<option value="">Pilih jenjang terlebih dahulu</option>';
             gelombangSelect.disabled = true;
             info.textContent = '';
             return;
         }
-
         gelombangSelect.disabled = true;
         gelombangSelect.innerHTML = '<option>Memuat...</option>';
-
         try {
             const res = await fetch(`/gelombang/${jenjangId}`);
             const data = await res.json();
-
             gelombangSelect.innerHTML = '<option value="">Pilih gelombang</option>';
-
             data.forEach((g) => {
                 const opt = document.createElement('option');
                 opt.value = g.id;
                 const isAktif = g.aktif === true || g.aktif === 1 || g.aktif === '1';
-
                 if (isAktif) {
                     opt.textContent = `${g.nama} — Rp${Number(g.biaya).toLocaleString('id-ID')}`;
                 } else {
@@ -1355,12 +1305,10 @@
                     opt.disabled = true;
                     opt.className = 'text-[#a5b0a8]';
                 }
-
                 opt.dataset.biaya = g.biaya;
                 opt.dataset.aktif = isAktif ? '1' : '0';
                 gelombangSelect.appendChild(opt);
             });
-
             gelombangSelect.disabled = false;
             info.textContent = '';
         } catch (e) {
@@ -1371,12 +1319,7 @@
     $('gelombang-id').addEventListener('change', function () {
         const opt = this.options[this.selectedIndex];
         const info = $('gelombang-info');
-
-        if (!opt || !opt.value) {
-            info.textContent = '';
-            return;
-        }
-
+        if (!opt || !opt.value) { info.textContent = ''; return; }
         if (opt.dataset.aktif === '0') {
             info.textContent = '⚠️ Gelombang ini sudah ditutup.';
             info.className = 'mt-1 text-xs text-[#963d21]';
@@ -1388,21 +1331,28 @@
         }
     });
 
-    // ============================================
-    // STATE
-    // ============================================
     let pendingForm = null;
     let isSubmitting = false;
     let isValidated = false;
 
-    // ============================================
-    // SUBMIT STEP 1 — Validasi
-    // ============================================
     $('registration-form').addEventListener('submit', async function (e) {
         e.preventDefault();
+        if (!this.checkValidity()) { this.reportValidity(); return; }
 
-        if (!this.checkValidity()) {
-            this.reportValidity();
+        const fotoInput = document.getElementById('foto');
+        if (!fotoInput.files.length) {
+            showErrorModal(['Foto siswa wajib diupload.']);
+            fotoInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        const fotoFile = fotoInput.files[0];
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (!allowedTypes.includes(fotoFile.type)) {
+            showErrorModal(['Foto harus berformat JPG, JPEG, atau PNG.']);
+            return;
+        }
+        if (fotoFile.size > 2 * 1024 * 1024) {
+            showErrorModal(['Ukuran foto maksimal 2MB.']);
             return;
         }
 
@@ -1419,18 +1369,25 @@
                 headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
                 body: fd,
             });
-
             const data = await res.json();
-
             if (data.success) {
                 isValidated = true;
-
                 const tglLahir = fd.get('tanggal_lahir') || '';
                 $('confirm-nama').textContent  = (fd.get('nama_lengkap') || '—').trim();
                 $('confirm-ttl').textContent   = `${(fd.get('tempat_lahir') || '—').trim()}, ${formatTanggalIndonesia(tglLahir)}`;
                 $('confirm-nisn').textContent  = (fd.get('nisn') || '—').trim();
                 $('confirm-wa').textContent    = (fd.get('no_whatsapp') || '—').trim();
                 $('confirm-email').textContent = (fd.get('email') || '—').trim();
+
+                const fotoFileForPreview = fotoInput.files[0];
+                if (fotoFileForPreview) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => {
+                        $('confirm-foto').src = ev.target.result;
+                        $('confirm-foto-wrapper').classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(fotoFileForPreview);
+                }
 
                 pendingForm = form;
                 showModal('confirm-modal');
@@ -1449,42 +1406,30 @@
         }
     });
 
-    // ============================================
-    // SUBMIT STEP 2 — Konfirmasi
-    // ============================================
     $('confirm-submit').addEventListener('click', async function () {
         if (isSubmitting || !pendingForm || !isValidated) return;
-
         isSubmitting = true;
-
         const confirmBtn = this;
         const confirmText = $('confirm-submit-text');
         const originalConfirmText = confirmText.textContent;
         confirmBtn.disabled = true;
         confirmText.textContent = 'Menyimpan...';
-
         hideModal('confirm-modal');
-
         const btn = $('submit-button');
         const msg = $('form-message');
         btn.disabled = true;
         btn.querySelector('span').textContent = 'Menyimpan...';
         hideMsg(msg);
-
         const formData = new FormData(pendingForm);
-
         try {
             const res = await fetch(ROUTES.daftar, {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
                 body: formData,
             });
-
             const data = await res.json();
-
             if (data.success) {
                 const d = data.data;
-
                 $('modal-nomor').textContent     = d.nomor_pendaftaran;
                 $('modal-nama').textContent      = d.nama_lengkap;
                 $('modal-jenjang').textContent   = d.jenjang;
@@ -1492,17 +1437,16 @@
                 $('modal-email').value           = d.email;
                 $('modal-password').value        = d.password;
                 $('modal-biaya').textContent     = Number(d.biaya || 0).toLocaleString('id-ID');
-
+                $('confirm-foto').src = '';
+                $('confirm-foto-wrapper').classList.add('hidden');
                 showModal('success-modal');
                 if (window.lucide) lucide.createIcons();
-
                 pendingForm.reset();
                 $('gelombang-id').innerHTML = '<option value="">Pilih jenjang terlebih dahulu</option>';
                 $('gelombang-id').disabled = true;
                 $('gelombang-info').textContent = '';
                 pendingForm = null;
                 isValidated = false;
-
                 jenjangSelect.value = '';
                 const jenjangDisplay = $('jenjang-display');
                 if (jenjangDisplay) jenjangDisplay.value = '';
@@ -1526,13 +1470,6 @@
         }
     });
 
-    // ============================================
-    // CEK STATUS — CONFIG-DRIVEN APPROACH
-    // ============================================
-
-    /**
-     * Style mapping untuk card
-     */
     const CARD_STYLES = {
         success: { card: 'bg-green-50 border-green-300',       icon: 'text-green-600',  text: 'text-green-900',  note: 'text-green-700' },
         running: { card: 'bg-amber-50 border-amber-300',       icon: 'text-amber-600',  text: 'text-amber-900',  note: 'text-amber-700' },
@@ -1541,34 +1478,24 @@
         locked:  { card: 'bg-[#f8fafc] border-dashed border-[#cbd5e1] opacity-60', icon: 'text-[#94a3b8]', text: 'text-[#94a3b8]', note: 'text-[#94a3b8]' },
     };
 
-    /**
-     * Terapkan style ke card
-     */
     function applyCardStyle(cardId, iconId, state, noteId) {
         const card = $(cardId);
         const icon = $(iconId);
         const note = noteId ? $(noteId) : null;
         if (!card) return;
-
         const s = CARD_STYLES[state] || CARD_STYLES.neutral;
         card.className = `rounded-xl p-3 border transition ${s.card}`;
-
         if (icon) {
             const iconName = state === 'locked' ? 'lock' : (icon.dataset.originalIcon || 'circle');
             icon.setAttribute('class', `h-4 w-4 ${s.icon}`);
             icon.setAttribute('data-lucide', iconName);
             icon.innerHTML = '';
         }
-
         const valueEl = card.querySelectorAll('p')[1];
         if (valueEl) valueEl.className = `text-sm font-bold ${s.text}`;
-
         if (note) note.className = `mt-1 text-[10px] leading-4 ${s.note}`;
     }
 
-    /**
-     * Lock card dengan pesan tertentu
-     */
     function lockCard(cardId, noteId, message) {
         applyCardStyle(cardId, cardId + '-icon', 'locked', noteId);
         const card = $(cardId);
@@ -1583,9 +1510,6 @@
         }
     }
 
-    /**
-     * Map status string ke state
-     */
     function getPaymentState(status) {
         if (status === 'Terverifikasi') return 'success';
         if (status === 'Menunggu Verifikasi') return 'running';
@@ -1613,44 +1537,31 @@
         return 'neutral';
     }
 
-    // ============================================
-    // HANDLER: Cek Status
-    // ============================================
     $('status-form').addEventListener('submit', async function (e) {
         e.preventDefault();
-
         const num    = $('status-number').value.trim();
         const msg    = $('status-message');
         const result = $('status-result');
-
         result.classList.add('hidden');
-
         const formData = new FormData();
         formData.append('nomor_pendaftaran', num);
-
         try {
             const res = await fetch(ROUTES.cekStatus, {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
                 body: formData,
             });
-
             const data = await res.json();
-
             if (!data.success) {
                 showMsg(msg, data.message || 'Data tidak ditemukan.');
                 msg.className = 'mt-4 rounded-lg px-4 py-3 text-sm border border-[#f2c1ae] bg-[#fff0ea] text-[#963d21]';
                 return;
             }
-
             const d = data.data;
-
-            // ---------- Header ----------
             $('result-number').textContent  = d.nomor_pendaftaran;
             $('result-nama').textContent    = d.nama_lengkap;
             $('result-jenjang').textContent = d.jenjang;
 
-            // ---------- CARD 1: PEMBAYARAN ----------
             const bayar = d.status_pembayaran || 'Belum Bayar';
             $('result-payment').textContent = bayar;
             $('result-payment-note').textContent =
@@ -1660,7 +1571,6 @@
                                                   'Login untuk upload bukti';
             applyCardStyle('card-payment', 'card-payment-icon', getPaymentState(bayar), 'result-payment-note');
 
-            // ---------- CARD 2: VERIFIKASI ----------
             const verifAktif = bayar === 'Terverifikasi';
             if (!verifAktif) {
                 lockCard('card-verification', 'result-verification-note', 'Menunggu pembayaran terverifikasi');
@@ -1671,7 +1581,6 @@
                 applyCardStyle('card-verification', 'card-verification-icon', getVerifState(verif), 'result-verification-note');
             }
 
-            // ---------- CARD 3: UJIAN ----------
             const ujianAktif = verifAktif && d.status_verifikasi === 'Terverifikasi';
             if (!ujianAktif) {
                 lockCard('card-exam', 'result-exam-date', 'Menunggu verifikasi pendaftaran');
@@ -1684,7 +1593,6 @@
                 applyCardStyle('card-exam', 'card-exam-icon', getExamState(ujian), 'result-exam-date');
             }
 
-            // ---------- CARD 4: KELULUSAN ----------
             const lulusAktif = ujianAktif && d.status_ujian === 'Sudah Ujian';
             if (!lulusAktif) {
                 lockCard('card-graduation', 'result-graduation-note', 'Menunggu ujian selesai');
@@ -1695,7 +1603,6 @@
                 applyCardStyle('card-graduation', 'card-graduation-icon', getGradState(lulus), 'result-graduation-note');
             }
 
-            // ---------- CARD 5: DAFTAR ULANG ----------
             const daftarAktif = lulusAktif && d.status_kelulusan === 'Lulus';
             if (!daftarAktif) {
                 lockCard('card-reregistration', 'result-reregistration-date', 'Menunggu hasil kelulusan');
@@ -1706,7 +1613,6 @@
                 applyCardStyle('card-reregistration', 'card-reregistration-icon', getReregState(daftar), 'result-reregistration-date');
             }
 
-            // ---------- NILAI UJIAN ----------
             const score = $('result-score');
             if (d.nilai_ujian) {
                 score.textContent = 'Nilai ujian Anda: ' + d.nilai_ujian;
@@ -1715,14 +1621,11 @@
                 score.classList.add('hidden');
             }
 
-            // ---------- CTA DAFTAR ULANG ----------
             const cta     = $('reregistration-cta');
             const ctaLink = $('reregistration-link');
-
             const bolehDaftarUlang = d.boleh_daftar_ulang !== undefined
                 ? d.boleh_daftar_ulang
                 : (d.status_kelulusan === 'Lulus' && d.status_daftar_ulang === 'Belum Daftar Ulang' && !!d.link_daftar_ulang);
-
             if (bolehDaftarUlang && d.link_daftar_ulang) {
                 ctaLink.href = d.link_daftar_ulang;
                 cta.classList.remove('hidden');
@@ -1730,11 +1633,9 @@
                 cta.classList.add('hidden');
             }
 
-            // ---------- Show ----------
             result.classList.remove('hidden');
             hideMsg(msg);
             if (window.lucide) lucide.createIcons();
-
         } catch (err) {
             console.error('[cekStatus] Error:', err);
             showMsg(msg, 'Gagal memuat data. Periksa koneksi Anda.');
@@ -1742,9 +1643,6 @@
         }
     });
 
-    // ============================================
-    // DELEGATED CLICKS — SEMUA MODAL
-    // ============================================
     document.addEventListener('click', function (e) {
         const copyBtn = e.target.closest('[data-copy]');
         if (copyBtn) {
@@ -1753,14 +1651,14 @@
             if (text) copyText(text, copyBtn);
             return;
         }
-
         if (e.target.closest('[data-close-modal]')) { hideModal('success-modal'); return; }
         if (e.target.closest('[data-close-error-modal]')) { hideErrorModal(); return; }
-
         if (e.target.closest('[data-close-confirm]')) {
             hideModal('confirm-modal');
             pendingForm = null;
             isValidated = false;
+            $('confirm-foto').src = '';
+            $('confirm-foto-wrapper').classList.add('hidden');
             setTimeout(() => {
                 const firstField = $('nama-lengkap');
                 if (firstField) {
@@ -1770,15 +1668,11 @@
             }, 100);
             return;
         }
-
         if (e.target.id === 'success-modal') hideModal('success-modal');
         if (e.target.id === 'error-modal')   hideErrorModal();
         if (e.target.id === 'confirm-modal') { hideModal('confirm-modal'); pendingForm = null; }
     });
 
-    // ============================================
-    // ESCAPE KEY — TUTUP SEMUA MODAL
-    // ============================================
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             hideModal('success-modal');

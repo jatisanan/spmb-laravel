@@ -4,14 +4,63 @@
 
 @section('content')
 
+@php
+    $fotoSiswa = $pendaftaran?->berkas->firstWhere('jenis', 'foto');
+    $butuhFoto = $pendaftaran && !$fotoSiswa;
+@endphp
+
+{{-- ============================================ --}}
+{{-- POPUP WAJIB UPLOAD FOTO (SISWA LAMA) --}}
+{{-- ============================================ --}}
+@if ($butuhFoto)
+    <div x-data="{ show: true }" x-show="show" x-cloak
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
+            <div class="bg-[#d8ae45] px-6 py-5 text-center">
+                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white mb-3">
+                    <i data-lucide="camera" class="h-8 w-8 text-[#0d4a36]"></i>
+                </div>
+                <h3 class="display-font text-xl font-bold text-[#073528]">Foto Siswa Belum Diupload</h3>
+                <p class="mt-1 text-sm text-[#5c4818]">Diperlukan untuk melengkapi data pendaftaran</p>
+            </div>
+            <div class="px-6 py-5">
+                <p class="text-sm text-[#244535] leading-6">
+                    Anda sudah terdaftar, tetapi <strong>foto siswa belum diupload</strong>.
+                    Foto ini diperlukan untuk kartu ujian dan berkas pendaftaran.
+                </p>
+                <p class="mt-2 text-sm text-[#244535] leading-6">
+                    Silakan upload foto formal terbaru (JPG/PNG, maks 2MB).
+                </p>
+            </div>
+            <div class="px-6 py-4 bg-[#f8faf5] border-t border-[#e1e9da]">
+                <a href="#upload-foto"
+                   @click="show = false; setTimeout(() => document.getElementById('upload-foto')?.scrollIntoView({behavior: 'smooth'}), 100)"
+                   class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[#0d4a36] px-5 py-3 font-bold text-white hover:bg-[#176346] transition">
+                    <i data-lucide="upload" class="h-4 w-4"></i>
+                    Upload Foto Sekarang
+                </a>
+            </div>
+        </div>
+    </div>
+@endif
+
 {{-- ============================================ --}}
 {{-- KARTU SAMBUTAN --}}
 {{-- ============================================ --}}
 <div class="rounded-2xl bg-[#0d4a36] text-white p-5 sm:p-6 shadow-lg mb-5">
     <div class="flex items-center gap-4">
-        <div class="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-full bg-[#d8ae45] text-xl sm:text-2xl font-bold text-[#073528]">
-            {{ strtoupper(substr($user->name, 0, 1)) }}
-        </div>
+        @if ($fotoSiswa)
+            <img src="{{ asset('storage/' . $fotoSiswa->file_path) }}"
+                 alt="Foto {{ $user->name }}"
+                 class="h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-full object-cover border-2 border-[#d8ae45] bg-white">
+        @else
+            <div class="flex h-14 w-14 sm:h-16 sm:w-16 shrink-0 items-center justify-center rounded-full bg-[#d8ae45] text-xl sm:text-2xl font-bold text-[#073528]">
+                {{ strtoupper(substr($user->name, 0, 1)) }}
+            </div>
+        @endif
         <div class="min-w-0">
             <p class="text-xs font-bold uppercase tracking-[.14em] text-[#e9d28b]">Selamat datang,</p>
             <h1 class="display-font mt-1 text-xl sm:text-2xl font-bold truncate">{{ $user->name }}</h1>
@@ -41,14 +90,13 @@
     </div>
 
     {{-- ============================================ --}}
-    {{-- CARD PEMBAYARAN — KONTEKSTUAL (WARNA SOFT) --}}
+    {{-- CARD PEMBAYARAN — KONTEKSTUAL --}}
     {{-- ============================================ --}}
     @php
         $pembayaran = $pendaftaran->pembayaran;
         $statusBayar = $pembayaran?->status ?? 'Belum Bayar';
         $jumlahBayar = $pembayaran?->jumlah ?? $pendaftaran->gelombang?->biaya ?? 0;
 
-        // Konfigurasi card dengan WARNA SOLID
         $cardConfig = match($statusBayar) {
             'Terverifikasi' => [
                 'bg'        => 'bg-green-100',
@@ -104,7 +152,7 @@
                 'headline'  => 'Pembayaran Ditolak',
                 'message'   => 'Bukti bayar ditolak admin. Silakan periksa dan upload ulang.',
             ],
-            default => [  // Belum Bayar — slate solid
+            default => [
                 'bg'        => 'bg-slate-100',
                 'border'    => 'border-slate-300',
                 'icon_bg'   => 'bg-slate-500',
@@ -165,16 +213,14 @@
     </a>
 
     {{-- ============================================ --}}
-    {{-- STATUS RINGKAS (4 KARTU) — DENGAN PRASYARAT --}}
+    {{-- STATUS RINGKAS (4 KARTU) --}}
     {{-- ============================================ --}}
     @php
-        // Prasyarat tiap tahap
         $pembayaranLunas     = $statusBayar === 'Terverifikasi';
         $verifikasiSelesai   = $pendaftaran->status_verifikasi === 'Terverifikasi';
         $ujianSelesai        = $pendaftaran->status_ujian === 'Sudah Ujian';
         $kelulusanLulus      = $pendaftaran->status_kelulusan === 'Lulus';
 
-        // Apakah tiap card bisa "aktif"?
         $verifikasiAktif  = $pembayaranLunas;
         $ujianAktif       = $verifikasiSelesai;
         $kelulusanAktif   = $ujianSelesai;
@@ -184,8 +230,7 @@
     <h2 class="display-font text-lg sm:text-xl font-bold text-[#0d4a36] mb-3">Status Pendaftaran</h2>
 
     <div class="grid gap-4 grid-cols-2 lg:grid-cols-4 mb-5">
-
-        {{-- ========== VERIFIKASI ========== --}}
+        {{-- VERIFIKASI --}}
         @if ($verifikasiAktif)
             @php
                 $clsVerif = match($pendaftaran->status_verifikasi) {
@@ -213,13 +258,11 @@
                 <span class="inline-flex items-center gap-1 rounded-full bg-[#e2e8f0] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#64748b]">
                     Terkunci
                 </span>
-                <p class="mt-2 text-xs text-[#94a3b8] leading-5">
-                    Menunggu pembayaran terverifikasi
-                </p>
+                <p class="mt-2 text-xs text-[#94a3b8] leading-5">Menunggu pembayaran terverifikasi</p>
             </div>
         @endif
 
-        {{-- ========== UJIAN ========== --}}
+        {{-- UJIAN --}}
         @if ($ujianAktif)
             <div class="rounded-2xl bg-white border border-[#dce6d3] p-4 sm:p-5 shadow-sm">
                 <div class="flex items-center justify-between mb-2">
@@ -246,13 +289,11 @@
                 <span class="inline-flex items-center gap-1 rounded-full bg-[#e2e8f0] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#64748b]">
                     Terkunci
                 </span>
-                <p class="mt-2 text-xs text-[#94a3b8] leading-5">
-                    Menunggu verifikasi berkas
-                </p>
+                <p class="mt-2 text-xs text-[#94a3b8] leading-5">Menunggu verifikasi berkas</p>
             </div>
         @endif
 
-        {{-- ========== KELULUSAN ========== --}}
+        {{-- KELULUSAN --}}
         @if ($kelulusanAktif)
             @php
                 $clsLulus = match($pendaftaran->status_kelulusan) {
@@ -277,13 +318,11 @@
                 <span class="inline-flex items-center gap-1 rounded-full bg-[#e2e8f0] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#64748b]">
                     Terkunci
                 </span>
-                <p class="mt-2 text-xs text-[#94a3b8] leading-5">
-                    Menunggu ujian selesai
-                </p>
+                <p class="mt-2 text-xs text-[#94a3b8] leading-5">Menunggu ujian selesai</p>
             </div>
         @endif
 
-        {{-- ========== DAFTAR ULANG ========== --}}
+        {{-- DAFTAR ULANG --}}
         @if ($daftarUlangAktif)
             @php
                 $clsDaftar = match($pendaftaran->status_daftar_ulang) {
@@ -314,9 +353,7 @@
                 <span class="inline-flex items-center gap-1 rounded-full bg-[#e2e8f0] px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#64748b]">
                     Terkunci
                 </span>
-                <p class="mt-2 text-xs text-[#94a3b8] leading-5">
-                    Menunggu kelulusan
-                </p>
+                <p class="mt-2 text-xs text-[#94a3b8] leading-5">Menunggu kelulusan</p>
             </div>
         @endif
     </div>
@@ -331,9 +368,7 @@
                     <i data-lucide="file-text" class="h-6 w-6 text-[#073528]"></i>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="display-font text-lg font-bold text-[#0d4a36]">
-                        Kartu Ujian Tersedia
-                    </p>
+                    <p class="display-font text-lg font-bold text-[#0d4a36]">Kartu Ujian Tersedia</p>
                     <p class="mt-1 text-sm text-[#617064] leading-6">
                         @if($pendaftaran->tanggal_ujian)
                             Jadwal ujian Anda: <strong>{{ $pendaftaran->tanggal_ujian->isoFormat('dddd, D MMMM Y') }}</strong>.
@@ -386,47 +421,241 @@
     <h2 class="display-font text-lg sm:text-xl font-bold text-[#0d4a36] mb-3">Data Pendaftaran</h2>
 
     <div class="rounded-2xl bg-white border border-[#dce6d3] p-5 sm:p-6 shadow-sm mb-5">
-        <dl class="grid gap-4 sm:grid-cols-2 text-sm">
-            <div>
-                <dt class="text-xs text-[#617064]">NISN</dt>
-                <dd class="font-mono font-semibold text-[#244535] mt-0.5">{{ $pendaftaran->nisn }}</dd>
+
+        {{-- Header card --}}
+        <div class="flex items-center gap-3 mb-5 pb-4 border-b border-[#e1e9da]">
+            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0d4a36]">
+                <i data-lucide="id-card" class="h-5 w-5 text-[#d8ae45]"></i>
             </div>
-            <div>
-                <dt class="text-xs text-[#617064]">Jenis Kelamin</dt>
-                <dd class="text-[#244535] mt-0.5">{{ $pendaftaran->jenis_kelamin }}</dd>
+            <div class="min-w-0">
+                <p class="text-[10px] font-bold uppercase tracking-[.14em] text-[#699944]">Kartu Identitas</p>
+                <p class="display-font text-base sm:text-lg font-bold text-[#0d4a36]">Data Pendaftaran Santri</p>
             </div>
-            <div>
-                <dt class="text-xs text-[#617064]">Tempat, Tanggal Lahir</dt>
-                <dd class="text-[#244535] mt-0.5">
-                    {{ $pendaftaran->tempat_lahir }},
-                    {{ $pendaftaran->tanggal_lahir?->isoFormat('D MMMM Y') }}
-                </dd>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-5 sm:gap-6">
+
+            {{-- FOTO SISWA (KIRI) --}}
+            <div class="shrink-0 mx-auto md:mx-0">
+                @if ($fotoSiswa)
+                    <a href="{{ asset('storage/' . $fotoSiswa->file_path) }}"
+                    target="_blank"
+                    class="block group">
+                        <div class="relative rounded-xl border-2 border-[#dce6d3] bg-[#f8faf5] p-1.5 group-hover:border-[#5d9f3f] group-hover:shadow-md transition">
+                            <img src="{{ asset('storage/' . $fotoSiswa->file_path) }}"
+                                alt="Foto {{ $pendaftaran->nama_lengkap }}"
+                                class="h-40 w-32 sm:h-44 sm:w-36 rounded-lg object-cover">
+                            <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide shadow-sm
+                                {{ $fotoSiswa->verified
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-[#fff2ca] text-[#805500] border border-[#f0e0a8]' }}">
+                                {{ $fotoSiswa->verified ? '✓ Terverifikasi' : 'Belum Verifikasi' }}
+                            </span>
+                        </div>
+                    </a>
+                    <p class="mt-3 text-center text-[10px] text-[#617064] truncate max-w-[130px] mx-auto"
+                    title="{{ $fotoSiswa->nama_asli }}">
+                        {{ Str::limit($fotoSiswa->nama_asli, 20) }}
+                    </p>
+                @else
+                    <div class="flex h-44 w-36 flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#d6dccf] bg-[#f8faf5]">
+                        <i data-lucide="user" class="h-8 w-8 text-[#d6dccf]"></i>
+                        <p class="mt-1 text-[10px] text-[#94a3b8]">Belum ada foto</p>
+                    </div>
+                @endif
             </div>
-            <div>
-                <dt class="text-xs text-[#617064]">Asal Sekolah</dt>
-                <dd class="text-[#244535] mt-0.5">{{ $pendaftaran->asal_sekolah }}</dd>
+
+            {{-- FIELD CHIPS (KANAN) --}}
+            <div class="flex-1 min-w-0 space-y-2">
+
+                {{-- Nama Lengkap (hero) --}}
+                <div class="rounded-lg bg-[#0d4a36] p-3 shadow-sm">
+                    <div class="flex items-center gap-1.5 mb-0.5">
+                        <i data-lucide="user" class="h-3 w-3 text-[#e9d28b]"></i>
+                        <p class="text-[9px] font-bold uppercase tracking-[.14em] text-[#e9d28b]">Nama Lengkap</p>
+                    </div>
+                    <p class="display-font text-base sm:text-lg font-bold text-white break-words">{{ $pendaftaran->nama_lengkap }}</p>
+                </div>
+
+                {{-- Grid 2 kolom --}}
+                <div class="grid gap-2 sm:grid-cols-2">
+
+                    {{-- NISN --}}
+                    <div class="rounded-lg bg-[#f8faf5] border border-[#e1e9da] p-2.5 hover:border-[#5d9f3f] hover:shadow-sm transition group">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <i data-lucide="id-card" class="h-3 w-3 text-[#699944] group-hover:text-[#0d4a36] transition"></i>
+                            <p class="text-[9px] font-bold uppercase tracking-[.1em] text-[#617064]">NISN</p>
+                        </div>
+                        <p class="font-mono text-xs font-bold text-[#0d4a36] break-all">{{ $pendaftaran->nisn }}</p>
+                    </div>
+
+                    {{-- Jenis Kelamin --}}
+                    <div class="rounded-lg bg-[#f8faf5] border border-[#e1e9da] p-2.5 hover:border-[#5d9f3f] hover:shadow-sm transition group">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <i data-lucide="users" class="h-3 w-3 text-[#699944] group-hover:text-[#0d4a36] transition"></i>
+                            <p class="text-[9px] font-bold uppercase tracking-[.1em] text-[#617064]">Jenis Kelamin</p>
+                        </div>
+                        <p class="text-xs font-semibold text-[#244535]">{{ $pendaftaran->jenis_kelamin }}</p>
+                    </div>
+
+                    {{-- TTL (full width) --}}
+                    <div class="sm:col-span-2 rounded-lg bg-[#f8faf5] border border-[#e1e9da] p-2.5 hover:border-[#5d9f3f] hover:shadow-sm transition group">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <i data-lucide="calendar" class="h-3 w-3 text-[#699944] group-hover:text-[#0d4a36] transition"></i>
+                            <p class="text-[9px] font-bold uppercase tracking-[.1em] text-[#617064]">Tempat, Tanggal Lahir</p>
+                        </div>
+                        <p class="text-xs font-semibold text-[#244535]">
+                            {{ $pendaftaran->tempat_lahir }},
+                            <span class="text-[#0d4a36]">{{ $pendaftaran->tanggal_lahir?->isoFormat('D MMMM Y') }}</span>
+                        </p>
+                    </div>
+
+                    {{-- Asal Sekolah --}}
+                    <div class="rounded-lg bg-[#f8faf5] border border-[#e1e9da] p-2.5 hover:border-[#5d9f3f] hover:shadow-sm transition group">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <i data-lucide="graduation-cap" class="h-3 w-3 text-[#699944] group-hover:text-[#0d4a36] transition"></i>
+                            <p class="text-[9px] font-bold uppercase tracking-[.1em] text-[#617064]">Asal Sekolah</p>
+                        </div>
+                        <p class="text-xs font-semibold text-[#244535]">{{ $pendaftaran->asal_sekolah }}</p>
+                    </div>
+
+                    {{-- Nama Ayah --}}
+                    <div class="rounded-lg bg-[#f8faf5] border border-[#e1e9da] p-2.5 hover:border-[#5d9f3f] hover:shadow-sm transition group">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <i data-lucide="user-check" class="h-3 w-3 text-[#699944] group-hover:text-[#0d4a36] transition"></i>
+                            <p class="text-[9px] font-bold uppercase tracking-[.1em] text-[#617064]">Nama Ayah</p>
+                        </div>
+                        <p class="text-xs font-semibold text-[#244535]">{{ $pendaftaran->nama_ayah ?: '—' }}</p>
+                    </div>
+
+                    {{-- Nama Ibu --}}
+                    <div class="rounded-lg bg-[#f8faf5] border border-[#e1e9da] p-2.5 hover:border-[#5d9f3f] hover:shadow-sm transition group">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <i data-lucide="heart" class="h-3 w-3 text-[#699944] group-hover:text-[#0d4a36] transition"></i>
+                            <p class="text-[9px] font-bold uppercase tracking-[.1em] text-[#617064]">Nama Ibu</p>
+                        </div>
+                        <p class="text-xs font-semibold text-[#244535]">{{ $pendaftaran->nama_ibu ?: '—' }}</p>
+                    </div>
+
+                    {{-- No. WhatsApp --}}
+                    <div class="rounded-lg bg-[#f8faf5] border border-[#e1e9da] p-2.5 hover:border-[#5d9f3f] hover:shadow-sm transition group">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <i data-lucide="phone" class="h-3 w-3 text-[#699944] group-hover:text-[#0d4a36] transition"></i>
+                            <p class="text-[9px] font-bold uppercase tracking-[.1em] text-[#617064]">No. WhatsApp</p>
+                        </div>
+                        <p class="font-mono text-xs font-semibold text-[#244535]">{{ $pendaftaran->no_whatsapp }}</p>
+                    </div>
+
+                    {{-- Email (full width) --}}
+                    <div class="sm:col-span-2 rounded-lg bg-[#f8faf5] border border-[#e1e9da] p-2.5 hover:border-[#5d9f3f] hover:shadow-sm transition group">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <i data-lucide="mail" class="h-3 w-3 text-[#699944] group-hover:text-[#0d4a36] transition"></i>
+                            <p class="text-[9px] font-bold uppercase tracking-[.1em] text-[#617064]">Email</p>
+                        </div>
+                        <p class="font-mono text-xs font-semibold text-[#244535] break-all">{{ $pendaftaran->email ?? '—' }}</p>
+                    </div>
+
+                    {{-- Alamat (full width) --}}
+                    <div class="sm:col-span-2 rounded-lg bg-[#f8faf5] border border-[#e1e9da] p-2.5 hover:border-[#5d9f3f] hover:shadow-sm transition group">
+                        <div class="flex items-center gap-1 mb-0.5">
+                            <i data-lucide="map-pin" class="h-3 w-3 text-[#699944] group-hover:text-[#0d4a36] transition"></i>
+                            <p class="text-[9px] font-bold uppercase tracking-[.1em] text-[#617064]">Alamat Lengkap</p>
+                        </div>
+                        <p class="text-xs font-semibold text-[#244535] leading-5">{{ $pendaftaran->alamat }}</p>
+                    </div>
+
+                </div>
             </div>
-            <div>
-                <dt class="text-xs text-[#617064]">Nama Ayah</dt>
-                <dd class="text-[#244535] mt-0.5">{{ $pendaftaran->nama_ayah ?: '—' }}</dd>
+        </div>
+
+        {{-- ============================================ --}}
+        {{-- UPLOAD / GANTI FOTO SISWA --}}
+        {{-- ============================================ --}}
+        <div id="upload-foto" class="mt-6 pt-6 border-t border-[#e1e9da]">
+            <div class="flex items-center gap-2 mb-3">
+                <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0d4a36]">
+                    <i data-lucide="camera" class="h-4 w-4 text-white"></i>
+                </div>
+                <h3 class="display-font text-base font-bold text-[#0d4a36]">
+                    {{ $fotoSiswa ? 'Ganti Foto Siswa' : 'Upload Foto Siswa' }}
+                </h3>
             </div>
-            <div>
-                <dt class="text-xs text-[#617064]">Nama Ibu</dt>
-                <dd class="text-[#244535] mt-0.5">{{ $pendaftaran->nama_ibu ?: '—' }}</dd>
+
+            @if (session('success'))
+                <div class="mb-3 rounded-lg bg-green-50 border border-green-300 px-4 py-3 text-sm text-green-800">
+                    <i data-lucide="check-circle-2" class="inline h-4 w-4 mr-1"></i>
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mb-3 rounded-lg bg-red-50 border border-red-300 px-4 py-3 text-sm text-red-800">
+                    <i data-lucide="alert-circle" class="inline h-4 w-4 mr-1"></i>
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="mb-3 rounded-lg bg-red-50 border border-red-300 px-4 py-3 text-sm text-red-800">
+                    @foreach ($errors->all() as $err)
+                        <p>• {{ $err }}</p>
+                    @endforeach
+                </div>
+            @endif
+
+            <div x-data="{
+                previewUrl: null,
+                fileName: '',
+                handleFile(e) {
+                    const file = e.target.files[0];
+                    if (!file) { this.previewUrl = null; this.fileName = ''; return; }
+                    this.fileName = file.name;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { this.previewUrl = ev.target.result; };
+                    reader.readAsDataURL(file);
+                },
+                resetFile() {
+                    this.previewUrl = null;
+                    this.fileName = '';
+                    this.$refs.fotoInput.value = '';
+                }
+            }">
+                <form method="POST" action="{{ route('student.dashboard.upload-foto') }}"
+                    enctype="multipart/form-data" class="space-y-3">
+                    @csrf
+
+                    <input type="file" name="foto" required
+                        accept=".jpg,.jpeg,.png"
+                        x-ref="fotoInput"
+                        @change="handleFile($event)"
+                        class="field-control text-sm">
+
+                    <p class="text-xs text-[#69786e]">
+                        Format JPG / JPEG / PNG. Maks 2MB. Gunakan foto formal terbaru.
+                    </p>
+
+                    <div x-show="previewUrl" x-cloak x-transition class="mt-2">
+                        <p class="text-xs font-bold text-[#244535] mb-1">Preview:</p>
+                        <div class="relative inline-block rounded-lg border-2 border-[#dce6d3] bg-[#f8faf5] p-1.5">
+                            <img :src="previewUrl" alt="Preview foto"
+                                class="max-h-48 w-auto rounded object-contain">
+                            <button type="button" @click="resetFile()"
+                                    class="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white shadow-md hover:bg-red-700">
+                                <i data-lucide="x" class="h-3.5 w-3.5"></i>
+                            </button>
+                        </div>
+                        <p class="mt-1 text-xs text-[#617064]" x-text="fileName"></p>
+                    </div>
+
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-lg bg-[#0d4a36] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#176346] transition">
+                        <i data-lucide="upload" class="h-4 w-4"></i>
+                        {{ $fotoSiswa ? 'Ganti Foto' : 'Upload Foto' }}
+                    </button>
+                </form>
             </div>
-            <div>
-                <dt class="text-xs text-[#617064]">No. WhatsApp</dt>
-                <dd class="text-[#244535] mt-0.5">{{ $pendaftaran->no_whatsapp }}</dd>
-            </div>
-            <div>
-                <dt class="text-xs text-[#617064]">Email</dt>
-                <dd class="text-[#244535] mt-0.5 break-all">{{ $pendaftaran->email ?? '—' }}</dd>
-            </div>
-            <div class="sm:col-span-2">
-                <dt class="text-xs text-[#617064]">Alamat</dt>
-                <dd class="text-[#244535] mt-0.5">{{ $pendaftaran->alamat }}</dd>
-            </div>
-        </dl>
+        </div>
+
     </div>
 
 @else

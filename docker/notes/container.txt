@@ -1,0 +1,2 @@
+docker exec -it spmb-jatisanan-php bash
+docker exec -it -u root spmb-jatisanan-php bash
