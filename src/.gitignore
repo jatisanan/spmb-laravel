@@ -8,6 +8,7 @@
 /storage/framework/sessions/*
 /storage/framework/views/*
 /storage/framework/testing/*
+/storage/logs/*
 /public/storage
 .DS_Store
 .phpunit.result.cache

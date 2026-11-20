@@ -26,19 +26,18 @@
     @php
         $totalBayar = max($total, 1);
         $pct = fn($n) => round($n / $totalBayar * 100);
+        
+        $pBelum    = $pct($statsPembayaran['belum']);
+        $pMenunggu = $pct($statsPembayaran['menunggu']);
+        $pTerverif = $pct($statsPembayaran['terverifikasi']);
+        $pGagal    = $pct($statsPembayaran['gagal']);
     @endphp
 
-    {{-- Progress bar gabungan --}}
+    {{-- Progress bar gabungan (Urutan: Terverifikasi -> Menunggu -> Belum -> Gagal) --}}
     <div class="mb-4 h-2.5 w-full overflow-hidden rounded-full bg-[#edf1ec] flex">
-        @php
-            $pBelum    = $pct($statsPembayaran['belum']);
-            $pMenunggu = $pct($statsPembayaran['menunggu']);
-            $pTerverif = $pct($statsPembayaran['terverifikasi']);
-            $pGagal    = $pct($statsPembayaran['gagal']);
-        @endphp
-        <div class="bg-[#a3b1a0]" style="width: {{ $pBelum }}%" title="Belum Bayar: {{ $pBelum }}%"></div>
-        <div class="bg-[#d8ae45]" style="width: {{ $pMenunggu }}%" title="Menunggu: {{ $pMenunggu }}%"></div>
         <div class="bg-[#5d9f3f]" style="width: {{ $pTerverif }}%" title="Terverifikasi: {{ $pTerverif }}%"></div>
+        <div class="bg-[#d8ae45]" style="width: {{ $pMenunggu }}%" title="Menunggu: {{ $pMenunggu }}%"></div>
+        <div class="bg-[#a3b1a0]" style="width: {{ $pBelum }}%" title="Belum Bayar: {{ $pBelum }}%"></div>
         <div class="bg-[#963d21]" style="width: {{ $pGagal }}%" title="Gagal: {{ $pGagal }}%"></div>
     </div>
 
@@ -47,13 +46,13 @@
         @php
             $pembayaranCards = [
                 [
-                    'label' => 'Belum Bayar',
-                    'value' => $statsPembayaran['belum'],
-                    'pct'   => $pBelum,
-                    'color' => 'bg-[#edf1ec] text-[#42604c]',
-                    'bar'   => 'bg-[#a3b1a0]',
-                    'icon'  => 'circle-dashed',
-                    'status'=> 'Belum Bayar',
+                    'label' => 'Terverifikasi',
+                    'value' => $statsPembayaran['terverifikasi'],
+                    'pct'   => $pTerverif,
+                    'color' => 'bg-[#e8f4df] text-[#175b31]',
+                    'bar'   => 'bg-[#5d9f3f]',
+                    'icon'  => 'check-circle',
+                    'status'=> 'Terverifikasi',
                 ],
                 [
                     'label' => 'Menunggu Verifikasi',
@@ -65,13 +64,13 @@
                     'status'=> 'Menunggu Verifikasi',
                 ],
                 [
-                    'label' => 'Terverifikasi',
-                    'value' => $statsPembayaran['terverifikasi'],
-                    'pct'   => $pTerverif,
-                    'color' => 'bg-[#e8f4df] text-[#175b31]',
-                    'bar'   => 'bg-[#5d9f3f]',
-                    'icon'  => 'check-circle',
-                    'status'=> 'Terverifikasi',
+                    'label' => 'Belum Bayar',
+                    'value' => $statsPembayaran['belum'],
+                    'pct'   => $pBelum,
+                    'color' => 'bg-[#edf1ec] text-[#42604c]',
+                    'bar'   => 'bg-[#a3b1a0]',
+                    'icon'  => 'circle-dashed',
+                    'status'=> 'Belum Bayar',
                 ],
                 [
                     'label' => 'Gagal',
