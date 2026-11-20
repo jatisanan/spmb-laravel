@@ -98,12 +98,12 @@
                 <div class="rounded-lg border border-[#c5d9e8] bg-[#f4f8fc] px-2.5 py-1.5">
                     <div class="flex items-center justify-between gap-1 mb-1">
                         <span class="text-[11px] font-bold text-[#1e4d75]">SMP</span>
-                        <span class="text-[11px] font-bold text-[#0d4a36]">{{ $c['smp']['total'] }} org</span>
+                        <span class="text-[11px] font-bold text-[#0d4a36]">{{ $c['smp']['total'] }} orang</span>
                     </div>
                     <div class="flex items-center gap-2 text-[10px] text-[#617064]">
-                        <span class="whitespace-nowrap">L: <strong class="text-[#1e4d75]">{{ $c['smp']['laki'] }}</strong></span>
+                        <span class="whitespace-nowrap">Laki-laki: <strong class="text-[#1e4d75]">{{ $c['smp']['laki'] }}</strong></span>
                         <span class="text-[#a5b0a8]">·</span>
-                        <span class="whitespace-nowrap">P: <strong class="text-[#963d21]">{{ $c['smp']['perempuan'] }}</strong></span>
+                        <span class="whitespace-nowrap">Perempuan: <strong class="text-[#963d21]">{{ $c['smp']['perempuan'] }}</strong></span>
                     </div>
                 </div>
 
@@ -111,12 +111,12 @@
                 <div class="rounded-lg border border-[#d6dccf] bg-[#f7f9f4] px-2.5 py-1.5">
                     <div class="flex items-center justify-between gap-1 mb-1">
                         <span class="text-[11px] font-bold text-[#4b5347]">SMA</span>
-                        <span class="text-[11px] font-bold text-[#0d4a36]">{{ $c['sma']['total'] }} org</span>
+                        <span class="text-[11px] font-bold text-[#0d4a36]">{{ $c['sma']['total'] }} orang</span>
                     </div>
                     <div class="flex items-center gap-2 text-[10px] text-[#617064]">
-                        <span class="whitespace-nowrap">L: <strong class="text-[#4b5347]">{{ $c['sma']['laki'] }}</strong></span>
+                        <span class="whitespace-nowrap">Laki-laki: <strong class="text-[#4b5347]">{{ $c['sma']['laki'] }}</strong></span>
                         <span class="text-[#a5b0a8]">·</span>
-                        <span class="whitespace-nowrap">P: <strong class="text-[#963d21]">{{ $c['sma']['perempuan'] }}</strong></span>
+                        <span class="whitespace-nowrap">Perempuan: <strong class="text-[#963d21]">{{ $c['sma']['perempuan'] }}</strong></span>
                     </div>
                 </div>
 
@@ -447,7 +447,7 @@
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-[#1e4d75]">SMP</span>
                             <span class="font-bold text-[#0d4a36]" id="modal-bd-smp-total">
-                                {{ $stats['breakdown']['total']['smp']['total'] }} org
+                                {{ $stats['breakdown']['total']['smp']['total'] }} orang
                             </span>
                         </div>
                         <div class="mt-0.5 text-[#617064]" id="modal-bd-smp">
@@ -459,7 +459,7 @@
                         <div class="flex items-center justify-between">
                             <span class="font-bold text-[#4b5347]">SMA</span>
                             <span class="font-bold text-[#0d4a36]" id="modal-bd-sma-total">
-                                {{ $stats['breakdown']['total']['sma']['total'] }} org
+                                {{ $stats['breakdown']['total']['sma']['total'] }} orang
                             </span>
                         </div>
                         <div class="mt-0.5 text-[#617064]" id="modal-bd-sma">
