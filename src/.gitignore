@@ -4,7 +4,10 @@
 .env.*
 !.env.example
 /storage/*.key
-
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/framework/testing/*
 /public/storage
 .DS_Store
 .phpunit.result.cache
