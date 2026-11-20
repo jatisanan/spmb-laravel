@@ -4,6 +4,30 @@
 @section('page-title', 'Data Pembayaran')
 @section('page-subtitle', 'Kelola verifikasi pembayaran pendaftar')
 
+@push('styles')
+<style>
+    .foto-thumb {
+        height: 48px;
+        width: 38px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #dce6d3;
+        background: #f8faf5;
+    }
+    .foto-placeholder {
+        height: 48px;
+        width: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        border: 1px dashed #d6dccf;
+        background: #f8faf5;
+        color: #d6dccf;
+    }
+</style>
+@endpush
+
 @section('content')
 
 {{-- ============================================ --}}
@@ -58,7 +82,6 @@
 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 mb-5">
     @foreach ($cards as $c)
         <div class="rounded-xl border border-[#e1e9da] bg-white p-4 shadow-sm flex flex-col">
-            {{-- Header: Ikon & Total Utama --}}
             <div class="flex items-start gap-3">
                 <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ $c['color'] }}">
                     <i data-lucide="{{ $c['icon'] }}" class="h-4 w-4"></i>
@@ -69,9 +92,8 @@
                 </div>
             </div>
 
-            {{-- Breakdown per Jenjang (dibuat sejajar L & P) --}}
             <div class="mt-3 space-y-2 flex-1 flex flex-col justify-end">
-                
+
                 {{-- KOTAK SMP --}}
                 <div class="rounded-lg border border-[#c5d9e8] bg-[#f4f8fc] px-2.5 py-1.5">
                     <div class="flex items-center justify-between gap-1 mb-1">
@@ -108,10 +130,9 @@
 {{-- ============================================ --}}
 <form method="GET" action="{{ route('admin.pembayaran.index') }}"
       class="rounded-2xl border border-[#e1e9da] bg-white p-4 sm:p-5 shadow-sm mb-5">
-    
-    {{-- Grid Utama: 4 Kolom --}}
+
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 items-end">
-        
+
         {{-- Kolom 1: Cari --}}
         <div class="flex flex-col gap-1.5">
             <label class="text-xs font-bold text-[#244535]">Cari</label>
@@ -143,7 +164,6 @@
         </div>
 
         {{-- Kolom 4: Tombol Aksi --}}
-        {{-- Kita beri label kosong (invisible) agar tingginya sama persis dengan input --}}
         <div class="flex flex-col gap-1.5">
             <label class="text-xs font-bold text-[#244535] invisible" aria-hidden="true">Aksi</label>
             <div class="flex gap-2">
@@ -201,9 +221,10 @@
 
         {{-- Tabel --}}
         <div class="overflow-x-auto">
-            <table class="admin-table" style="min-width: 1000px;">
+            <table class="admin-table" style="min-width: 1120px;">
                 <thead>
                     <tr>
+                        <th class="whitespace-nowrap">Foto</th>
                         <th class="whitespace-nowrap">Nomor</th>
                         <th class="whitespace-nowrap">Nama</th>
                         <th class="whitespace-nowrap">Gelombang</th>
@@ -229,8 +250,28 @@
                             $bisaDiverifikasi = $pembayaran
                                 && in_array($statusBayar, ['Menunggu Verifikasi', 'Gagal'])
                                 && $pembayaran->bukti_path;
+
+                            $foto = $p->berkas->firstWhere('jenis', 'foto');
                         @endphp
                         <tr data-pendaftaran-id="{{ $p->id }}">
+                            {{-- FOTO SISWA --}}
+                            <td class="whitespace-nowrap align-middle" data-cell="foto">
+                                @if ($foto)
+                                    <a href="{{ asset('storage/' . $foto->file_path) }}"
+                                       target="_blank" rel="noopener noreferrer"
+                                       class="inline-block group"
+                                       title="Lihat foto {{ $p->nama_lengkap }}">
+                                        <img src="{{ asset('storage/' . $foto->file_path) }}"
+                                             alt="Foto {{ $p->nama_lengkap }}"
+                                             class="foto-thumb group-hover:ring-2 group-hover:ring-[#5d9f3f] transition">
+                                    </a>
+                                @else
+                                    <div class="foto-placeholder" title="Belum ada foto">
+                                        <i data-lucide="user" class="h-4 w-4"></i>
+                                    </div>
+                                @endif
+                            </td>
+
                             <td class="font-mono font-bold text-[#0d4a36] whitespace-nowrap">
                                 {{ $p->nomor_pendaftaran }}
                             </td>
@@ -310,7 +351,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-4 py-6 text-center text-sm text-[#617064]">
+                            <td colspan="8" class="px-4 py-6 text-center text-sm text-[#617064]">
                                 Tidak ada pendaftar {{ $j->nama }} pada halaman ini.
                             </td>
                         </tr>
@@ -646,17 +687,14 @@
                     const statusCell = currentRow.querySelector('[data-cell="status"]');
 
                     if (statusCell) {
-                        // Cek apakah chip baru bisa diverifikasi lagi
                         const bisaDiverifikasiBaru = ['Menunggu Verifikasi', 'Gagal'].includes(newStatus);
 
                         if (bisaDiverifikasiBaru && statusCell.querySelector('.btn-verify')) {
-                            // Chip sudah button, tinggal update class & text
                             const btn = statusCell.querySelector('.btn-verify');
                             btn.className = 'btn-verify status-chip ' + clsBayar(newStatus) + ' hover:shadow-md hover:scale-105 transition cursor-pointer inline-flex items-center gap-1';
                             btn.innerHTML = `<i data-lucide="${newStatus === 'Gagal' ? 'refresh-cw' : 'shield-check'}" class="h-3 w-3"></i> ${newStatus}`;
                             btn.dataset.status = newStatus;
                         } else {
-                            // Ganti chip jadi span non-klik
                             const iconName = newStatus === 'Terverifikasi' ? 'check-circle' : 'clock';
                             const title = newStatus === 'Terverifikasi' ? 'Sudah terverifikasi' : 'Menunggu pendaftar upload bukti';
 
@@ -707,7 +745,6 @@
         const verifyBtn = e.target.closest('.btn-verify');
         if (verifyBtn) {
             if (!verifyBtn.dataset.verifikasiUrl) {
-                // Fallback: redirect ke detail
                 window.location.href = verifyBtn.closest('tr').querySelector('a[href*="/pembayaran/"]').href;
                 return;
             }

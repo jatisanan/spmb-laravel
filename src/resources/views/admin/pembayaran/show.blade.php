@@ -6,6 +6,10 @@
 
 @section('content')
 
+@php
+    $fotoSiswa = $pembayaran->pendaftaran->berkas->firstWhere('jenis', 'foto');
+@endphp
+
 <div class="mb-5">
     <a href="{{ route('admin.pembayaran.index') }}"
        class="inline-flex items-center gap-2 text-sm font-semibold text-[#0d4a36] hover:underline">
@@ -34,49 +38,89 @@
     {{-- ============================================ --}}
     <div class="lg:col-span-2 space-y-5">
 
-        {{-- Info Pendaftar --}}
+        {{-- Info Pendaftar + FOTO SISWA --}}
         <div class="rounded-2xl border border-[#e1e9da] bg-white p-5 shadow-sm">
             <h3 class="display-font text-lg font-bold text-[#0d4a36] mb-4">Data Pendaftar</h3>
 
-            <dl class="grid gap-3 sm:grid-cols-2 text-sm">
-                <div>
-                    <dt class="text-xs text-[#617064]">Nomor Pendaftaran</dt>
-                    <dd class="font-mono font-bold text-[#0d4a36] mt-0.5">{{ $pembayaran->pendaftaran->nomor_pendaftaran }}</dd>
+            <div class="flex flex-col sm:flex-row gap-5">
+
+                {{-- ============================================ --}}
+                {{-- FOTO SISWA (PALING KIRI) --}}
+                {{-- ============================================ --}}
+                <div class="shrink-0 mx-auto sm:mx-0">
+                    @if ($fotoSiswa)
+                        <a href="{{ asset('storage/' . $fotoSiswa->file_path) }}"
+                           target="_blank" rel="noopener noreferrer"
+                           class="block group">
+                            <div class="relative rounded-xl border-2 border-[#dce6d3] bg-[#f8faf5] p-1.5 group-hover:border-[#5d9f3f] group-hover:shadow-md transition">
+                                <img src="{{ asset('storage/' . $fotoSiswa->file_path) }}"
+                                     alt="Foto {{ $pembayaran->pendaftaran->nama_lengkap }}"
+                                     class="h-40 w-32 sm:h-44 sm:w-36 rounded-lg object-cover">
+                                <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide shadow-sm
+                                    {{ $fotoSiswa->verified
+                                        ? 'bg-green-600 text-white'
+                                        : 'bg-[#fff2ca] text-[#805500] border border-[#f0e0a8]' }}">
+                                    {{ $fotoSiswa->verified ? '✓ Terverifikasi' : 'Belum Verifikasi' }}
+                                </span>
+                            </div>
+                        </a>
+                        <p class="mt-3 text-center text-[10px] text-[#617064] truncate max-w-[144px] mx-auto"
+                           title="{{ $fotoSiswa->nama_asli }}">
+                            {{ Str::limit($fotoSiswa->nama_asli, 20) }}
+                        </p>
+                    @else
+                        <div class="flex h-44 w-36 flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#d6dccf] bg-[#f8faf5]">
+                            <i data-lucide="user" class="h-8 w-8 text-[#d6dccf]"></i>
+                            <p class="mt-1 text-[10px] text-[#94a3b8]">Belum ada foto</p>
+                        </div>
+                    @endif
                 </div>
-                <div>
-                    <dt class="text-xs text-[#617064]">NISN</dt>
-                    <dd class="font-mono text-[#244535] mt-0.5">{{ $pembayaran->pendaftaran->nisn }}</dd>
+
+                {{-- ============================================ --}}
+                {{-- DATA IDENTITAS (KANAN) --}}
+                {{-- ============================================ --}}
+                <div class="flex-1 min-w-0">
+                    <dl class="grid gap-3 sm:grid-cols-2 text-sm">
+                        <div>
+                            <dt class="text-xs text-[#617064]">Nomor Pendaftaran</dt>
+                            <dd class="font-mono font-bold text-[#0d4a36] mt-0.5">{{ $pembayaran->pendaftaran->nomor_pendaftaran }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[#617064]">NISN</dt>
+                            <dd class="font-mono text-[#244535] mt-0.5">{{ $pembayaran->pendaftaran->nisn }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[#617064]">Nama Lengkap</dt>
+                            <dd class="font-semibold text-[#244535] mt-0.5">{{ $pembayaran->pendaftaran->nama_lengkap }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[#617064]">Jenjang</dt>
+                            <dd class="text-[#244535] mt-0.5">{{ $pembayaran->pendaftaran->jenjang->nama }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[#617064]">Gelombang</dt>
+                            <dd class="text-[#244535] mt-0.5">
+                                {{ $pendaftaran->gelombang?->nama ?? '— (gelombang dihapus)' }}
+                            </dd>
+                        </div>
+                        <div>
+                            <dt class="text-xs text-[#617064]">No. WhatsApp</dt>
+                            <dd class="text-[#244535] mt-0.5">
+                                @if ($pembayaran->pendaftaran->no_whatsapp)
+                                    <a href="https://wa.me/{{ preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $pembayaran->pendaftaran->no_whatsapp)) }}"
+                                       target="_blank" rel="noopener noreferrer"
+                                       class="text-[#0d4a36] font-semibold hover:underline inline-flex items-center gap-1">
+                                        <i data-lucide="message-circle" class="h-3.5 w-3.5"></i>
+                                        {{ $pembayaran->pendaftaran->no_whatsapp }}
+                                    </a>
+                                @else
+                                    —
+                                @endif
+                            </dd>
+                        </div>
+                    </dl>
                 </div>
-                <div>
-                    <dt class="text-xs text-[#617064]">Nama Lengkap</dt>
-                    <dd class="font-semibold text-[#244535] mt-0.5">{{ $pembayaran->pendaftaran->nama_lengkap }}</dd>
-                </div>
-                <div>
-                    <dt class="text-xs text-[#617064]">Jenjang</dt>
-                    <dd class="text-[#244535] mt-0.5">{{ $pembayaran->pendaftaran->jenjang->nama }}</dd>
-                </div>
-                <div>
-                    <dt class="text-xs text-[#617064]">Gelombang</dt>
-                    <dd class="text-[#244535] mt-0.5">
-                        {{ $pendaftaran->gelombang?->nama ?? '— (gelombang dihapus)' }}
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-xs text-[#617064]">No. WhatsApp</dt>
-                    <dd class="text-[#244535] mt-0.5">
-                        @if ($pembayaran->pendaftaran->no_whatsapp)
-                            <a href="https://wa.me/{{ preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $pembayaran->pendaftaran->no_whatsapp)) }}"
-                               target="_blank" rel="noopener noreferrer"
-                               class="text-[#0d4a36] font-semibold hover:underline inline-flex items-center gap-1">
-                                <i data-lucide="message-circle" class="h-3.5 w-3.5"></i>
-                                {{ $pembayaran->pendaftaran->no_whatsapp }}
-                            </a>
-                        @else
-                            —
-                        @endif
-                    </dd>
-                </div>
-            </dl>
+            </div>
         </div>
 
         {{-- Info Pembayaran --}}

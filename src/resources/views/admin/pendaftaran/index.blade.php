@@ -29,6 +29,27 @@
         color: #a5b0a8;
     }
     .quick-tab-btn:disabled:hover { color: #a5b0a8; border-bottom-color: transparent; }
+
+    /* Thumbnail foto siswa di tabel */
+    .foto-thumb {
+        height: 48px;
+        width: 38px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid #dce6d3;
+        background: #f8faf5;
+    }
+    .foto-placeholder {
+        height: 48px;
+        width: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        border: 1px dashed #d6dccf;
+        background: #f8faf5;
+        color: #d6dccf;
+    }
 </style>
 @endpush
 
@@ -87,7 +108,6 @@
                     <p class="text-xs text-[#617064]">{{ $c['label'] }}</p>
                     <p class="text-lg font-bold text-[#0d4a36]">{{ $c['value'] }}</p>
 
-                    {{-- Breakdown per jenjang dibungkus kotak --}}
                     <div class="mt-2 space-y-2">
 
                         {{-- KOTAK SMP --}}
@@ -222,9 +242,10 @@
 
         {{-- Tabel --}}
         <div class="overflow-x-auto">
-            <table class="admin-table" style="min-width: 1300px;">
+            <table class="admin-table" style="min-width: 1420px;">
                 <thead>
                     <tr>
+                        <th class="whitespace-nowrap">Foto</th>
                         <th class="whitespace-nowrap">Tanggal</th>
                         <th class="whitespace-nowrap">Nomor</th>
                         <th class="whitespace-nowrap">Nama</th>
@@ -241,6 +262,7 @@
                     @forelse ($items as $p)
                         @php
                             $statusPembayaran = $p->pembayaran?->status ?? 'Belum Bayar';
+                            $foto = $p->berkas->firstWhere('jenis', 'foto');
 
                             $bisaVerifikasi = $statusPembayaran === 'Terverifikasi';
                             $bisaUjian = $p->status_verifikasi === 'Terverifikasi';
@@ -268,6 +290,24 @@
                             ];
                         @endphp
                         <tr data-pendaftaran-id="{{ $p->id }}">
+                            {{-- FOTO SISWA --}}
+                            <td class="whitespace-nowrap align-middle" data-cell="foto">
+                                @if ($foto)
+                                    <a href="{{ asset('storage/' . $foto->file_path) }}"
+                                       target="_blank" rel="noopener noreferrer"
+                                       class="inline-block group"
+                                       title="Lihat foto {{ $p->nama_lengkap }}">
+                                        <img src="{{ asset('storage/' . $foto->file_path) }}"
+                                             alt="Foto {{ $p->nama_lengkap }}"
+                                             class="foto-thumb group-hover:ring-2 group-hover:ring-[#5d9f3f] transition">
+                                    </a>
+                                @else
+                                    <div class="foto-placeholder" title="Belum ada foto">
+                                        <i data-lucide="user" class="h-4 w-4"></i>
+                                    </div>
+                                @endif
+                            </td>
+
                             <td class="whitespace-nowrap align-middle">
                                 @if ($p->created_at)
                                     <p class="text-xs font-semibold text-[#244535] leading-tight">
@@ -452,7 +492,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="px-4 py-6 text-center text-sm text-[#617064]">
+                            <td colspan="11" class="px-4 py-6 text-center text-sm text-[#617064]">
                                 Tidak ada pendaftar {{ $j->nama }} pada halaman ini.
                             </td>
                         </tr>
@@ -791,7 +831,6 @@
 
         if (window.lucide) lucide.createIcons();
 
-        // Update dataset tombol quick-action
         const anyBtn = row.querySelector('.btn-quick-action');
         if (anyBtn) {
             if (data.status_pembayaran !== undefined) {

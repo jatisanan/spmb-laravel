@@ -13,7 +13,8 @@ class PendaftaranController extends Controller
 {
     public function index(Request $request)
     {
-        $baseQuery = Pendaftaran::with(['jenjang', 'gelombang', 'pembayaran']);
+        // 'berkas' ditambahkan agar kolom foto di tabel tidak N+1
+        $baseQuery = Pendaftaran::with(['jenjang', 'gelombang', 'pembayaran', 'berkas']);
 
         if ($request->filled('q')) {
             $baseQuery->search($request->q);

@@ -16,7 +16,7 @@ class PembayaranController extends Controller
      */
     public function index(Request $request)
     {
-        $baseQuery = Pendaftaran::with(['jenjang', 'gelombang', 'pembayaran']);
+        $baseQuery = Pendaftaran::with(['jenjang', 'gelombang', 'pembayaran', 'berkas']);
 
         if ($request->filled('q')) {
             $q = $request->q;
@@ -137,7 +137,7 @@ class PembayaranController extends Controller
      */
     public function show(Pendaftaran $pendaftaran)
     {
-        $pendaftaran->load(['jenjang', 'gelombang', 'pembayaran.verifier']);
+        $pendaftaran->load(['jenjang', 'gelombang', 'pembayaran.verifier', 'berkas']);
 
         $gelombangHilang = ($pendaftaran->gelombang === null);
 
